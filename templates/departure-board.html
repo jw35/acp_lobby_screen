@@ -1,0 +1,52 @@
+<!doctype html>
+<title>Departure Board</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='trains.css') }}">
+<script src="{{ url_for('static', filename='trains.js') }}" type="text/javascript"></script>
+<body>
+
+<div class="container">
+
+<div class="departure_board">
+
+<h1>Train departures for {{ data.locationName }}</h1>
+<h2>Last updated {{ data.generatedAt.strftime("%H:%M") }}</h2>
+
+{% if data.nrccMessages %}
+    {% for message in data.nrccMessages.message %}
+        {% for key in message %}
+            <div class="message">{{ message[key] | safe }}</div>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+
+<table>
+  <tr>
+    <th>Time</th>
+    <th>Destination</th>
+    <th>Platform</th>
+    <th>Expected</th>
+  </tr>
+{% for service in data.trainServices.service %}
+  <tr>
+    <td>{{ service.std }}</td>
+    <td>{{ service.destination.location.0.locationName }}</td>
+    {% if service.platform %}
+    <td>{{ service.platform }}</td>
+    {% else %}
+    <td></td>
+    {% endif %}
+    <td>{{ service.etd }}</td>
+  </tr>
+{% endfor %}
+</table>
+
+<div class="credit">
+    <a href="http://www.nationalrail.co.uk/"><img width="300" alt="Powered by National Rail Enquires" src="static/NRE_Powered_logo.png"></a>
+</div>
+
+</div>
+
+</div>
+
+</body>
+
