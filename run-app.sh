@@ -1,8 +1,8 @@
 #!/bin/bash
 
-export FLASK_APP=trains.py
+export FLASK_APP=lobby_pannel.py
 export FLASK_DEBUG=1
 
-export TRAINS_SETTINGS=trains.config
+export LOBBY_PANNEL_SETTINGS=lobby_pannel.config
 
 flask run 

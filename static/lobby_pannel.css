@@ -1,0 +1,46 @@
+.container_2_2 {
+    height: 540px;
+    width: 640px;
+    border: 1px solid black;
+    overflow: hidden;
+}
+
+.container_1_2 {
+    height: 540px;
+    width: 320px;
+    border: 1px solid black;
+    overflow: hidden;
+}
+
+/* Styles for the station board widgit */
+
+.station_board {
+    height: 100%;
+    width: 100%;
+    padding: 1em;
+}
+
+.station_board h1, .station_board h2 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.station_board .message {
+    background-color: #fdd;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.station_board table {
+    width: 100%;
+}
+
+.station_board th, .station_board td {
+    padding: 0.1em;
+}
+
+.station_board tr td:first-child { text-align: center; }
+.station_board tr td:first-child + td + td { text-align: center; }
+.station_board tr td:first-child + td + td + td { text-align: center; }

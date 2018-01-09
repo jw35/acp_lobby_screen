@@ -1,4 +1,35 @@
-{% extends "layout.html" %}
-{% block body %}
-<p>Work in progress</p>
-{% endblock %}
+<!doctype html>
+
+<html>
+
+  <head>
+    <title>Lobby Pannel</title>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='lobby_pannel.css') }}">
+
+    <script src="{{ url_for('static', filename='station_board.js') }}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+      var station_board_1 = new Station_Board('#station_board_1');
+      var station_board_2 = new Station_Board('#station_board_2');
+      function init() {
+        console.log("initing board 1");
+        station_board_1.init({'station': 'CBG', 'offset': 0});
+        console.log("initing board 2");
+        station_board_2.init({'station': 'CMB', 'offset': 0});
+      }
+    </script>
+
+  </head>
+
+  <body onLoad="init()">
+    <div class="container_2_2" id="station_board_1"></div>
+    <div class="container_1_2" id="station_board_2"></div>
+  </body>
+
+</html>

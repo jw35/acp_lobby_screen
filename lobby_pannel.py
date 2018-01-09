@@ -12,9 +12,9 @@ app.config.from_object(__name__)
 app.config.update(dict(
     SEND_FILE_MAX_AGE_DEFAULT=0,
 ))
-app.config.from_envvar('TRAINS_SETTINGS', silent=False)
+app.config.from_envvar('LOBBY_PANNEL_SETTINGS', silent=False)
 # Check we loaded a config
-assert 'NRE_API_KEY' in app.config
+assert 'NRE_API_KEY' in app.config, 'No NRE_API_KEY setting found'
 
 
 # Direct logs to STDERR even when not in debug
@@ -32,20 +32,22 @@ def hello_world():
     return render_template('index.html')
 
 
-@app.route('/departure-board', methods=['GET'])
-def departure_board():
+@app.route('/station_board', methods=['GET'])
+def station_board():
     '''
     Retrieve a 'DepartureBoard' from National Rail Enquiries
     and render it as a web page
     '''
 
     station = request.args.get('station', '')
+    assert station, 'No station code found'
+    offset = int(request.args.get('offset', 0))
 
     client = zeep.Client(wsdl=WSDL)
     data = client.service.GetDepartureBoard(numRows=50,crs=station,
         _soapheaders={"AccessToken":app.config["NRE_API_KEY"]},
-        timeOffset=0)
+        timeOffset=offset)
 
-    return render_template('departure-board.html', data=data)
+    return render_template('station_board.html', data=data)
 
 

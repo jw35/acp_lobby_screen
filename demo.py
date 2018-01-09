@@ -33,7 +33,7 @@ for service in data["trainServices"]["service"]:
 
     print(service["serviceID"])
 
-    service_details = client.service.GetServiceDetails(serviceID=service["serviceID"])
+    service_details = client.service.GetServiceDetails(serviceID=service["serviceID"],_soapheaders={"AccessToken":TOKEN})
 
     print(service_details)
 
