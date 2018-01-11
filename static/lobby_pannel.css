@@ -12,6 +12,70 @@
     overflow: hidden;
 }
 
+.container_2_1 {
+    height: 270px;
+    width: 640px;
+    border: 1px solid black;
+    overflow: hidden;
+}
+
+.container_1_1 {
+    height: 270px;
+    width: 320px;
+    border: 1px solid black;
+    overflow: hidden;
+}
+
+.col_1 {
+    position: absolute;
+    left: 0px;
+}
+
+.col_2 {
+    position: absolute;
+    left: 320px;
+}
+
+.col_3 {
+    position: absolute;
+    left: 640px;
+}
+
+.col_4 {
+    position: absolute;
+    left: 960px;
+}
+
+.col_5 {
+    position: absolute;
+    left: 1280px;
+}
+
+.col_6 {
+    position: absolute;
+    left: 1600px;
+}
+
+.row_1 {
+    position: absolute;
+    top: 0px;
+}
+
+.row_2 {
+    position: absolute;
+    top: 270px;
+}
+
+.row_3 {
+    position: absolute;
+    top: 540px;
+}
+
+.row_4 {
+    position: absolute;
+    top: 810px;
+}
+
 /* Styles for the station board widgit */
 
 .station_board {
