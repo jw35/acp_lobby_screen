@@ -8,7 +8,7 @@ from werkzeug.contrib.cache import SimpleCache
 WSDL = 'https://lite.realtime.nationalrail.co.uk/OpenLDBWS/wsdl.aspx?ver=2017-10-01'
 
 
-app= Flask(__name__)
+app= Flask(__name__, static_url_path="/lobby_panel/static")
 app.config.from_object(__name__)
 app.config.update(dict(
     SEND_FILE_MAX_AGE_DEFAULT=0,
