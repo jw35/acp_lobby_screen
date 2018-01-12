@@ -34,7 +34,7 @@
   {% elif dest == 'London Liverpool Street' %}
     {% set dest = 'London Liv. St' %}
   {% elif dest == 'Birmingham New Street' %}
-    {% set dest = 'Birmingham New St' %}
+    {% set dest = "Birm'ham New St" %}
   {% endif %}
   {% if service.etd != 'On time' %}
   <tr class="issue">
@@ -52,7 +52,7 @@
 
 <div class="credit">
     <a href="http://www.nationalrail.co.uk/"><img alt="Powered by National Rail Enquires" 
-      src="{{url_for('static', filename='NRE_Powered_logo.png') }}"></a>
+      src="{{url_for('static', filename='station_board/NRE_Powered_logo.png') }}"></a>
 </div>
 
 </div>
