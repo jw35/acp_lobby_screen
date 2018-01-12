@@ -11,16 +11,17 @@
             crossorigin="anonymous"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='lobby_panel.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='station_board/station_board.css') }}">
 
-    <script src="{{ url_for('static', filename='station_board.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='station_board/station_board.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
 
       var widgit = [];
 
       widgit.push(new StationBoard('station_board_1',{'station': 'CBG', 'offset': 0}));
-      widgit.push(new StationBoard('station_board_2',{'station': 'CMB', 'offset': 0}));
-      widgit.push(new StationBoard('station_board_3',{'station': 'CBG', 'offset': 0}));
+      widgit.push(new StationBoard('station_board_2',{'station': 'CBG', 'offset': 30}));
+      widgit.push(new StationBoard('station_board_3',{'station': 'CMB', 'offset': 0}));
       widgit.push(new StationBoard('station_board_4',{'station': 'PAD', 'offset': 0}));
 
       function reload_widgits () {
@@ -37,8 +38,13 @@
 
       function page_load() {
         for (var i = 0; i < widgit.length; i++) {
-          console.log("Initing ", widgit[i].container);
-          widgit[i].init();
+          if ('init' in widgit[i]) {
+            console.log("Initing ", widgit[i].container);
+            widgit[i].init();
+          }
+          else {
+            console.log("Not initing ", widgit[i].container);
+          }
         }
         setInterval(function() {
           console.log("Running page-level reloader");
