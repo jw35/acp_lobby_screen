@@ -3,6 +3,7 @@ import re
 import logging
 from logging import Formatter
 import zeep
+from werkzeug.contrib.cache import SimpleCache
 
 WSDL = 'https://lite.realtime.nationalrail.co.uk/OpenLDBWS/wsdl.aspx?ver=2017-10-01'
 
@@ -16,6 +17,8 @@ app.config.from_envvar('LOBBY_PANNEL_SETTINGS', silent=False)
 # Check we loaded a config
 assert 'NRE_API_KEY' in app.config, 'No NRE_API_KEY setting found'
 
+# An in-memory cache for departure board information
+cache = SimpleCache()
 
 # Direct logs to STDERR even when not in debug
 @app.before_first_request
@@ -43,10 +46,17 @@ def station_board():
     assert station, 'No station code found'
     offset = int(request.args.get('offset', 0))
 
-    client = zeep.Client(wsdl=WSDL)
-    data = client.service.GetDepartureBoard(numRows=50,crs=station,
-        _soapheaders={"AccessToken":app.config["NRE_API_KEY"]},
-        timeOffset=offset)
+    cache_key = "{0} {1}".format(station, offset);
+    data = cache.get(cache_key)
+    if data:
+        app.logger.info('Cache hit for %s', cache_key)
+    else:
+        app.logger.info('Cache miss for %s', cache_key)
+        client = zeep.Client(wsdl=WSDL)
+        data = client.service.GetDepartureBoard(numRows=50,crs=station,
+            _soapheaders={"AccessToken":app.config["NRE_API_KEY"]},
+            timeOffset=offset)
+        cache.set(cache_key,data,timeout=30)
 
     return render_template('station_board.html', data=data)
 
