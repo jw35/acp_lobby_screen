@@ -7,6 +7,8 @@
 
 <div class="station_board">
 
+<div class="content_area">
+
 <h1>Train departures for {{ data.locationName }}</h1>
 <h2>Last updated {{ data.generatedAt.strftime("%H:%M") }}</h2>
 
@@ -22,25 +24,33 @@
   <tr>
     <th>Time</th>
     <th>Destination</th>
-    <th>Platform</th>
     <th>Expected</th>
   </tr>
 {% for service in data.trainServices.service %}
+  {% set dest = service.destination.location.0.locationName %}
+  {% if dest == 'London Kings Cross' %}
+    {% set dest = 'London Kings X' %}
+  {% elif dest == 'London Liverpool Street' %}
+    {% set dest = 'London Liv. St' %}
+  {% elif dest == 'Birmingham New Street' %}
+    {% set dest = 'Birmingham New St' %}
+  {% endif %}
+  {% if service.etd != 'On time' %}
+  <tr class="issue">
+  {% else %}
   <tr>
+  {% endif %}
     <td>{{ service.std }}</td>
-    <td>{{ service.destination.location.0.locationName }}</td>
-    {% if service.platform %}
-    <td>{{ service.platform }}</td>
-    {% else %}
-    <td></td>
-    {% endif %}
+    <td>{{ dest }}</td>
     <td>{{ service.etd }}</td>
   </tr>
 {% endfor %}
 </table>
 
+</div>
+
 <div class="credit">
-    <a href="http://www.nationalrail.co.uk/"><img width="300" alt="Powered by National Rail Enquires" src="static/NRE_Powered_logo.png"></a>
+    <a href="http://www.nationalrail.co.uk/"><img alt="Powered by National Rail Enquires" src="static/NRE_Powered_logo.png"></a>
 </div>
 
 </div>

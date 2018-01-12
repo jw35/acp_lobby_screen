@@ -1,31 +1,87 @@
-.container_2_2 {
-    height: 540px;
-    width: 640px;
+/* Temporary CSS for a lashed-up demo of an ACP 'Lobby Pannel */
+
+/* This is intended to render on a 1920 x 1080 ONLY. It implements
+   a 6 (column) by 4 (row) grid for widgits, with a 60px row at the 
+   bottom for credits, status display, etc. 
+
+   Row heights are ((1080-60)/4) = 255px. Column widths are 1920/6 = 320px
+*/
+
+/* Force box-sizing: border-box everywhere. Note that this may break
+   some 3rd-party styling in which case it may need to be forced back to
+   content-box there */
+*, *:before, *:after {
+  -webkit-box-sizing: border-box; 
+  -moz-box-sizing: border-box; 
+  box-sizing: border-box;
+}
+
+/* https://getbootstrap.com/docs/4.0/content/reboot/#native-font-stack */
+body {
+  font-family: -apple-system,
+  BlinkMacSystemFont,
+  "Segoe UI",
+  "Roboto",
+  "Helvetica Neue", Arial, sans-serif,
+  "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* For debugging, create a 1920 x 1080 *inside* a 1px border */
+.wrapper {
+    width: 1922px;
+    height: 1082px;
+    overflow: hidden;
+    border: 1px solid red;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+/* Basic container boxes for 1x1, 1x2, 2x1 amd 2x2 display areas. */
+.container_1_1 {
+    height: 255px;
+    width: 320px;
     border: 1px solid black;
     overflow: hidden;
 }
 
 .container_1_2 {
-    height: 540px;
+    height: 510px;
     width: 320px;
     border: 1px solid black;
     overflow: hidden;
 }
 
 .container_2_1 {
-    height: 270px;
+    height: 255px;
     width: 640px;
     border: 1px solid black;
     overflow: hidden;
 }
 
-.container_1_1 {
-    height: 270px;
+.container_2_2 {
+    height: 510px;
+    width: 640px;
+    border: 1px solid black;
+    overflow: hidden;
+}
+
+.container_1_4 {
+    height: 1020px;
     width: 320px;
     border: 1px solid black;
     overflow: hidden;
 }
 
+.container_2_4 {
+    height: 1020px;
+    width: 640px;
+    border: 1px solid black;
+    overflow: hidden;
+}
+
+
+/* Column positions */
 .col_1 {
     position: absolute;
     left: 0px;
@@ -56,6 +112,7 @@
     left: 1600px;
 }
 
+/* Row positions */
 .row_1 {
     position: absolute;
     top: 0px;
@@ -63,17 +120,38 @@
 
 .row_2 {
     position: absolute;
-    top: 270px;
+    top: 255px;
 }
 
 .row_3 {
     position: absolute;
-    top: 540px;
+    top: 510px;
 }
 
 .row_4 {
     position: absolute;
-    top: 810px;
+    top: 765px;
+}
+
+.credits {
+    position: absolute;
+    left: 0px;
+    top: 1020px;
+    height: 60px;
+    width: 1920px;
+    overflow: hidden;
+    border: 1px solid green;
+}
+
+.credits img {
+    height:50px;
+    margin:5px;
+}
+
+.credits span {
+    font-weight: bold;
+    font-size: 20pt;
+    padding-bottom: 20px;
 }
 
 /* Styles for the station board widgit */
@@ -81,7 +159,27 @@
 .station_board {
     height: 100%;
     width: 100%;
-    padding: 1em;
+    padding: 0.5em;
+}
+
+.station_board .content_area {
+    border-bottom: 40px solid transparent;
+    height: 100%;
+    overflow: hidden;
+}
+
+.credit {
+    left: 0px;
+    bottom: 0.5em;
+    width: 100%;
+    height: 30px;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    position: absolute;
+}
+
+.credit img {
+    height: 30px;
 }
 
 .station_board h1, .station_board h2 {
@@ -91,20 +189,38 @@
 
 .station_board .message {
     background-color: #fdd;
-    padding-top: 1em;
-    padding-bottom: 1em;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    padding: 0.5em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.station_board .message p {
+    margin: 0px;
 }
 
 .station_board table {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0.5em;
+    height: 100%;
     width: 100%;
+    overflow: hidden;
 }
 
 .station_board th, .station_board td {
-    padding: 0.1em;
+    padding-top: 0.1em;
+    padding-bottom: 0.1em;
+    padding-left: 0.4em;
+    padding-right: 0.4em;
 }
 
+.station_board tr.issue {
+    background-color: #fdd;
+}
+
+.station_board tr th:first-child { text-align: center; }
 .station_board tr td:first-child { text-align: center; }
+.station_board tr th:first-child + th { text-align: left; }
+.station_board tr td:first-child + td { text-align: left; }
+.station_board tr th:first-child + th + th { text-align: center; }
 .station_board tr td:first-child + td + td { text-align: center; }
-.station_board tr td:first-child + td + td + td { text-align: center; }
