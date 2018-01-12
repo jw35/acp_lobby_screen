@@ -20,7 +20,8 @@
 
       widgit.push(new StationBoard('station_board_1',{'station': 'CBG', 'offset': 0}));
       widgit.push(new StationBoard('station_board_2',{'station': 'CMB', 'offset': 0}));
-      widgit.push(new StationBoard('station_board_3',{'station': 'PAD', 'offset': 0}));
+      widgit.push(new StationBoard('station_board_3',{'station': 'CBG', 'offset': 0}));
+      widgit.push(new StationBoard('station_board_4',{'station': 'PAD', 'offset': 0}));
 
       function reload_widgits () {
         for (var i = 0; i < widgit.length; i++) {
@@ -54,8 +55,8 @@
     <div class="wrapper">
       <div class="container_1_2 col_1 row_1" id="station_board_1"></div>
       <div class="container_1_2 col_2 row_1" id="station_board_2"></div>
-      <div class="container_1_2 col_2 row_3" id="station_board_3"></div>
-      <div class="container_1_1 col_6 row_4"></div>
+      <div class="container_1_2 col_1 row_3" id="station_board_3"></div>
+      <div class="container_1_2 col_2 row_3" id="station_board_4"></div>
 
       <div class="credits">
         <a href="https://www.greatercambridge.org.uk/"><img alt="Greater Cambridge Partnership" src="{{ url_for('static', filename='logo_gccd_112.png') }}"></a>
