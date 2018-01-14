@@ -20,6 +20,7 @@
     <script src="{{ url_for('static', filename='station_board/station_board.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='traffic_map/traffic_map.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='message_area/message_area.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='iframe_area/iframe_area.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
 
@@ -29,6 +30,10 @@
       widgit.push(new StationBoard('station_board_2',{station: 'CBG', offset: 30}));
       widgit.push(new StationBoard('station_board_3',{station: 'CMB', offset: 0}));
       widgit.push(new StationBoard('station_board_4',{station: 'PAD', offset: 0}));
+
+      widgit.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
+      widgit.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
+
       widgit.push(new MessageArea('message_area_1',{message:
         '<h1>Message area</h1>' +
         '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod ' +
@@ -40,8 +45,7 @@
         '<ul><li>Pugh</li><li>Pugh</li><li>Barney McGrew</li><li>Cuthbert</li><li>Dibble</li><li>Grub</li></ul>'
       }))
 
-      widgit.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
-      widgit.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
+      widgit.push(new IframeArea('iframe_area_1',{url: 'http://www.brsn.org.uk'}));
 
       function reload_widgits () {
         for (var i = 0; i < widgit.length; i++) {
@@ -88,6 +92,7 @@
 
       <div class="container_1_2 col_5 row_1" id="message_area_1"></div>
 
+      <div class="container_2_2 col_5 row_3" id="iframe_area_1"></div>
 
       <div class="credits">
         <a href="https://www.greatercambridge.org.uk/"><img alt="Greater Cambridge Partnership" src="{{ url_for('static', filename='logo_gccd_112.png') }}"></a>
