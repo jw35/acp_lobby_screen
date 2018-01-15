@@ -25,17 +25,17 @@
 
     <script type="text/javascript">
 
-      var widgit = [];
+      var widget = [];
 
-      widgit.push(new StationBoard('station_board_1',{station: 'CBG', offset: 0}));
-      widgit.push(new StationBoard('station_board_2',{station: 'CBG', offset: 30}));
-      widgit.push(new StationBoard('station_board_3',{station: 'CMB', offset: 0}));
-      widgit.push(new StationBoard('station_board_4',{station: 'PAD', offset: 0}));
+      widget.push(new StationBoard('station_board_1',{station: 'CBG', offset: 0}));
+      widget.push(new StationBoard('station_board_2',{station: 'CBG', offset: 30}));
+      widget.push(new StationBoard('station_board_3',{station: 'CMB', offset: 0}));
+      widget.push(new StationBoard('station_board_4',{station: 'PAD', offset: 0}));
 
-      widgit.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
-      widgit.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
+      widget.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
+      widget.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
 
-      widgit.push(new MessageArea('message_area_1',{message:
+      widget.push(new MessageArea('message_area_1',{message:
         '<h1>Message area</h1>' +
         '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod ' +
         'tempor incididunt ut labore et dolore magna aliqua. </p>' +
@@ -53,33 +53,33 @@
         'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>'
       }))
 
-      widgit.push(new IframeArea('iframe_area_1',{url: 'http://people.ds.cam.ac.uk/jw35/'}));
+      widget.push(new IframeArea('iframe_area_1',{url: 'http://people.ds.cam.ac.uk/jw35/'}));
 
-      function reload_widgits () {
-        for (var i = 0; i < widgit.length; i++) {
-          if ('reload' in widgit[i]) {
-            console.log("Reloading ", widgit[i].container);
-            widgit[i].reload();
+      function reload_widgets () {
+        for (var i = 0; i < widget.length; i++) {
+          if ('reload' in widget[i]) {
+            console.log("Reloading ", widget[i].container);
+            widget[i].reload();
           }
           else {
-            console.log("Not reloading ", widgit[i].container);
+            console.log("Not reloading ", widget[i].container);
           }
         }
       }
 
       function page_load() {
-        for (var i = 0; i < widgit.length; i++) {
-          if ('init' in widgit[i]) {
-            console.log("Initing ", widgit[i].container);
-            widgit[i].init();
+        for (var i = 0; i < widget.length; i++) {
+          if ('init' in widget[i]) {
+            console.log("Initing ", widget[i].container);
+            widget[i].init();
           }
           else {
-            console.log("Not initing ", widgit[i].container);
+            console.log("Not initing ", widget[i].container);
           }
         }
         setInterval(function() {
           console.log("Running page-level reloader");
-          reload_widgits();
+          reload_widgets();
         }, 60000)
       }
 

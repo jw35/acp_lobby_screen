@@ -1,47 +1,47 @@
-Lobby Screen Widgit Guide v0.1
-=============================
+Lobby Screen widget Guide v0.2
+==============================
 
-This document defines the interface that Lobby Screen widgits need to
+This document defines the interface that Lobby Screen widgets need to
 implement so that they can be correctly displayed. The
 intention behind this interface is for it to be as flexible as possible
-while at the same time requiring minimal coupling between the widgits
+while at the same time requiring minimal coupling between the widgets
 and the framework that displays them.
 
 The current definition is experimental and subject to further (possibly
 major) refinement.
 
-Widgit Requirements
+Widget Requirements
 ===================
 
-1. Each widgit has a name by which it is known, for example
+1. Each widget has a name by which it is known, for example
 `station_board`.
 
-2. All files making up a widgit are stored in a directory with the same
-name as the widgit.
+2. All files making up a widget are stored in a directory with the same
+name as the widget.
 
 3. Within this directory, the following files will be recognised. All
-are optional, but a widgit with no files won't do anything!
+are optional, but a widget with no files won't do anything!
 
     1. __`<name>.js`__
 
         A JavaScript file containing an object definition for the
-        widgit. If present, this file will be included into any page
-        that displays this widgit and it's constructor and method called
+        widget. If present, this file will be included into any page
+        that displays this widget and it's constructor and method called
         as described below.
 
         This object has the flowing characteristics:
 
-        * Named based on the widgit name, but in camel case without
+        * Named based on the widget name, but in camel case without
           any '\_' characters - for example `StationBoard`.
 
         * A constructor which is invoked by `new` and which takes
           two parameters:
 
-          * The DOM `id` of an page element into which the widgit's
+          * The DOM `id` of an page element into which the widget's
             content will be placed
           * A JavaScript object containing `name:value` pairs
             representing parameters for a particular instance of the
-            widgit.
+            widget.
 
           The constructor may be called before DOM construction is
           complete and so shouldn't reference any DOM objects.
@@ -50,14 +50,14 @@ are optional, but a widgit with no files won't do anything!
           called after
           DOM construction is complete. It will normally arrange
           to
-          populate the widgit. This method may take responsibility for
-          subsequently updating the widgit's content, or this could
+          populate the widget. This method may take responsibility for
+          subsequently updating the widget's content, or this could
           be left to the `reload()` method (see below).
 
         * Optionally a `reload()` method. if present, this will be
           periodically
-          called after the widgit has been initialised which will
-          typically arrange to update the widgit's content.
+          called after the widget has been initialised which will
+          typically arrange to update the widget's content.
 
         The JavaScript can assume the availability of the Jquery
         library.
@@ -65,9 +65,9 @@ are optional, but a widgit with no files won't do anything!
     2. __`<name>.css`__
 
         A file containing CSS definitions which, if present, will be
-        included into any page that displays this widgit.
+        included into any page that displays this widget.
 
-        To avoid name clashes, widgits must associate a class named
+        To avoid name clashes, widgets must associate a class named
         after their name with their outermost element and then prefix
         all CSS rules with this class. For example
 
@@ -78,49 +78,49 @@ are optional, but a widgit with no files won't do anything!
         .station_board table { ...; ...; }
         ```
 
-        The page displaying the widgit will establish suitable style
+        The page displaying the widget will establish suitable style
         defaults (including a default body font size) which should be
         relied on where possible to help promote visual conformity
-        between widgets. Where possible, widgit-specific styles should
+        between widgets. Where possible, widget-specific styles should
         use relative dimensions such as ems, rems or percentages so tha
         tthey can adapt (where possible) to different body font sizes
         and display areas.
 
-        Widgits are currently displayed on a grid with columns 320px
+        widgets are currently displayed on a grid with columns 320px
         wide and rows 255px high.
 
     3. __`<name>.html`__
 
         A file containing an HTML fragment which, if present, will be
-        included into any page that displays this widgit as the initial
-        widgit content.
+        included into any page that displays this widget as the initial
+        widget content.
 
-4. Other files can be included in the widgit directory which can be
+4. Other files can be included in the widget directory which can be
 referenced by relative URL from elsewhere.
 
-5. The provision or location of additional resources needed by widgits,
+5. The provision or location of additional resources needed by widgets,
 such as API endpoints or HTML page fragments, is not covered by this
 document.
 
-Widgit implementation
+Widget implementation
 =====================
 
-Using this API, widgits can be implemented an a variety of ways:
+Using this API, widgets can be implemented an a variety of ways:
 
-* A purely static widgit can just use HTML and CSS to render its content
+* A purely static widget can just use HTML and CSS to render its content
 and omit the JavaScript file.
 
-* A 'dynamic' widgit can render its content using JavaScript in response
+* A 'dynamic' widget can render its content using JavaScript in response
 to an `init()` call and based on the parameters passed on object
 instantiation. It could render all of the content, or update skeleton
 content loaded from HTML.
 
-* Content for dynamic widgits could be rendered entirely by JavaScript,
+* Content for dynamic widgets could be rendered entirely by JavaScript,
 probably based on information retrieved by an API, or could be generated
 server-side and substituted into place (e.g. by jQuery's `$
 (...).load()` function)
 
-* Widgits can take responsibility for updating themselves, perhaps by
+* widgets can take responsibility for updating themselves, perhaps by
 invoking `setTimeout()` folowing each render or by real-time push over
 web sockets, or can arrange to refresh themselves in response to calls
 to a `relaod()` method.
@@ -139,13 +139,13 @@ with the requirements of this document.__
 station_board.js
 ----------------
 
-`station_board` is an example of a widgit implemented in JavaScript
-which retrieves and displays content rendered server-side. The widgit
+`station_board` is an example of a widget implemented in JavaScript
+which retrieves and displays content rendered server-side. The widget
 arranges its own reloads (but has commented-out code to implement a
 `reload()` method):
 
 ```javascript
-/* Station Board Widgit for ACP Lobby Screen */
+/* Station Board widget for ACP Lobby Screen */
 
 function StationBoard(container, params) {
 
@@ -187,8 +187,8 @@ index.html
 It's assumed that some web application provides the lobby screens
 themselves. It is further assumes that this application maintains a
 database that records which panels should appear on which screens,
-and which widgits should appear on panel, along with their
-positioning, size, and required parameters. The same widgit can appear
+and which widgets should appear on panel, along with their
+positioning, size, and required parameters. The same widget can appear
 more than once on a particular panel (presumably with different
 parameters).
 
@@ -197,7 +197,7 @@ each panel, either by tempting them server-side or by building them
 dynamically based on a suitable data feed.
 
 An example page, containing multiple instances of the
-`station_board` widgit:
+`station_board` widget:
 
 ```html
 <!doctype html>
@@ -218,33 +218,33 @@ An example page, containing multiple instances of the
 
     <script type="text/javascript">
 
-      var widgit = [];
+      var widget = [];
 
-      widgit.push(new StationBoard('station_board_1',{'station': 'CBG', 'offset': 0}));
-      widgit.push(new StationBoard('station_board_2',{'station': 'CMB', 'offset': 0}));
-      widgit.push(new StationBoard('station_board_3',{'station': 'CBG', 'offset': 0}));
-      widgit.push(new StationBoard('station_board_4',{'station': 'PAD', 'offset': 0}));
+      widget.push(new StationBoard('station_board_1',{'station': 'CBG', 'offset': 0}));
+      widget.push(new StationBoard('station_board_2',{'station': 'CMB', 'offset': 0}));
+      widget.push(new StationBoard('station_board_3',{'station': 'CBG', 'offset': 0}));
+      widget.push(new StationBoard('station_board_4',{'station': 'PAD', 'offset': 0}));
 
-      function reload_widgits () {
-        for (var i = 0; i < widgit.length; i++) {
-          if ('reload' in widgit[i]) {
-            console.log("Reloading ", widgit[i].container);
-            widgit[i].reload();
+      function reload_widgets () {
+        for (var i = 0; i < widget.length; i++) {
+          if ('reload' in widget[i]) {
+            console.log("Reloading ", widget[i].container);
+            widget[i].reload();
           }
           else {
-            console.log("Not reloading ", widgit[i].container);
+            console.log("Not reloading ", widget[i].container);
           }
         }
       }
 
       function page_load() {
-        for (var i = 0; i < widgit.length; i++) {
-          console.log("Initing ", widgit[i].container);
-          widgit[i].init();
+        for (var i = 0; i < widget.length; i++) {
+          console.log("Initing ", widget[i].container);
+          widget[i].init();
         }
         setInterval(function() {
           console.log("Running page-level reloader");
-          reload_widgits();
+          reload_widgets();
         }, 60000)
       }
 

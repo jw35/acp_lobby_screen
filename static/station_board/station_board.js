@@ -1,4 +1,4 @@
-/* Station Board Widgit for ACP Lobby Screen */
+/* Station Board Widget for ACP Lobby Screen */
 
 function StationBoard(container, params) {
 
