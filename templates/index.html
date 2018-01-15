@@ -90,17 +90,33 @@
   <body onLoad="page_load()">
 
     <div class="wrapper">
-      <div class="container_1_2 col_1 row_1" id="station_board_1"></div>
-      <div class="container_1_2 col_2 row_1" id="station_board_2"></div>
-      <div class="container_1_2 col_1 row_3" id="station_board_3"></div>
-      <div class="container_1_2 col_2 row_3" id="station_board_4"></div>
+      <div class="container_1_2 col_1 row_1" id="station_board_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_1_2 col_2 row_1" id="station_board_2">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_1_2 col_1 row_3" id="station_board_3">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_1_2 col_2 row_3" id="station_board_4">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
 
-      <div class="container_2_2 col_3 row_1" id="traffic_map_1"></div>
-      <div class="container_2_2 col_3 row_3" id="traffic_map_2"></div>
+      <div class="container_2_2 col_3 row_1" id="traffic_map_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_2_2 col_3 row_3" id="traffic_map_2">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
 
-      <div class="container_1_2 col_5 row_1" id="message_area_1"></div>
+      <div class="container_1_2 col_5 row_1" id="message_area_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
 
-      <div class="container_2_2 col_5 row_3" id="iframe_area_1"></div>
+      <div class="container_2_2 col_5 row_3" id="iframe_area_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
 
       <div class="credits">
         <a href="https://www.greatercambridge.org.uk/"><img alt="Greater Cambridge Partnership" src="{{ url_for('static', filename='logo_gccd_112.png') }}"></a>

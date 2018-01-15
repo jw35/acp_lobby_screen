@@ -154,3 +154,10 @@ body {
     padding-bottom: 20px;
 }
 
+.spinner {
+    display: block;
+    height: 24px;
+    width: 24px;
+    margin: auto;
+    margin-top: 115px;
+}
