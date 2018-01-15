@@ -1,8 +1,8 @@
-Lobby Panel Widgit Guide v0.1
+Lobby Screen Widgit Guide v0.1
 =============================
 
-This document defines the interface that Lobby Panel widgits need to
-implement so that they can be correctly displayed by a Lobby Panel. The
+This document defines the interface that Lobby Screen widgits need to
+implement so that they can be correctly displayed. The
 intention behind this interface is for it to be as flexible as possible
 while at the same time requiring minimal coupling between the widgits
 and the framework that displays them.
@@ -128,10 +128,10 @@ to a `relaod()` method.
 Examples
 ========
 
-A working example of a Lobby Panel based on this framework is available
+A working example of a Lobby Screen based on this framework is available
 at
 
-  <https://github.com/jw35/icp_lobby_panel>
+  <https://github.com/jw35/acp_lobby_screen>
 
 __Note that at present this implementation is not entirely consistent
 with the requirements of this document.__
@@ -145,7 +145,7 @@ arranges its own reloads (but has commented-out code to implement a
 `reload()` method):
 
 ```javascript
-/* Station Board Widgit for ACP Lobby Panel */
+/* Station Board Widgit for ACP Lobby Screen */
 
 function StationBoard(container, params) {
 
@@ -184,10 +184,10 @@ function StationBoard(container, params) {
 index.html
 ----------
 
-It's assumed that some web application provides the lobby panels
+It's assumed that some web application provides the lobby screens
 themselves. It is further assumes that this application maintains a
-database that records which panels should be displayed on which screens,
-and which widgits should appear on each panel, along with their
+database that records which panels should appear on which screens,
+and which widgits should appear on panel, along with their
 positioning, size, and required parameters. The same widgit can appear
 more than once on a particular panel (presumably with different
 parameters).
@@ -205,14 +205,14 @@ An example page, containing multiple instances of the
 <html>
 
   <head>
-    <title>Lobby Panel</title>
+    <title>ACP Lobby Screen</title>
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"
             integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
             crossorigin="anonymous"></script>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='lobby_panel.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
 
     <script src="{{ url_for('static', filename='station_board.js') }}" type="text/javascript"></script>
 

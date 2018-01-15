@@ -1,4 +1,4 @@
-/* Iframe Area Widgit for ACP Lobby Panel */
+/* Iframe Area Widgit for ACP Lobby Screen */
 
 function IframeArea(container, params) {
 

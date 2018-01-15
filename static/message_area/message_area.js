@@ -1,4 +1,4 @@
-/* Message Area Widgit for ACP Lobby Panel */
+/* Message Area Widgit for ACP Lobby Screen */
 
 function MessageArea(container, params) {
 

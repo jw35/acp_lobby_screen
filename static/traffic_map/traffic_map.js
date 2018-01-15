@@ -1,4 +1,4 @@
-/* Traffic Map Widgit for ACP Lobby Panel */
+/* Traffic Map Widgit for ACP Lobby Screen */
 
 function TrafficMap(container, params) {
 

@@ -8,12 +8,12 @@ from werkzeug.contrib.cache import SimpleCache
 WSDL = 'https://lite.realtime.nationalrail.co.uk/OpenLDBWS/wsdl.aspx?ver=2017-10-01'
 
 
-app= Flask(__name__, static_url_path="/lobby_panel/static")
+app= Flask(__name__, static_url_path="/lobby_screen/static")
 app.config.from_object(__name__)
 app.config.update(dict(
     SEND_FILE_MAX_AGE_DEFAULT=0,
 ))
-app.config.from_envvar('LOBBY_PANEL_SETTINGS', silent=False)
+app.config.from_envvar('LOBBY_SCREEN_SETTINGS', silent=False)
 # Check we loaded a config
 assert 'NRE_API_KEY' in app.config, 'No NRE_API_KEY setting found'
 
