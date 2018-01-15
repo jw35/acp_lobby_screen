@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='lobby_panel.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='station_board/station_board.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='message_area/message_area.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='iframe_area/iframe_area.css') }}">
 
     <script src="{{ url_for('static', filename='station_board/station_board.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='traffic_map/traffic_map.js') }}" type="text/javascript"></script>
@@ -45,7 +46,7 @@
         '<ul><li>Pugh</li><li>Pugh</li><li>Barney McGrew</li><li>Cuthbert</li><li>Dibble</li><li>Grub</li></ul>'
       }))
 
-      widgit.push(new IframeArea('iframe_area_1',{url: 'http://www.brsn.org.uk'}));
+      widgit.push(new IframeArea('iframe_area_1',{url: 'http://people.ds.cam.ac.uk/jw35/'}));
 
       function reload_widgits () {
         for (var i = 0; i < widgit.length; i++) {
