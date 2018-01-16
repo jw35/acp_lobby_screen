@@ -2,10 +2,18 @@
 
 function StopBusMap(container, params) {
 
-    this.container = container;
-    this.params = params;
+this.container = container;
+this.params = params;
 
-    this.sensors = {};
+this.sensors = {};
+
+this.progress_indicators = {}; // dictionary by VehicleRef
+
+this.RTMONITOR_URI = 'http://tfc-app2.cl.cam.ac.uk/rtmonitor/sirivm';
+
+this.sock = {}; // the page's WebSocket
+
+this.OLD_DATA_RECORD = 60; // time (s) threshold where a data record is considered 'old'
 
 // Here we define the 'data record format' of the incoming websocket feed
 this.RECORD_INDEX = 'VehicleRef';  // data record property that is primary key
@@ -25,7 +33,7 @@ this.ICON_IMAGE.src = this.ICON_URL;
 
 this.icon_size = 'L';
 
-var this.oldsensorIcon = L.icon({
+this.oldsensorIcon = L.icon({
     iconUrl: this.ICON_URL,
     iconSize: [20, 20]
 });
@@ -74,9 +82,9 @@ this.bus_stop_icon = L.icon({
         this.map = L.map(map_div, { zoomControl:false }).setView([this.params.lat, this.params.lng], this.params.zoom);
         this.map_tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(self.map);
+            }).addTo(this.map);
 
-        this.sock_connect();
+        this.sock_connect(self);
 
         this.do_load();
     }
@@ -95,50 +103,45 @@ this.bus_stop_icon = L.icon({
 // ***************************************************************************
 // *******************  WebSocket code    ************************************
 // ***************************************************************************
-
-var RTMONITOR_URI = 'http://tfc-app2.cl.cam.ac.uk/rtmonitor/sirivm';
-
-var sock; // the page's WebSocket
-
 // sock_connect() will be called on startup (i.e. in init())
 // It will connect socket, when successful will
 // send { 'msg_type': 'rt_connect'} message, and should receive { 'msg_type': 'rt_connect_ok' }, then
 // send { 'msg_type': 'rt_subscribe', 'request_id' : 'A' } which subsribes to ALL records.
-this.sock_connect = function()
+this.sock_connect = function(parent)
 {
-    sock = new SockJS(RTMONITOR_URI);
+    parent.sock = new SockJS(parent.RTMONITOR_URI);
 
-    sock.onopen = function() {
-                this.log('** socket open');
-                this.sock_send_str('{ "msg_type": "rt_connect" }');
+    parent.sock.onopen = function() {
+                parent.log('** socket open');
+                parent.sock_send_str('{ "msg_type": "rt_connect" }');
                 };
 
-    sock.onmessage = function(e) {
+    parent.sock.onmessage = function(e) {
                 var json_msg = JSON.parse(e.data);
                 if (json_msg.msg_type != null && json_msg.msg_type == "rt_nok")
                 {
-                    this.log('<span class="log_error">** '+e.data+'</span>');
+                    parent.log('<span class="log_error">** '+e.data+'</span>');
                     return;
                 }
                 if (json_msg.msg_type != null && json_msg.msg_type == "rt_connect_ok")
                 {
-                    this.log('Connected OK');
-                    this.sock_send_str('{ "msg_type": "rt_subscribe", "request_id": "A" }');
+                    parent.log('Connected OK');
+                    parent.sock_send_str('{ "msg_type": "rt_subscribe", "request_id": "A" }');
 
                     return;
                 }
-                this.handle_records(e.data);
+                parent.handle_records(e.data);
                 };
 
-    sock.onclose = function() {
-                    this.log('** socket closed');
+    parent.sock.onclose = function() {
+                parent.log('** socket closed');
                 };
 }
 
 this.sock_close = function()
 {
     this.log('** closing socket...');
-    sock.close();
+    this.sock.close();
 }
 
 this.sock_send = function(input_name)
@@ -150,22 +153,22 @@ this.sock_send = function(input_name)
 
 this.sock_send_str = function(msg)
 {
-    if (sock == null)
+    if (this.sock == null)
     {
 	    this.log('<span style="color: red;">Socket not yet connected</span>');
 	    return;
     }
-    if (sock.readyState == SockJS.CONNECTING)
+    if (this.sock.readyState == SockJS.CONNECTING)
     {
 	    this.log('<span style="color: red;">Socket connecting...</span>');
   	    return;
     }
-    if (sock.readyState == SockJS.CLOSING)
+    if (this.sock.readyState == SockJS.CLOSING)
     {
 	    this.log('<span style="color: red;">Socket closing...</span>');
 	    return;
     }
-    if (sock.readyState == SockJS.CLOSED)
+    if (this.sock.readyState == SockJS.CLOSED)
     {
 	    this.log('<span style="color: red;">Socket closed</span>');
 	    return;
@@ -173,7 +176,7 @@ this.sock_send_str = function(msg)
 
     this.log('sending: '+msg);
 
-    sock.send(msg);
+    this.sock.send(msg);
 }
 
 // We have received data from a previously unseen sensor, so initialize
@@ -195,7 +198,7 @@ this.create_sensor = function(msg, clock_time)
                                                   [1000],
                                                   {icon: marker_icon});
     sensor['marker']
-        .addTo(map)
+        .addTo(this.map)
         .bindPopup(this.popup_content(msg), { className: "sensor-popup"})
         .bindTooltip(this.tooltip_content(msg), {
                             // permanent: true,
@@ -213,7 +216,7 @@ this.create_sensor = function(msg, clock_time)
     this.sensors[sensor_id] = sensor;
 
     // flag if this record is OLD or NEW
-    this.init_old_statussensor, clock_time);
+    this.init_old_status(sensor, clock_time);
 
 }
 
@@ -226,6 +229,13 @@ this.update_sensor = function(msg, clock_time)
 
 		if (this.get_msg_date(msg).getTime() != this.get_msg_date(this.sensors[sensor_id].msg).getTime())
         {
+            // store as latest msg
+            // moving current msg to prev_msg
+            this.sensors[sensor_id].prev_msg = this.sensors[sensor_id].msg;
+		    this.sensors[sensor_id].msg = msg; // update entry for this msg
+
+            var sensor = this.sensors[sensor_id];
+
             // move marker
             var pos = this.get_msg_point(msg);
             var marker = this.sensors[sensor_id].marker;
@@ -236,12 +246,25 @@ this.update_sensor = function(msg, clock_time)
 		    marker.setTooltipContent(this.tooltip_content(msg));
 		    marker.setPopupContent(this.popup_content(msg));
 
-            // store as latest msg
-            // moving current msg to prev_msg
-            this.sensors[sensor_id].prev_msg = this.sensors[sensor_id].msg;
-		    this.sensors[sensor_id].msg = msg; // update entry for this msg
+            var bearing = get_bearing(this.get_msg_point(sensor.prev_msg), pos);
 
-            var sensor = this.sensors[sensor_id];
+            var sensor_id = msg[this.RECORD_INDEX];
+
+            // Remove old progress indicator
+            if (this.progress_indicators[sensor_id])
+            {
+                this.map.removeLayer(this.progress_indicators[sensor_id].indicator);
+            }
+
+            var progress_indicator = {};
+
+            progress_indicator.indicator = L.semiCircle([pos.lat, pos.lng], { radius: 200 }).setDirection(bearing,270);
+
+            this.progress_indicators[sensor_id] = progress_indicator;
+
+            progress_indicator.indicator.addTo(this.map);
+
+            console.log('set progress indicator');
 
             // flag if this record is OLD or NEW
             this.update_old_status(sensor, clock_time);
@@ -268,7 +291,7 @@ this.update_old_status = function(sensor, clock_time)
     // calculate age of sensor (in seconds)
     var age = (clock_time - data_timestamp) / 1000;
 
-    if (age > OLD_DATA_RECORD)
+    if (age > this.OLD_DATA_RECORD)
     {
         // data record is OLD
         // skip if this data record is already flagged as old
@@ -320,7 +343,7 @@ this.get_msg_date = function(msg)
 // Convert '-PT1H2M33S' to '-1:02:33'
 this.xml_duration_to_string = function(xml)
 {
-    var seconds = this.xml_duration_to_secondsxml);
+    var seconds = this.xml_duration_to_seconds(xml);
 
     var sign = (seconds < 0) ? '-' : '+';
 
