@@ -13,7 +13,7 @@ function IframeArea(container, params) {
 
     this.reload = function() {
         console.log("Running StationBoard.reload", this.container);
-        $('#' + this.container + ', iframe').attr("src", this.params.url);
+        $('#' + this.container + ' iframe').attr("src", this.params.url);
     }
 
     this.do_load = function myself() {
