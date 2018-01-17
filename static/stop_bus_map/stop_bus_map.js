@@ -86,6 +86,20 @@ this.bus_stop_icon = L.icon({
 
         this.sock_connect(self);
 
+        // create a timer to update the progress indicators every second
+        this.progress_timer = setInterval( (function (parent) { return function () { parent.timer_update(parent) }; })(self),
+                                           1000);
+
+        // listener to detect ESC 'keydown' while in map_only mode to escape back to normal
+        document.onkeydown = function(evt) {
+            evt = evt || window.event;
+            if (evt.keyCode == 27) // ESC to escape from map-only view
+            {
+                self.sock_close();
+                clearInterval(self.progress_timer);
+            }
+        }; // end onkeydown
+
         this.do_load();
     }
 
@@ -126,7 +140,20 @@ this.sock_connect = function(parent)
                 if (json_msg.msg_type != null && json_msg.msg_type == "rt_connect_ok")
                 {
                     parent.log('Connected OK');
-                    parent.sock_send_str('{ "msg_type": "rt_subscribe", "request_id": "A" }');
+                    parent.sock_send_str('{ "msg_type": "rt_subscribe", '+
+                                         '  "request_id": "'+parent.container+'_A", '+
+                                         '  "filters": [ { "test": "inside", '+
+                                         '                 "lat_key": "Latitude", '+
+                                         '                 "lng_key": "Longitude", '+
+                                         '                 "points": [ '+
+                                         '                            {  "lat": 52.2219, "lng": 0.07537 }, '+
+                                         '                            {  "lat": 52.2221, "lng": 0.10554 }, '+
+                                         '                            {  "lat": 52.2065, "lng": 0.10576 }, '+
+                                         '                            {  "lat": 52.2070, "lng": 0.07490 }'+
+                                         '                          ]'+
+                                         '              } ]'+
+                                         '}'
+                                        );
 
                     return;
                 }
@@ -216,7 +243,7 @@ this.create_sensor = function(msg, clock_time)
     this.sensors[sensor_id] = sensor;
 
     // flag if this record is OLD or NEW
-    this.init_old_status(sensor, clock_time);
+    this.init_old_status(sensor, new Date());
 
 }
 
@@ -246,30 +273,69 @@ this.update_sensor = function(msg, clock_time)
 		    marker.setTooltipContent(this.tooltip_content(msg));
 		    marker.setPopupContent(this.popup_content(msg));
 
-            var bearing = get_bearing(this.get_msg_point(sensor.prev_msg), pos);
-
-            var sensor_id = msg[this.RECORD_INDEX];
-
-            // Remove old progress indicator
-            if (this.progress_indicators[sensor_id])
-            {
-                this.map.removeLayer(this.progress_indicators[sensor_id].indicator);
-            }
-
-            var progress_indicator = {};
-
-            progress_indicator.indicator = L.semiCircle([pos.lat, pos.lng], { radius: 200 }).setDirection(bearing,270);
-
-            this.progress_indicators[sensor_id] = progress_indicator;
-
-            progress_indicator.indicator.addTo(this.map);
-
-            console.log('set progress indicator');
+            this.draw_progress_indicator(sensor);
 
             // flag if this record is OLD or NEW
-            this.update_old_status(sensor, clock_time);
+            this.update_old_status(sensor, new Date());
 
 		}
+}
+
+this.timer_update = function(parent)
+{
+    console.log('(timer) timer_update');
+
+    parent.check_old_records(parent, new Date());
+
+    for (var sensor_id in parent.progress_indicators)
+    {
+        if (parent.progress_indicators.hasOwnProperty(sensor_id))
+        {
+            //console.log('(timer) timer_update '+sensor_id);
+            parent.draw_progress_indicator(parent.sensors[sensor_id]);
+        }
+    }
+}
+
+this.draw_progress_indicator = function(sensor)
+{
+    var pos = this.get_msg_point(sensor.msg);
+
+    var bearing = get_bearing(this.get_msg_point(sensor.prev_msg), pos);
+
+    var sensor_id = sensor.msg[this.RECORD_INDEX];
+
+    //console.log('draw_progress_indicator '+sensor_id);
+
+    // Remove old progress indicator
+    if (this.progress_indicators[sensor_id])
+    {
+        //console.log('draw_progress_indicator removing layer '+sensor_id);
+        this.map.removeLayer(this.progress_indicators[sensor_id].layer);
+    }
+
+    if (sensor.state.old == null || !sensor.state.old)
+    {
+        var progress_indicator = {};
+
+        progress_indicator.time = this.get_msg_date(sensor.msg);
+
+        console.log(sensor_id+' at '+(new Date())+' vs '+progress_indicator.time);
+
+        var bus_speed = 7; // m/s
+
+        var time_delta = ((new Date()).getTime() - progress_indicator.time.getTime()) / 1000;
+
+        var progress_distance = Math.max(20, time_delta * bus_speed);
+
+        console.log('progress_distance '+sensor_id+' '+Math.round(time_delta*10)/10+'s '+Math.round(progress_distance)+'m');
+
+        progress_indicator.layer = L.semiCircle([pos.lat, pos.lng], { radius:  progress_distance}).setDirection(bearing,270);
+
+        this.progress_indicators[sensor_id] = progress_indicator;
+
+        progress_indicator.layer.addTo(this.map);
+    }
 }
 
 // Given a data record, update '.old' property t|f and reset marker icon
@@ -300,6 +366,7 @@ this.update_old_status = function(sensor, clock_time)
             return;
         }
         // set the 'old' flag on this record and update icon
+        console.log('update_old_status OLD '+sensor.msg[this.RECORD_INDEX]);
         sensor.state.old = true;
         sensor.marker.setIcon(this.oldsensorIcon);
     }
@@ -516,12 +583,12 @@ this.handle_msg = function(msg, clock_time)
 
 // watchdog function to flag 'old' data records
 // records are stored in 'this.sensors' object
-this.check_old_records = function(clock_time)
+this.check_old_records = function(parent, clock_time)
 {
     //console.log('checking for old data records..,');
 
     // do nothing if timestamp format not recognised
-    switch (this.RECORD_TS_FORMAT)
+    switch (parent.RECORD_TS_FORMAT)
     {
         case 'ISO8601':
             break;
@@ -530,9 +597,9 @@ this.check_old_records = function(clock_time)
             return;
     }
 
-    for (var sensor_id in this.sensors)
+    for (var sensor_id in parent.sensors)
     {
-        this.update_old_status(this.sensors[sensor_id], clock_time);
+        parent.update_old_status(parent.sensors[sensor_id], clock_time);
     }
 }
 
