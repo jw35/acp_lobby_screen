@@ -9,6 +9,7 @@ from collections import OrderedDict
 import datetime
 import pytz
 import iso8601
+import jinja2
 
 WSDL = 'https://lite.realtime.nationalrail.co.uk/OpenLDBWS/wsdl.aspx?ver=2017-10-01'
 
@@ -108,12 +109,7 @@ def setup_logging():
         app.logger.setLevel(logging.INFO)
 
 
-@app.route('/')
-def hello_world():
-    return render_template('index.html')
-
-
-@app.route('/station_board', methods=['GET'])
+@app.route('/widget/station_board', methods=['GET'])
 def station_board():
     '''
     Retrieve a 'DepartureBoard' from National Rail Enquiries
@@ -190,7 +186,7 @@ def mph_to_descr(speed):
         return 'huricane'
 
 
-@app.route('/weather', methods=['GET'])
+@app.route('/widget/weather', methods=['GET'])
 def weather():
     '''
     Extract forecast information from the Met Office Data feed
@@ -229,3 +225,15 @@ def icon_check():
         "weather_descriptions": weather_descriptions,
         "weather_icon": weather_icon,
     })
+
+
+@app.route('/<layout_id>')
+def layout(layout_id):
+    try:
+        return render_template(layout_id + '.html')
+    except jinja2.exceptions.TemplateNotFound:
+        abort(404)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
