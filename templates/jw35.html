@@ -1,0 +1,155 @@
+<!doctype html>
+
+<html>
+
+  <head>
+    <title>JW35's ACP Lobby Screen</title>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+
+    <!-- For traffic_map widget -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEkMI-ZAAt1kjv668jfBXhNB1-odv5m3g">
+    </script>
+
+    <!-- For the twitter_timeline widget -->
+    <script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+    <!-- Widget stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='station_board/station_board.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='message_area/message_area.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='iframe_area/iframe_area.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='weather/weather.css') }}">
+
+    <!-- Widget Javascript -->
+    <script src="{{ url_for('static', filename='station_board/station_board.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='traffic_map/traffic_map.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='message_area/message_area.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='iframe_area/iframe_area.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='twitter_timeline/twitter_timeline.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='weather/weather.js') }}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+      // Widget instantiation
+
+      var widget = [];
+
+      widget.push(new StationBoard('station_board_1',{station: 'CBG', offset: 0}));
+      widget.push(new StationBoard('station_board_2',{station: 'CBG', offset: 30}));
+      widget.push(new StationBoard('station_board_3',{station: 'CMB', offset: 0}));
+
+      widget.push(new Weather('weather_area_1', {location: '310042'}))
+
+      widget.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
+      widget.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
+
+      widget.push(new MessageArea('message_area_1',{message:
+        '<h1>Message area</h1>' +
+        '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod ' +
+        'tempor incididunt ut labore et dolore magna aliqua. </p>' +
+        '<p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ' +
+        'ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit ' +
+        'esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non ' +
+        'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>' +
+        '<ul><li>Pugh</li><li>Pugh</li><li>Barney McGrew</li><li>Cuthbert</li><li>Dibble</li>' +
+        '<li>Grub</li></ul>' +
+        '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod ' +
+        'tempor incididunt ut labore et dolore magna aliqua. </p>' +
+        '<p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ' +
+        'ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit ' +
+        'esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non ' +
+        'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>'
+      }))
+
+      widget.push(new IframeArea('iframe_area_1',{url: 'http://people.ds.cam.ac.uk/jw35/'}));
+      
+      widget.push(new TwitterTimeline('twitter_timeline_1',{who: 'Cambs_Traffic'}));
+
+      // Generic framework - init and refresh handling
+
+      function reload_widgets () {
+        for (var i = 0; i < widget.length; i++) {
+          if ('reload' in widget[i]) {
+            console.log("Reloading ", widget[i].container);
+            widget[i].reload();
+          }
+          else {
+            console.log("Not reloading ", widget[i].container);
+          }
+        }
+      }
+
+      function page_load() {
+        for (var i = 0; i < widget.length; i++) {
+          if ('init' in widget[i]) {
+            console.log("Initing ", widget[i].container);
+            widget[i].init();
+          }
+          else {
+            console.log("Not initing ", widget[i].container);
+          }
+        }
+        setInterval(function() {
+          console.log("Running page-level reloader");
+          reload_widgets();
+        }, 60000)
+      }
+
+    </script>
+
+  </head>
+
+  <body onLoad="page_load()">
+
+    <!-- Widget display area definition -->
+
+    <div class="wrapper">
+      <div class="container_1_2 col_1 row_1" id="station_board_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_1_2 col_2 row_1" id="station_board_2">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_1_2 col_1 row_3" id="station_board_3">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_2 col_2 row_3" id="weather_area_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_2_2 col_3 row_1" id="traffic_map_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_2_2 col_3 row_3" id="traffic_map_2">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_2 col_5 row_1" id="message_area_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_2 col_5 row_3" id="iframe_area_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_4 col_6 row_1" id="twitter_timeline_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="credits">
+        <a href="https://www.greatercambridge.org.uk/"><img alt="Greater Cambridge Partnership" src="{{ url_for('static', filename='logo_gccd_112.png') }}"></a>
+        <a href="http://www.connectingcambridgeshire.co.uk/smartcamb/"><img alt="Connecting Cambridgshire" src="{{ url_for('static', filename='logo_sc_112.png') }}" ></a>
+        <a href="http://www.cam.ac.uk"><img alt="The University of Cambridge" src="{{ url_for('static', filename='logo_uc_112.png') }}"></a>
+        <span>Adaptive Cities Platform</span>
+      </div>
+
+    </div>
+
+  </body>
+
+</html>
