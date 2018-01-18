@@ -17,27 +17,19 @@
 
     {% include 'sockjs.html' %}
 
-    <!-- For the twitter_timeline widget -->
-    <script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-    <!-- Widget stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='station_board/station_board.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='message_area/message_area.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='iframe_area/iframe_area.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='stop_bus_map/stop_bus_map.css') }}">
 
-    <!-- Widget Javascript -->
     <script src="{{ url_for('static', filename='station_board/station_board.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='traffic_map/traffic_map.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='message_area/message_area.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='iframe_area/iframe_area.js') }}" type="text/javascript"></script>
-
     <script src="{{ url_for('static', filename='stop_bus_map/stop_bus_map.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
-
-      // Widget instantiation
 
       var widget = [];
 
@@ -68,10 +60,6 @@
       }))
 
       widget.push(new IframeArea('iframe_area_1',{url: 'http://people.ds.cam.ac.uk/jw35/'}));
-      
-      widget.push(new TwitterTimeline('twitter_timeline_1',{who: 'Cambs_Traffic'}));
-
-      // Generic framework - init and refresh handling
 
       function reload_widgets () {
         for (var i = 0; i < widget.length; i++) {
@@ -107,8 +95,6 @@
 
   <body onLoad="page_load()">
 
-    <!-- Widget display area definition -->
-
     <div class="wrapper">
       <div class="container_1_2 col_1 row_1" id="station_board_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
@@ -134,11 +120,7 @@
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_2 col_5 row_3" id="iframe_area_1">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-
-      <div class="container_1_4 col_6 row_1" id="twitter_timeline_1">
+      <div class="container_2_2 col_5 row_3" id="iframe_area_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 

@@ -1,0 +1,50 @@
+.stop_bus_map_title_div {
+    height: 10%;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.stop_bus_map_title_text {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: auto;
+    text-align: center;
+    color: blue;
+}
+
+.stop_bus_map_div {
+    width: 100%;
+    height: 90%;
+}
+
+.sensor-popup {
+    font-size: small;
+}
+
+.marker_sensor_M {
+    background-image: url("/static/images/bus_logo_M.png");
+    /* background-color: green; */
+}
+
+.marker_sensor_L {
+    background-image: url("/static/images/bus_logo_L.png");
+    /* background-color: green; */
+}
+
+.marker_label_M {
+    /* background-color: white; */
+    /* margin-left: 8px; */
+    margin-top: 7px;
+    font-size: 7px;
+    text-align: center;
+}
+
+.marker_label_L {
+    /* background-color: white; */
+    /* margin-left: 8px; */
+    margin-top: 8px;
+    font-size: 11px;
+    text-align: center;
+}
+
