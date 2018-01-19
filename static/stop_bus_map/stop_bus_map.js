@@ -215,7 +215,7 @@ this.create_sensor = function(msg, clock_time)
     var sensor_id = msg[this.RECORD_INDEX];
 
     var sensor = { sensor_id: sensor_id,
-                   msg: msg
+                   msg: msg,
                  };
 
     var marker_icon = this.create_sensor_icon(msg);
@@ -283,8 +283,6 @@ this.update_sensor = function(msg, clock_time)
 
 this.timer_update = function(parent)
 {
-    console.log('(timer) timer_update');
-
     parent.check_old_records(parent, new Date());
 
     for (var sensor_id in parent.progress_indicators)
@@ -299,10 +297,6 @@ this.timer_update = function(parent)
 
 this.draw_progress_indicator = function(sensor)
 {
-    var pos = this.get_msg_point(sensor.msg);
-
-    var bearing = get_bearing(this.get_msg_point(sensor.prev_msg), pos);
-
     var sensor_id = sensor.msg[this.RECORD_INDEX];
 
     //console.log('draw_progress_indicator '+sensor_id);
@@ -318,19 +312,38 @@ this.draw_progress_indicator = function(sensor)
     {
         var progress_indicator = {};
 
-        progress_indicator.time = this.get_msg_date(sensor.msg);
+        var pos = this.get_msg_point(sensor.msg);
 
-        console.log(sensor_id+' at '+(new Date())+' vs '+progress_indicator.time);
+        var prev_pos = this.get_msg_point(sensor.prev_msg);
+
+        var distance = get_distance(prev_pos, pos);
+
+        // only update bearing of bus if we've moved at least 40m
+        if (distance > 40)
+        {
+            sensor.progress_bearing = get_bearing(prev_pos, pos);
+        }
+
+        if (!sensor.progress_bearing)
+        {
+            sensor.progress_bearing = 0;
+        }
+
+        //console.log(sensor_id+' at '+(new Date())+' vs '+msg.received_timestamp);
 
         var bus_speed = 7; // m/s
 
-        var time_delta = ((new Date()).getTime() - progress_indicator.time.getTime()) / 1000;
+        var time_delta = ((new Date()).getTime() - sensor.msg.received_timestamp.getTime()) / 1000;
 
         var progress_distance = Math.max(20, time_delta * bus_speed);
 
-        console.log('progress_distance '+sensor_id+' '+Math.round(time_delta*10)/10+'s '+Math.round(progress_distance)+'m');
+        //console.log('progress_distance '+sensor_id+' '+Math.round(time_delta*10)/10+'s '+Math.round(progress_distance)+'m');
 
-        progress_indicator.layer = L.semiCircle([pos.lat, pos.lng], { radius:  progress_distance}).setDirection(bearing,270);
+        progress_indicator.layer = L.semiCircle([pos.lat, pos.lng],
+                                                { radius:  progress_distance,
+                                                  fillOpacity: 0.1,
+                                                  dashArray: [5, 5],
+                                                }).setDirection(sensor.progress_bearing,270);
 
         this.progress_indicators[sensor_id] = progress_indicator;
 
@@ -567,6 +580,9 @@ this.log = function(str)
 // process a single data record
 this.handle_msg = function(msg, clock_time)
 {
+    // Add a timestamp for when we received this data record
+    msg.received_timestamp = new Date();
+
     var sensor_id = msg[this.RECORD_INDEX];
 
     // If an existing entry in 'this.sensors' has this key, then update
