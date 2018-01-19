@@ -141,12 +141,15 @@ body {
 .credits img {
     height:50px;
     margin:5px;
+    padding: 0 0.5em;
 }
 
 .credits span {
     font-weight: bold;
     font-size: 20pt;
-    padding-bottom: 20px;
+    position: absolute;
+    right: 0.5em;
+    bottom: 0.15em;
 }
 
 .spinner {
