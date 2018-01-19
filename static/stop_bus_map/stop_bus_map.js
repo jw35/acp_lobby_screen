@@ -13,9 +13,9 @@ function StopBusMap(container, params) {
 
     this.OLD_DATA_RECORD = 60; // time (s) threshold where a data record is considered 'old'
 
-    this.PROGRESS_BEARING_DISTANCE = 20;
+    this.PROGRESS_MIN_DISTANCE = 20;
 
-    this.CRUMB_COUNT = 100; // how many breadcrumbs to keep on the page
+    this.CRUMB_COUNT = 400; // how many breadcrumbs to keep on the page
 
     // Here we define the 'data record format' of the incoming websocket feed
     this.RECORD_INDEX = 'VehicleRef';  // data record property that is primary key
@@ -272,7 +272,7 @@ this.update_sensor = function(msg, clock_time)
             // move marker
             var pos = this.get_msg_point(msg);
 
-            this.add_breadcrumb(pos);
+            this.add_breadcrumb(sensor);
 
             var marker = this.sensors[sensor_id].marker;
 		    marker.moveTo([pos.lat, pos.lng], [1000] );
@@ -328,7 +328,7 @@ this.draw_progress_indicator = function(sensor)
         var distance = get_distance(prev_pos, pos);
 
         // only update bearing of bus if we've moved at least 40m
-        if (distance > this.PROGRESS_BEARING_DISTANCE)
+        if (distance > this.PROGRESS_MIN_DISTANCE)
         {
             sensor.progress_bearing = get_bearing(prev_pos, pos);
         }
@@ -362,18 +362,28 @@ this.draw_progress_indicator = function(sensor)
 }
 
 // draw a breadcrumb, up to max of CRUMB_COUNT.  After CRUMB_COUNT, we replace a random previous breadcrumb
-this.add_breadcrumb = function(pos)
+this.add_breadcrumb = function(sensor)
 {
-    var crumb = L.circleMarker([pos.lat, pos.lng], { color: 'blue', radius: 1 }).addTo(this.map);
-    if (this.crumbs.length < this.CRUMB_COUNT) // fewer than CRUMB_COUNT so append
+    var pos = this.get_msg_point(sensor.msg);
+
+    var prev_pos = this.get_msg_point(sensor.prev_msg);
+
+    var distance = get_distance(prev_pos, pos);
+
+    // only update bearing of bus if we've moved at least 40m
+    if (distance > this.PROGRESS_MIN_DISTANCE)
     {
-        this.crumbs.push(crumb);
-    }
-    else // replace a random existing crumb
-    {
-        var index = Math.floor(Math.random() * CRUMB_COUNT);
-        this.map.removeLayer(crumbs[index]);
-        crumbs[index] = crumb;
+        var crumb = L.circleMarker([pos.lat, pos.lng], { color: 'blue', radius: 1 }).addTo(this.map);
+        if (this.crumbs.length < this.CRUMB_COUNT) // fewer than CRUMB_COUNT so append
+        {
+            this.crumbs.push(crumb);
+        }
+        else // replace a random existing crumb
+        {
+            var index = Math.floor(Math.random() * this.CRUMB_COUNT);
+            this.map.removeLayer(this.crumbs[index]);
+            this.crumbs[index] = crumb;
+        }
     }
 }
 
@@ -600,7 +610,10 @@ this.handle_records = function(websock_data)
 
 this.log = function(str)
 {
-    console.log(str);
+    if ((typeof DEBUG !== 'undefined') && DEBUG.indexOf('stop_bus_map_log') >= 0)
+    {
+        console.log(str);
+    }
 }
 
 // process a single data record
