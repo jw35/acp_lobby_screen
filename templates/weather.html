@@ -1,0 +1,54 @@
+<!doctype html>
+<title>Weather</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='weather/weather.css') }}">
+<body>
+
+<div class="container_1_2">
+
+<div class="weather">
+
+<h1>{{ data.location }}</h1>
+
+{% for result in data.results %}
+
+{% set timestamp = result.0 %}
+{% set data = result.1 %}
+
+{% if data.icon %}
+<img src="{{ url_for('static', filename='weather/icons/weather_icon-' + data.icon + '.png') }}" alt="" />
+{% endif %}
+
+{% if loop.index0 == 0 %}
+<h2>Now</h2>
+{% else %}
+<h2>Forecast for {{ timestamp.astimezone(tz=None).strftime('%H:%M') }}</h2>
+{% endif %}
+
+<p>
+
+<b>{{ data.description }}</b>
+
+<br>
+
+<b>{{ data.T }}&deg;C</b>
+{% if data.T != data.F %}
+(feels like {{ data.F }}&deg;C)
+{% endif %}
+
+<br>
+
+Wind <b>{{ data.wind_desc }}</b> ({{ data.S }} mph) <b>{{ data.D }}</b>
+
+</p>
+
+{% endfor %}
+
+<p>Issued {{ data.issued.astimezone(tz=None).strftime("%H:%M") }}</p>
+
+</div>
+
+</div>
+
+</body>
+

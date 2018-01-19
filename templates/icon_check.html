@@ -1,0 +1,25 @@
+<!doctype html>
+<title>Icon check</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
+<body>
+
+<div class="weather">
+
+{% for code in data.weather_descriptions %}
+
+{% set icon = data.weather_icon[code] %}
+
+<p>{{ code }} {{ data.weather_descriptions[code] }} {{ icon }} 
+
+{% if code in data.weather_icon %}
+
+<img src="{{ url_for('static', filename='weather/icons/weather_icon-' + icon + '.png') }}" alt="" />
+
+{% endif %}
+
+</p>
+
+{% endfor %}
+
+</body>
+
