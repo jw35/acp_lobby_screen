@@ -3,4 +3,6 @@ setup_token
 lobby_screen.config
 __pycache__
 nohup.out
+*~
+*.swp
 
