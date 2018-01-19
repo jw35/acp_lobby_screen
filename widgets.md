@@ -1,4 +1,4 @@
-Lobby Screen widget Guide v0.2
+Lobby Screen widget Guide v0.3
 ==============================
 
 This document defines the interface that Lobby Screen widgets need to
@@ -42,6 +42,12 @@ are optional, but a widget with no files won't do anything!
           * A JavaScript object containing `name:value` pairs
             representing parameters for a particular instance of the
             widget.
+
+          [[JW: we might need to add a third parameter to supply the
+          URL of the widget directory (i.e. the one containing the
+          JavaScript file). This would allow the JavaScript to access
+          other resources in the widget directory without having to
+          hard-code URLs]]
 
           The constructor may be called before DOM construction is
           complete and so shouldn't reference any DOM objects.
@@ -105,15 +111,27 @@ document.
 Widget implementation
 =====================
 
+Widgets should avoid referencing any resources (styles, images, etc.)
+from outside the widgit directory so that widgets are self contained and
+will work anywhere. Likewise, widgits should only access resources using
+relative URLs so that they work from any server and at any position in
+URL space.
+
+Widgits should expect their output to be clipped to the size of the
+DOM element passed to their init() method and should not do anything
+to circumvent this.
+
 Using this API, widgets can be implemented an a variety of ways:
 
-* A purely static widget can just use HTML and CSS to render its content
-and omit the JavaScript file.
+* A purely static widget that just uses HTML and CSS to render its
+content and which omits the JavaScript file.
 
 * A 'dynamic' widget can render its content using JavaScript in response
 to an `init()` call and based on the parameters passed on object
 instantiation. It could render all of the content, or update skeleton
-content loaded from HTML.
+content loaded from HTML. Note however that the same skeleton HTML
+will be loaded in each case which may lead to namespace problems such
+as clashing 'id=' parameters.
 
 * Content for dynamic widgets could be rendered entirely by JavaScript,
 probably based on information retrieved by an API, or could be generated
