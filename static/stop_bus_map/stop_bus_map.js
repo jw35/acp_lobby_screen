@@ -2,60 +2,66 @@
 
 function StopBusMap(container, params) {
 
-this.container = container;
-this.params = params;
+    this.container = container;
+    this.params = params;
 
-this.sensors = {};
+    this.sensors = {};
 
-this.progress_indicators = {}; // dictionary by VehicleRef
+    this.progress_indicators = {}; // dictionary by VehicleRef
 
-this.RTMONITOR_URI = 'http://tfc-app2.cl.cam.ac.uk/rtmonitor/sirivm';
+    this.RTMONITOR_URI = 'http://tfc-app2.cl.cam.ac.uk/rtmonitor/sirivm';
 
-this.sock = {}; // the page's WebSocket
+    this.OLD_DATA_RECORD = 60; // time (s) threshold where a data record is considered 'old'
 
-this.OLD_DATA_RECORD = 60; // time (s) threshold where a data record is considered 'old'
+    this.PROGRESS_BEARING_DISTANCE = 20;
 
-// Here we define the 'data record format' of the incoming websocket feed
-this.RECORD_INDEX = 'VehicleRef';  // data record property that is primary key
-this.RECORDS_ARRAY = 'request_data'; // incoming socket data property containing data records
-this.RECORD_TS = 'RecordedAtTime'; // data record property containing timestamp
-this.RECORD_TS_FORMAT = 'ISO8601'; // data record timestamp format
-                                  // 'ISO8601' = iso-format string
-this.RECORD_LAT = 'Latitude';      // name of property containing latitude
-this.RECORD_LNG = 'Longitude';     // name of property containing longitude
+    this.CRUMB_COUNT = 100; // how many breadcrumbs to keep on the page
 
-// *****************
-// Map globals
-this.ICON_URL = '/static/images/bus-logo.png';
+    // Here we define the 'data record format' of the incoming websocket feed
+    this.RECORD_INDEX = 'VehicleRef';  // data record property that is primary key
+    this.RECORDS_ARRAY = 'request_data'; // incoming socket data property containing data records
+    this.RECORD_TS = 'RecordedAtTime'; // data record property containing timestamp
+    this.RECORD_TS_FORMAT = 'ISO8601'; // data record timestamp format
+                                       // 'ISO8601' = iso-format string
+    this.RECORD_LAT = 'Latitude';      // name of property containing latitude
+    this.RECORD_LNG = 'Longitude';     // name of property containing longitude
 
-this.ICON_IMAGE = new Image();
-this.ICON_IMAGE.src = this.ICON_URL;
-
-this.icon_size = 'L';
-
-this.oldsensorIcon = L.icon({
-    iconUrl: this.ICON_URL,
-    iconSize: [20, 20]
-});
-
-// *************************
-// **** Routes stuff
-
-this.bus_stop_icon = L.icon({
-    iconUrl: '/static/images/bus_stop.png',
-    iconSize: [15,40],
-    iconAnchor: [3,40]
-});
+    // *****************
+    // Map globals
+    this.ICON_URL = '/static/images/bus-logo.png';
 
 
-    console.log("Instantiated StopBusMap", container, params);
+    this.sock = {}; // the page's WebSocket
+
+    this.ICON_IMAGE = new Image();
+    this.ICON_IMAGE.src = this.ICON_URL;
+
+    this.icon_size = 'L';
+
+    this.oldsensorIcon = L.icon({
+        iconUrl: this.ICON_URL,
+        iconSize: [20, 20]
+    });
+
+    // *************************
+    // **** Routes stuff
+
+    this.bus_stop_icon = L.icon({
+        iconUrl: '/static/images/bus_stop.png',
+        iconSize: [15,40],
+        iconAnchor: [3,40]
+    });
+
+    this.crumbs = []; // array to hold breadcrumbs as they are drawn
 
     this.init = function() {
         var self = this;
 
+        this.log("Instantiated StopBusMap", container, params);
+
         var container_el = document.getElementById(container);
 
-        console.log("Running StopBusMap.init", this.container);
+        this.log("Running StopBusMap.init", this.container);
 
         while (container_el.firstChild) {
                 container_el.removeChild(container_el.firstChild);
@@ -104,14 +110,14 @@ this.bus_stop_icon = L.icon({
     }
 
     /*this.reload = function() {
-        console.log("Running StationBoard.reload", this.container);
+        this.log("Running StationBoard.reload", this.container);
         this.do_load();
     }*/
 
     this.do_load = function () {
         var self = this;
-        console.log("Running StopBusMap.do_load", this.container);
-        console.log("StopBusMapMap.do_load done", this.container);
+        this.log("Running StopBusMap.do_load", this.container);
+        this.log("StopBusMapMap.do_load done", this.container);
     }
 
 // ***************************************************************************
@@ -234,7 +240,7 @@ this.create_sensor = function(msg, clock_time)
                           })
         .on('click', function()
                 {
-                  //console.log("marker click handler");
+                  //this.log("marker click handler");
                 })
         .start();
 
@@ -265,6 +271,9 @@ this.update_sensor = function(msg, clock_time)
 
             // move marker
             var pos = this.get_msg_point(msg);
+
+            this.add_breadcrumb(pos);
+
             var marker = this.sensors[sensor_id].marker;
 		    marker.moveTo([pos.lat, pos.lng], [1000] );
 		    marker.resume();
@@ -289,7 +298,7 @@ this.timer_update = function(parent)
     {
         if (parent.progress_indicators.hasOwnProperty(sensor_id))
         {
-            //console.log('(timer) timer_update '+sensor_id);
+            //parent.log('(timer) timer_update '+sensor_id);
             parent.draw_progress_indicator(parent.sensors[sensor_id]);
         }
     }
@@ -299,12 +308,12 @@ this.draw_progress_indicator = function(sensor)
 {
     var sensor_id = sensor.msg[this.RECORD_INDEX];
 
-    //console.log('draw_progress_indicator '+sensor_id);
+    //this.log('draw_progress_indicator '+sensor_id);
 
     // Remove old progress indicator
     if (this.progress_indicators[sensor_id])
     {
-        //console.log('draw_progress_indicator removing layer '+sensor_id);
+        //this.log('draw_progress_indicator removing layer '+sensor_id);
         this.map.removeLayer(this.progress_indicators[sensor_id].layer);
     }
 
@@ -319,7 +328,7 @@ this.draw_progress_indicator = function(sensor)
         var distance = get_distance(prev_pos, pos);
 
         // only update bearing of bus if we've moved at least 40m
-        if (distance > 40)
+        if (distance > this.PROGRESS_BEARING_DISTANCE)
         {
             sensor.progress_bearing = get_bearing(prev_pos, pos);
         }
@@ -329,7 +338,7 @@ this.draw_progress_indicator = function(sensor)
             sensor.progress_bearing = 0;
         }
 
-        //console.log(sensor_id+' at '+(new Date())+' vs '+msg.received_timestamp);
+        //this.log(sensor_id+' at '+(new Date())+' vs '+msg.received_timestamp);
 
         var bus_speed = 7; // m/s
 
@@ -337,17 +346,34 @@ this.draw_progress_indicator = function(sensor)
 
         var progress_distance = Math.max(20, time_delta * bus_speed);
 
-        //console.log('progress_distance '+sensor_id+' '+Math.round(time_delta*10)/10+'s '+Math.round(progress_distance)+'m');
+        //this.log('progress_distance '+sensor_id+' '+Math.round(time_delta*10)/10+'s '+Math.round(progress_distance)+'m';
 
         progress_indicator.layer = L.semiCircle([pos.lat, pos.lng],
                                                 { radius:  progress_distance,
-                                                  fillOpacity: 0.1,
-                                                  dashArray: [5, 5],
+                                                  fillOpacity: 0.15,
+                                                  dashArray: [5, 8],
+                                                  weight: 3
                                                 }).setDirection(sensor.progress_bearing,270);
 
         this.progress_indicators[sensor_id] = progress_indicator;
 
         progress_indicator.layer.addTo(this.map);
+    }
+}
+
+// draw a breadcrumb, up to max of CRUMB_COUNT.  After CRUMB_COUNT, we replace a random previous breadcrumb
+this.add_breadcrumb = function(pos)
+{
+    var crumb = L.circleMarker([pos.lat, pos.lng], { color: 'blue', radius: 1 }).addTo(this.map);
+    if (this.crumbs.length < this.CRUMB_COUNT) // fewer than CRUMB_COUNT so append
+    {
+        this.crumbs.push(crumb);
+    }
+    else // replace a random existing crumb
+    {
+        var index = Math.floor(Math.random() * CRUMB_COUNT);
+        this.map.removeLayer(crumbs[index]);
+        crumbs[index] = crumb;
     }
 }
 
@@ -379,7 +405,7 @@ this.update_old_status = function(sensor, clock_time)
             return;
         }
         // set the 'old' flag on this record and update icon
-        console.log('update_old_status OLD '+sensor.msg[this.RECORD_INDEX]);
+        this.log('update_old_status OLD '+sensor.msg[this.RECORD_INDEX]);
         sensor.state.old = true;
         sensor.marker.setIcon(this.oldsensorIcon);
     }
@@ -565,7 +591,7 @@ this.more_content = function(sensor_id)
 this.handle_records = function(websock_data)
 {
     var incoming_data = JSON.parse(websock_data);
-    //console.log('handle_records'+json['request_data'].length);
+    //this.log('handle_records'+json['request_data'].length);
     for (var i = 0; i < incoming_data[this.RECORDS_ARRAY].length; i++)
     {
 	    this.handle_msg(incoming_data[this.RECORDS_ARRAY][i], new Date());
@@ -601,7 +627,7 @@ this.handle_msg = function(msg, clock_time)
 // records are stored in 'this.sensors' object
 this.check_old_records = function(parent, clock_time)
 {
-    //console.log('checking for old data records..,');
+    //parent.log('checking for old data records..,');
 
     // do nothing if timestamp format not recognised
     switch (parent.RECORD_TS_FORMAT)
