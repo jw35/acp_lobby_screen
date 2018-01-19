@@ -1,5 +1,21 @@
 /* Bus Stop Map Widget for ACP Lobby Screen */
 
+// lobby_screen widget. Draws real-time buses on a map.
+
+// used in lobby screen with:
+//      new StopBusMap(<container div id>, <params object>)
+//
+//      e.g.
+//
+//      new StopBusMap('stop_bus_map_1',
+//                     { id: 'stop_bus_map_1',
+//                       static_url: '/lobby_screen/static',
+//                       title: 'Live Buses: U and Citi4',
+//                       stop_id: 'XXYYZZ',
+//                       lat: 52.215,
+//                       lng: 0.09,
+//                       zoom: 15 });
+//
 function StopBusMap(container, params) {
 
     this.container = container;
@@ -11,7 +27,9 @@ function StopBusMap(container, params) {
 
     this.RTMONITOR_URI = 'http://tfc-app2.cl.cam.ac.uk/rtmonitor/sirivm';
 
-    this.OLD_DATA_RECORD = 60; // time (s) threshold where a data record is considered 'old'
+    this.OLD_DATA_RECORD = 70; // time (s) threshold where a data record is considered 'old'
+
+    this.OBSOLETE_DATA_RECORD = 140; // at this age, we discard the sensor
 
     this.PROGRESS_MIN_DISTANCE = 20;
 
@@ -27,8 +45,10 @@ function StopBusMap(container, params) {
     this.RECORD_LNG = 'Longitude';     // name of property containing longitude
 
     // *****************
-    // Map globals
-    this.ICON_URL = '/static/images/bus-logo.png';
+    //
+    this.STATIC_URL = params.static_url;
+
+    this.ICON_URL = this.STATIC_URL+'/stop_bus_map/images/bus-logo.png';
 
 
     this.sock = {}; // the page's WebSocket
@@ -47,7 +67,7 @@ function StopBusMap(container, params) {
     // **** Routes stuff
 
     this.bus_stop_icon = L.icon({
-        iconUrl: '/static/images/bus_stop.png',
+        iconUrl: this.STATIC_URL+'/stop_bus_map/images/bus_stop.png',
         iconSize: [15,40],
         iconAnchor: [3,40]
     });
@@ -294,6 +314,24 @@ this.timer_update = function(parent)
 {
     parent.check_old_records(parent, new Date());
 
+    // cull obsolete sensors
+    //
+    for (var sensor_id in parent.sensors)
+    {
+        if (parent.sensors.hasOwnProperty(sensor_id) && parent.sensors[sensor_id].state.obsolete)
+        {
+            console.log('culling '+sensor_id);
+            delete parent.sensors[sensor_id];
+
+            if (parent.progress_indicators[sensor_id])
+            {
+                //this.log('draw_progress_indicator removing layer '+sensor_id);
+                this.map.removeLayer(this.progress_indicators[sensor_id].layer);
+                delete parent.progress_indicators[sensor_id];
+            }
+        }
+    }
+
     for (var sensor_id in parent.progress_indicators)
     {
         if (parent.progress_indicators.hasOwnProperty(sensor_id))
@@ -408,6 +446,12 @@ this.update_old_status = function(sensor, clock_time)
 
     if (age > this.OLD_DATA_RECORD)
     {
+        if (age > this.OBSOLETE_DATA_RECORD)
+        {
+            this.map.removeLayer(sensor.marker);
+            sensor.state.obsolete = true;
+            return;
+        }
         // data record is OLD
         // skip if this data record is already flagged as old
         if (sensor.state.old != null && sensor.state.old)
