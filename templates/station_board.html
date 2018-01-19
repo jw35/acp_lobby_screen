@@ -9,9 +9,8 @@
 
 <div class="content_area">
 
-<h2>Train departures from</h2>
 <h1>{{ data.locationName }}</h1>
-<h2>Last updated {{ data.generatedAt.strftime("%H:%M") }}</h2>
+<h2>Updated {{ data.generatedAt.strftime("%H:%M") }}</h2>
 
 {% if data.nrccMessages %}
     {% for message in data.nrccMessages.message %}
