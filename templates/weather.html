@@ -9,16 +9,16 @@
 <div class="weather">
 
 <h1>{{ data.location.title() }}</h1>
-
+<h2>Issued {{ data.issued.astimezone(tz=None).strftime("%H:%M") }}</h2>
 {% for result in data.results %}
 
 {% set timestamp = result.0 %}
 {% set data = result.1 %}
 
 {% if loop.index0 == 0 %}
-<h2>Now:</h2>
+<h2 class="time">Now:</h2>
 {% else %}
-<h2>{{ timestamp.astimezone(tz=None).strftime('%H:%M') }}:</h2>
+<h2 class="time">{{ timestamp.astimezone(tz=None).strftime('%H:%M') }}:</h2>
 {% endif %}
 {% if data.icon %}
 <img src="{{ url_for('static', filename='weather/icons/weather_icon-' + data.icon + '.png') }}" alt="" />
@@ -42,8 +42,6 @@ Wind <b>{{ data.wind_desc }}</b> ({{ data.S }} mph) <b>{{ data.D }}</b>
 </p>
 
 {% endfor %}
-
-<p>Issued {{ data.issued.astimezone(tz=None).strftime("%H:%M") }}</p>
 
 </div>
 
