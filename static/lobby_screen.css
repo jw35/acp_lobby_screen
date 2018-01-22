@@ -23,13 +23,46 @@ body {
 
 /* For debugging, create a 1920 x 1080 *inside* a 1px border */
 .wrapper {
-    width: 1922px;
-    height: 1082px;
+    width: 1920px;
+    height: 1080px;
     overflow: hidden;
-    border: 1px solid red;
+    /* border: 1px solid red; */
     position: absolute;
     left: 0px;
     top: 0px;
+}
+
+.credits {
+    position: absolute;
+    left: 0px;
+    top:  0px;
+    height: 60px;
+    width: 1920px;
+    overflow: hidden;
+    /*border: 1px solid green; */
+}
+
+.credits img {
+    height:50px;
+    margin:5px;
+    padding: 0 0.5em;
+}
+
+.credits span {
+    font-weight: bold;
+    font-size: 50px;
+    position: absolute;
+    right: 0.5em;
+}
+
+#screen_clock {
+    display: inline-block;
+    font-size: 50px;
+    font-weight: bold;
+    width: 200px;
+    height: 50px;
+    margin-left: 20px;
+    vertical-align: top;
 }
 
 /* Basic container boxes for 1x1, 1x2, 2x1 amd 2x2 display areas. */
@@ -110,46 +143,22 @@ body {
 /* Row positions */
 .row_1 {
     position: absolute;
-    top: 0px;
+    top: 60px;
 }
 
 .row_2 {
     position: absolute;
-    top: 255px;
+    top: 315px;
 }
 
 .row_3 {
     position: absolute;
-    top: 510px;
+    top: 570px;
 }
 
 .row_4 {
     position: absolute;
-    top: 765px;
-}
-
-.credits {
-    position: absolute;
-    left: 0px;
-    top: 1020px;
-    height: 60px;
-    width: 1920px;
-    overflow: hidden;
-    border: 1px solid green;
-}
-
-.credits img {
-    height:50px;
-    margin:5px;
-    padding: 0 0.5em;
-}
-
-.credits span {
-    font-weight: bold;
-    font-size: 20pt;
-    position: absolute;
-    right: 0.5em;
-    bottom: 0.15em;
+    top: 825px;
 }
 
 .spinner {
