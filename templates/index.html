@@ -120,9 +120,19 @@ example of a locally-configured static message.</p>
           }
         }
         setInterval(function() {
-          console.log("Running page-level reloader");
+          //console.log("Running page-level reloader");
           reload_widgets();
-        }, 60000)
+        }, 60000);
+
+        setInterval(update_screen_clock, 1000);
+      }
+
+      function update_screen_clock() {
+        var datetime = new Date();
+        var hh = ('0'+datetime.getHours()).slice(-2);
+        var mm = ('0'+datetime.getMinutes()).slice(-2);
+        var ss = ('0'+datetime.getSeconds()).slice(-2);
+        document.getElementById('screen_clock').innerHTML = hh+':'+mm+':'+ss;
       }
 
     </script>
@@ -134,6 +144,21 @@ example of a locally-configured static message.</p>
     <!-- Widget display area definition -->
 
     <div class="wrapper">
+
+      <div class="credits">
+        <div id="screen_clock"></div>
+
+        <a href="https://www.greatercambridge.org.uk/">
+            <img alt="Greater Cambridge Partnership" src="{{ url_for('static', filename='logo_gccd_112.png') }}">
+        </a>
+        <a href="http://www.connectingcambridgeshire.co.uk/smartcamb/">
+            <img alt="Connecting Cambridgshire" src="{{ url_for('static', filename='logo_sc_112.png') }}" >
+        </a>
+        <a href="http://www.cam.ac.uk">
+            <img alt="The University of Cambridge" src="{{ url_for('static', filename='logo_uc_112.png') }}">
+        </a>
+        <span>Adaptive Cities Platform</span>
+      </div>
 
       <div class="container_1_2 col_1 row_1" id="message_area_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
@@ -163,13 +188,6 @@ example of a locally-configured static message.</p>
 
       <div class="container_1_4 col_4 row_1" id="twitter_timeline_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-
-      <div class="credits">
-        <a href="https://www.greatercambridge.org.uk/"><img alt="Greater Cambridge Partnership" src="{{ url_for('static', filename='logo_gccd_112.png') }}"></a>
-        <a href="http://www.connectingcambridgeshire.co.uk/smartcamb/"><img alt="Connecting Cambridgshire" src="{{ url_for('static', filename='logo_sc_112.png') }}" ></a>
-        <a href="http://www.cam.ac.uk"><img alt="The University of Cambridge" src="{{ url_for('static', filename='logo_uc_112.png') }}"></a>
-        <span>Adaptive Cities Platform</span>
       </div>
 
     </div>
