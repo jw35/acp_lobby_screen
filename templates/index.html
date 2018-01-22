@@ -45,6 +45,8 @@
 
     <script type="text/javascript">
 
+      var DEBUG = ''; // widget.log() code will check this global variable
+
       // Widget instantiation
 
       var widget = [];
@@ -75,7 +77,15 @@ example of a locally-configured static message.</p>
 
       widget.push(new Weather('weather_area_1', {location: '310042'}))
 
-      widget.push(new StopBusMap('stop_bus_map_1',{id: 'stop_bus_map_1', title: 'U and Citi4', stop_id: 'XXYYZZ', lat: 52.215, lng: 0.09, zoom: 15}));
+      widget.push(new StopBusMap('stop_bus_map_1',
+                                 { id: 'stop_bus_map_1', 
+                                   static_url: '/lobby_screen/static',
+                                   title: 'Live Buses: U and Citi4', 
+                                   stop_id: 'XXYYZZ', 
+                                   breadcrumbs: true,
+                                   lat: 52.215, 
+                                   lng: 0.09, 
+                                   zoom: 15 }));
 
       widget.push(new StationBoard('station_board_1',{station: 'CBG', offset: 0}));
       widget.push(new StationBoard('station_board_2',{station: 'CMB', offset: 0}));
@@ -133,25 +143,25 @@ example of a locally-configured static message.</p>
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_2 col_2 row_1" id="stop_bus_map_1">
+      <div class="container_2_2 col_5 row_1" id="stop_bus_map_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_2 col_2 row_3" id="station_board_1">
+      <div class="container_1_2 col_5 row_3" id="station_board_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
-      <div class="container_1_2 col_3 row_3" id="station_board_2">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-
-      <div class="container_2_2 col_4 row_1" id="traffic_map_1">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-      <div class="container_2_2 col_4 row_3" id="traffic_map_2">
+      <div class="container_1_2 col_6 row_3" id="station_board_2">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_4 col_6 row_1" id="twitter_timeline_1">
+      <div class="container_2_2 col_2 row_1" id="traffic_map_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_2_2 col_2 row_3" id="traffic_map_2">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_4 col_4 row_1" id="twitter_timeline_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
