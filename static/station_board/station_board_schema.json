@@ -12,17 +12,7 @@
         "station": {
             "type": "string",
             "title": "Station code",
-            "description": "National Rail Enquiries CRS code for the station",
-            "pattern": "^[A-Z]{3}$",
-            "UImapping": {
-                "title": "Station name",
-                "description": "Name of the station to generate a departure board for",
-                "mapping": {
-                    "Cammbridge": "CBG",
-                    "Cambridge North": "CMB",
-                    "Royston": "ROY"
-                }
-            }
+            "format": "station_id"
         },
 
         "offset": {
