@@ -8,20 +8,19 @@ function TrafficMap(container, params) {
 
     this.container = container;
     this.params = params;
-    console.log("Instantiated TrafficMap", container, params);
 
     this.init = function () {
-        console.log("Running init", this.container);
+        this.log("Running init", this.container);
         this.do_load();
     };
 
     /*this.reload = function() {
-        console.log("Running StationBoard.reload", this.container);
+        this.log("Running StationBoard.reload", this.container);
         this.do_load();
     }*/
 
     this.do_load = function () {
-        console.log("Running do_load", this.container);
+        this.log("Running do_load", this.container);
         var map, trafficLayer;
         map = new google.maps.Map(document.getElementById(this.container), {
             zoom: this.params.zoom,
@@ -32,7 +31,15 @@ function TrafficMap(container, params) {
             autoRefresh: true
         });
         trafficLayer.setMap(map);
-        console.log("TragfficMap.do_load done", this.container);
+        this.log("TragfficMap.do_load done", this.container);
     };
+
+    this.log = function() {
+        if ((typeof DEBUG !== 'undefined') && DEBUG.indexOf('traffic_map_log') >= 0) {
+            console.log.apply(console, arguments);
+        }
+    };
+
+    this.log("Instantiated TrafficMap", container, params);
 
 }
