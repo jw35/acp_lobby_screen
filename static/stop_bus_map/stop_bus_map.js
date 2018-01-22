@@ -1,5 +1,22 @@
 /* Bus Stop Map Widget for ACP Lobby Screen */
 
+// lobby_screen widget. Draws real-time buses on a map.
+
+// used in lobby screen with:
+//      new StopBusMap(<container div id>, <params object>)
+//
+//      e.g.
+//
+//      new StopBusMap('stop_bus_map_1',
+//                     { id: 'stop_bus_map_1',
+//                       static_url: '/lobby_screen/static',
+//                       title: 'Live Buses: U and Citi4',
+//                       stop_id: 'XXYYZZ',
+//                       breadcrumbs: true,
+//                       lat: 52.215,
+//                       lng: 0.09,
+//                       zoom: 15 });
+//
 function StopBusMap(container, params) {
 
     this.container = container;
@@ -11,7 +28,9 @@ function StopBusMap(container, params) {
 
     this.RTMONITOR_URI = 'http://tfc-app2.cl.cam.ac.uk/rtmonitor/sirivm';
 
-    this.OLD_DATA_RECORD = 60; // time (s) threshold where a data record is considered 'old'
+    this.OLD_DATA_RECORD = 70; // time (s) threshold where a data record is considered 'old'
+
+    this.OBSOLETE_DATA_RECORD = 140; // at this age, we discard the sensor
 
     this.PROGRESS_MIN_DISTANCE = 20;
 
@@ -27,8 +46,10 @@ function StopBusMap(container, params) {
     this.RECORD_LNG = 'Longitude';     // name of property containing longitude
 
     // *****************
-    // Map globals
-    this.ICON_URL = '/static/images/bus-logo.png';
+    //
+    this.STATIC_URL = params.static_url;
+
+    this.ICON_URL = this.STATIC_URL+'/stop_bus_map/images/bus-logo.png';
 
 
     this.sock = {}; // the page's WebSocket
@@ -47,7 +68,7 @@ function StopBusMap(container, params) {
     // **** Routes stuff
 
     this.bus_stop_icon = L.icon({
-        iconUrl: '/static/images/bus_stop.png',
+        iconUrl: this.STATIC_URL+'/stop_bus_map/images/bus_stop.png',
         iconSize: [15,40],
         iconAnchor: [3,40]
     });
@@ -63,10 +84,18 @@ function StopBusMap(container, params) {
 
         this.log("Running StopBusMap.init", this.container);
 
+        // Empty the 'container' div (i.e. remove loading GIF)
         while (container_el.firstChild) {
                 container_el.removeChild(container_el.firstChild);
         }
 
+        // Write HTML into 'container' div:
+        //
+        // <div id="<container>_title_div">
+        //   <div id="<container>_title_text>TITLE HERE (params.title)</div>
+        // </div>
+        //<div id="<container>_map">MAP WILL GO HERE</div>
+        //
         var title_div = document.createElement('div');
         title_div.setAttribute('class', 'stop_bus_map_title_div');
         title_div.setAttribute('id', this.container+'_title_div');
@@ -82,7 +111,7 @@ function StopBusMap(container, params) {
 
         var map_div = document.createElement('div');
         map_div.setAttribute('class','stop_bus_map_div');
-        map_div.setAttribute('id', this.container+'_div');
+        map_div.setAttribute('id', this.container+'_map');
         container_el.appendChild(map_div);
 
         this.map = L.map(map_div, { zoomControl:false }).setView([this.params.lat, this.params.lng], this.params.zoom);
@@ -91,6 +120,8 @@ function StopBusMap(container, params) {
             }).addTo(this.map);
 
         this.sock_connect(self);
+
+        this.draw_stop(params.stop_id);
 
         // create a timer to update the progress indicators every second
         this.progress_timer = setInterval( (function (parent) { return function () { parent.timer_update(parent) }; })(self),
@@ -120,6 +151,13 @@ function StopBusMap(container, params) {
         this.log("StopBusMapMap.do_load done", this.container);
     }
 
+// Stops API shim
+//
+this.stop_id_to_stop = function(stop_id)
+{
+    return { lat: 52.2113, lng: 0.091 };
+}
+
 // ***************************************************************************
 // *******************  WebSocket code    ************************************
 // ***************************************************************************
@@ -146,20 +184,45 @@ this.sock_connect = function(parent)
                 if (json_msg.msg_type != null && json_msg.msg_type == "rt_connect_ok")
                 {
                     parent.log('Connected OK');
-                    parent.sock_send_str('{ "msg_type": "rt_subscribe", '+
-                                         '  "request_id": "'+parent.container+'_A", '+
-                                         '  "filters": [ { "test": "inside", '+
-                                         '                 "lat_key": "Latitude", '+
-                                         '                 "lng_key": "Longitude", '+
-                                         '                 "points": [ '+
-                                         '                            {  "lat": 52.2219, "lng": 0.07537 }, '+
-                                         '                            {  "lat": 52.2221, "lng": 0.10554 }, '+
-                                         '                            {  "lat": 52.2065, "lng": 0.10576 }, '+
-                                         '                            {  "lat": 52.2070, "lng": 0.07490 }'+
-                                         '                          ]'+
-                                         '              } ]'+
-                                         '}'
-                                        );
+
+                    var map_bounds = parent.map.getBounds();
+
+                    var map_sw = map_bounds.getSouthWest();
+
+                    var map_ne = map_bounds.getNorthEast();
+
+                    var boundary_ns = (map_ne.lat - map_sw.lat) * 0.5; // We will subscribe to real-time data
+                                                                       // In a box larger than the map bounds
+                    var boundary_ew = (map_ne.lng - map_sw.lng) * 0.5;
+
+                    var north = map_ne.lat + boundary_ns;
+
+                    var south = map_sw.lat - boundary_ns;
+
+                    var east = map_ne.lng + boundary_ew;
+
+                    var west = map_sw.lng - boundary_ew;
+
+                    L.rectangle([[south,west],[north,east]], { fillOpacity: 0 }).addTo(parent.map);
+
+                    // Subscribe to the real-time data INSIDE a clockwise rectangle derived from map bounds
+                    var rt_request = '{ "msg_type": "rt_subscribe", '+
+                                     '  "request_id": "'+parent.container+'_A", '+
+                                     '  "filters": [ { "test": "inside", '+
+                                     '                 "lat_key": "Latitude", '+
+                                     '                 "lng_key": "Longitude", '+
+                                     '                 "points": [ '+
+                                     '                            {  "lat": '+north+', "lng": '+west+' }, '+
+                                     '                            {  "lat": '+north+', "lng": '+east+' }, '+
+                                     '                            {  "lat": '+south+', "lng": '+east+' }, '+
+                                     '                            {  "lat": '+south+', "lng": '+west+' } '+
+                                     '                          ]'+
+                                     '              } ]'+
+                                     '}';
+
+                    console.log(rt_request);
+
+                    parent.sock_send_str(rt_request);
 
                     return;
                 }
@@ -272,7 +335,10 @@ this.update_sensor = function(msg, clock_time)
             // move marker
             var pos = this.get_msg_point(msg);
 
-            this.add_breadcrumb(sensor);
+            if (this.params.breadcrumbs && this.map.getBounds().contains(L.latLng(pos)))
+            {
+                this.add_breadcrumb(sensor);
+            }
 
             var marker = this.sensors[sensor_id].marker;
 		    marker.moveTo([pos.lat, pos.lng], [1000] );
@@ -293,6 +359,24 @@ this.update_sensor = function(msg, clock_time)
 this.timer_update = function(parent)
 {
     parent.check_old_records(parent, new Date());
+
+    // cull obsolete sensors
+    //
+    for (var sensor_id in parent.sensors)
+    {
+        if (parent.sensors.hasOwnProperty(sensor_id) && parent.sensors[sensor_id].state.obsolete)
+        {
+            console.log('culling '+sensor_id);
+            delete parent.sensors[sensor_id];
+
+            if (parent.progress_indicators[sensor_id])
+            {
+                //this.log('draw_progress_indicator removing layer '+sensor_id);
+                this.map.removeLayer(this.progress_indicators[sensor_id].layer);
+                delete parent.progress_indicators[sensor_id];
+            }
+        }
+    }
 
     for (var sensor_id in parent.progress_indicators)
     {
@@ -350,6 +434,7 @@ this.draw_progress_indicator = function(sensor)
 
         progress_indicator.layer = L.semiCircle([pos.lat, pos.lng],
                                                 { radius:  progress_distance,
+                                                  color: '#05aa05',
                                                   fillOpacity: 0.15,
                                                   dashArray: [5, 8],
                                                   weight: 3
@@ -408,6 +493,12 @@ this.update_old_status = function(sensor, clock_time)
 
     if (age > this.OLD_DATA_RECORD)
     {
+        if (age > this.OBSOLETE_DATA_RECORD)
+        {
+            this.map.removeLayer(sensor.marker);
+            sensor.state.obsolete = true;
+            return;
+        }
         // data record is OLD
         // skip if this data record is already flagged as old
         if (sensor.state.old != null && sensor.state.old)
@@ -658,5 +749,17 @@ this.check_old_records = function(parent, clock_time)
     }
 }
 
-} // end of StopBusMap
+// Draw a stop on the map
+//
+this.draw_stop = function(stop_id)
+{
+    var stop = this.stop_id_to_stop(stop_id);
+
+    L.marker([stop.lat, stop.lng],
+             {icon: this.bus_stop_icon})
+     .addTo(this.map);
+}
+
+// END of 'class' StopBusMap
+}
 

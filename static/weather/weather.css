@@ -32,6 +32,11 @@
 }
 
 .weather h2 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.weather h2.time {
     margin-top: 0.5em;
     margin-bottom: 0px;
 }

@@ -41,8 +41,10 @@
       widget.push(new StationBoard('station_board_1',{station: 'CBG', offset: 0}));
       widget.push(new StopBusMap('stop_bus_map_1',
                                  { id: 'stop_bus_map_1', 
-                                   title: 'Live Buses U and Citi4', 
+                                   static_url: '/lobby_screen/static',
+                                   title: 'Live Buses: U and Citi4', 
                                    stop_id: 'XXYYZZ', 
+                                   breadcrumbs: true,
                                    lat: 52.215, 
                                    lng: 0.09, 
                                    zoom: 15 }));
