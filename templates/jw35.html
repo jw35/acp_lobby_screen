@@ -67,8 +67,9 @@
         'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>'
       }))
 
-      widget.push(new IframeArea('iframe_area_1',{url: 'http://people.ds.cam.ac.uk/jw35/'}));
-      
+      widget.push(new IframeArea('iframe_area_1',{url: 'http://people.ds.cam.ac.uk/jw35/',
+                                                  scale: 0.5}));
+
       widget.push(new TwitterTimeline('twitter_timeline_1',{who: 'Cambs_Traffic'}));
 
       // Generic framework - init and refresh handling
