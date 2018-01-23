@@ -100,11 +100,11 @@ example of a locally-configured static message.</p>
       function reload_widgets () {
         for (var i = 0; i < widget.length; i++) {
           if ('reload' in widget[i]) {
-            console.log("Reloading ", widget[i].container);
+            //console.log("Reloading ", widget[i].container);
             widget[i].reload();
           }
           else {
-            console.log("Not reloading ", widget[i].container);
+            //console.log("Not reloading ", widget[i].container);
           }
         }
       }

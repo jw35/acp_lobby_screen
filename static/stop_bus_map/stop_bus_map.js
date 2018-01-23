@@ -7,8 +7,8 @@
 //
 //      e.g.
 //
-//      new StopBusMap('stop_bus_map_1',
-//                     { id: 'stop_bus_map_1',
+//      new StopBusMap('stop_bus_map_1',         // 'id' of DOM object (e.g. DIV) this widget should launch into
+//                     { id: 'stop_bus_map_1',   // params: configure the widget
 //                       static_url: '/lobby_screen/static',
 //                       title: 'Live Buses: U and Citi4',
 //                       stop_id: 'XXYYZZ',
@@ -52,8 +52,6 @@ function StopBusMap(container, params) {
     this.ICON_URL = this.STATIC_URL+'/stop_bus_map/images/bus-logo.png';
 
 
-    this.sock = {}; // the page's WebSocket
-
     this.ICON_IMAGE = new Image();
     this.ICON_IMAGE.src = this.ICON_URL;
 
@@ -74,6 +72,10 @@ function StopBusMap(container, params) {
     });
 
     this.crumbs = []; // array to hold breadcrumbs as they are drawn
+
+    this.sock = {}; // the page's WebSocket
+
+    this.sock_timer = {}; // intervalTimer we use for retries iif socket has failed
 
     this.init = function() {
         var self = this;
@@ -113,6 +115,12 @@ function StopBusMap(container, params) {
         map_div.setAttribute('class','stop_bus_map_div');
         map_div.setAttribute('id', this.container+'_map');
         container_el.appendChild(map_div);
+
+        var connection_div = document.createElement('div');
+        connection_div.setAttribute('class','stop_bus_map_connection_div');
+        connection_div.setAttribute('id', this.container+'_connection');
+        connection_div.innerHTML = "Connection issues";
+        container_el.appendChild(connection_div);
 
         this.map = L.map(map_div, { zoomControl:false }).setView([this.params.lat, this.params.lng], this.params.zoom);
         this.map_tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -171,6 +179,8 @@ this.sock_connect = function(parent)
 
     parent.sock.onopen = function() {
                 parent.log('** socket open');
+                clearInterval(parent.sock_timer); // delete reconnect timer if it's running
+                document.getElementById(parent.container+'_connection').style.display = 'none';
                 parent.sock_send_str('{ "msg_type": "rt_connect" }');
                 };
 
@@ -220,7 +230,7 @@ this.sock_connect = function(parent)
                                      '              } ]'+
                                      '}';
 
-                    parent.log(rt_request);
+                    //parent.log(rt_request);
 
                     parent.sock_send_str(rt_request);
 
@@ -230,8 +240,19 @@ this.sock_connect = function(parent)
                 };
 
     parent.sock.onclose = function() {
-                parent.log('** socket closed');
+                parent.log('** socket closed, starting reconnect timer');
+                // start interval timer trying to reconnect
+                clearInterval(parent.sock_timer);
+
+                document.getElementById(parent.container+'_connection').style.display = 'inline-block';
+                parent.sock_timer = setInterval(function (obj) { return function () { parent.sock_reconnect(parent); } }(parent), 10000);
                 };
+}
+
+this.sock_reconnect = function(parent)
+{
+    parent.log('sock_reconnect trying to connect');
+    parent.sock_connect(parent);
 }
 
 this.sock_close = function()
