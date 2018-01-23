@@ -26,7 +26,14 @@ function StationBoard(container, params) {
                 "&offset=" + this.params.offset + " .station_board";
         this.log("do_load URI", url);
         this.log("Container", '#' + this.container);
-        $('#' + this.container).load(url, function () {
+        $('#' + this.container).load(url, function (response, status, xhr) {
+            if (status === 'error') {
+                self.log("Error loading station board", xhr.status, xhr.statusText);
+                $('#' + self.container + ' .widget_error').show();
+            }
+            else {
+                $('#' + self.container + ' .widget_error').hide();
+            }
             setTimeout(function () { self.do_load(); }, 60000);
         });
         this.log("do_load done", this.container);

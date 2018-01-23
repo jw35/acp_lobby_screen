@@ -8,6 +8,10 @@
 
 <div class="weather">
 
+<div class="content_area">
+
+<h1 class="widget_error">Connection issues</h1>
+
 <h1>{{ data.location.title() }}</h1>
 <h2>Issued {{ data.issued.astimezone(tz=None).strftime("%H:%M") }}</h2>
 {% for result in data.results %}
@@ -42,6 +46,8 @@ Wind <b>{{ data.wind_desc }}</b> ({{ data.S }} mph) <b>{{ data.D }}</b>
 </p>
 
 {% endfor %}
+
+</div>
 
 </div>
 

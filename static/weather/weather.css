@@ -4,6 +4,11 @@
     height: 100%;
     width: 100%;
     padding: 0.5em;
+    position: relative;
+}
+
+.weather .content_area {
+    position: relative;
 }
 
 .weather .content_area {
@@ -50,4 +55,15 @@
 .weather p {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
+}
+
+.weather .widget_error {
+    display: none;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    background: red;
+    text-align: center;
+    color: white;
 }
