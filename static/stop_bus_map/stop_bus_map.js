@@ -220,7 +220,7 @@ this.sock_connect = function(parent)
                                      '              } ]'+
                                      '}';
 
-                    console.log(rt_request);
+                    parent.log(rt_request);
 
                     parent.sock_send_str(rt_request);
 
@@ -366,7 +366,7 @@ this.timer_update = function(parent)
     {
         if (parent.sensors.hasOwnProperty(sensor_id) && parent.sensors[sensor_id].state.obsolete)
         {
-            console.log('culling '+sensor_id);
+            parent.log('culling '+sensor_id);
             delete parent.sensors[sensor_id];
 
             if (parent.progress_indicators[sensor_id])
@@ -483,7 +483,9 @@ this.init_old_status = function(sensor, clock_time)
 
 this.update_old_status = function(sensor, clock_time)
 {
-    var data_timestamp = this.get_msg_date(sensor.msg); // will hold Date from sensor
+    var data_timestamp = sensor.msg.received_timestamp;
+
+    //var data_timestamp = this.get_msg_date(sensor.msg); // will hold Date from sensor
 
     // get current value of sensor.state.old flag (default false)
     var current_old_flag = !(sensor.state.old == null) || sensor.state.old;
