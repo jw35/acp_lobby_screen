@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='station_board/station_board.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='message_area/message_area.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='iframe_area/iframe_area.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stop_timetable/stop_timetable.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='stop_bus_map/stop_bus_map.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='weather/weather.css') }}">
 
@@ -29,6 +30,7 @@
     <script src="{{ url_for('static', filename='message_area/message_area.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='iframe_area/iframe_area.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='stop_bus_map/stop_bus_map.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='stop_timetable/stop_timetable.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='twitter_timeline/twitter_timeline.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='weather/weather.js') }}" type="text/javascript"></script>
 
@@ -49,6 +51,16 @@
                                    lng: 0.09, 
                                    zoom: 15 }));
 
+      widget.push(new StopTimetable('stop_timetable_1',
+                                 { id: 'stop_timetable_1', 
+                                   static_url: '/lobby_screen/static',
+                                   title: 'William Gates Building "U"', 
+                                   stop_id: '0500CCITY424', 
+                                   common_name: 'William Gates Building',
+                                   lat: 52.21129, 
+                                   lng: 0.09107
+                                 }));
+
       widget.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
       widget.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
 
@@ -61,11 +73,11 @@
       function reload_widgets () {
         for (var i = 0; i < widget.length; i++) {
           if ('reload' in widget[i]) {
-            console.log("Reloading ", widget[i].container);
+            //console.log("Reloading ", widget[i].container);
             widget[i].reload();
           }
           else {
-            console.log("Not reloading ", widget[i].container);
+            //console.log("Not reloading ", widget[i].container);
           }
         }
       }
@@ -81,7 +93,7 @@
           }
         }
         setInterval(function() {
-          console.log("Running page-level reloader");
+          //console.log("Running page-level reloader");
           reload_widgets();
         }, 60000)
       }
@@ -106,6 +118,9 @@
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
       <div class="container_1_2 col_4 row_3" id="twitter_timeline_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_1_2 col_4 row_1" id="stop_timetable_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
       <div class="container_2_2 col_5 row_1" id="stop_bus_map_1">
