@@ -36,3 +36,14 @@
     text-align: center;
     display: none;
 }
+
+.stop_timetable_departure_line {
+    display: inline-block;
+    margin: 2px 10px 2px 10px;
+}
+
+.stop_timetable_departure_time {
+    display: inline-block;
+    margin: 2px 10px 2px 10px;
+}
+

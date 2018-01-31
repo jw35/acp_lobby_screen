@@ -367,7 +367,15 @@ this.draw_departures = function(parent, stop)
         var departure = stop.departures[i];
 
         var departure_div = document.createElement('div');
-        departure_div.innerHTML = departure.line_name + ' ' +departure.time;
+        var line_div = document.createElement('div');
+        line_div.setAttribute('class', 'stop_timetable_departure_line');
+        line_div.innerHTML = departure.line_name;
+        var time_div = document.createElement('div');
+        time_div.setAttribute('class', 'stop_timetable_departure_time');
+        time_div.innerHTML = departure.time.slice(0,5);
+        departure_div.appendChild(line_div);
+        departure_div.appendChild(time_div);
+
         parent.departures_div.appendChild(departure_div);
     }
 }
