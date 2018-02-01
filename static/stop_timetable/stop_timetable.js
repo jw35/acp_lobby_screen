@@ -5,15 +5,12 @@
 //
 //      e.g.
 //
-//      new StopTimetable('stop_bus_map_1',         // 'id' of DOM object (e.g. DIV) this widget should launch into
-//                     { id: 'stop_bus_map_1',   // params: configure the widget
-//                       static_url: '/lobby_screen/static',
-//                       title: 'Live Buses: U and Citi4',
-//                       stop_id: 'XXYYZZ',
-//                       breadcrumbs: true,
-//                       lat: 52.215,
-//                       lng: 0.09,
-//                       zoom: 15 });
+//      new StopTimetable('stop_timetable_1',         // 'id' of DOM object (e.g. DIV) this widget should launch into
+//                     { stop_id: '0500CCITY424',     
+//                       common_name: 'William Gates Building', // Temporary, pending NaPTAN API
+//                       lat: 52.21129,                         // Dito
+//                       lng: 0.09107                           // Dito
+//                      });
 //
 function StopTimetable(container, params) {
 
@@ -105,28 +102,37 @@ function StopTimetable(container, params) {
 
         // Write HTML into 'container' div:
         //
+        // <div class="stop_timetable">
+        //   <div class="content_area">
+        //     <h1>Title</h1>
+        //     <div class="departures">
+        //       ...
+        //     </div>
+        //   </div>
+        // </div>
+
+
         // <div id="<container>_title_div">
         //   <div id="<container>_title_text>TITLE HERE (params.title)</div>
         // </div>
         //<div id="<container>_map">MAP WILL GO HERE</div>
         //
-        var title_div = document.createElement('div');
-        title_div.setAttribute('class', 'stop_timetable_title_div');
-        title_div.setAttribute('id', this.container+'_title_div');
 
-        var title_text = document.createElement('div');
-        title_text.setAttribute('class', 'stop_timetable_title_text');
-        title_text.setAttribute('id', this.container+'_title_text');
-        title_text.innerHTML = params.title;
+        var stop_timetable = document.createElement('div');
+        stop_timetable.setAttribute('class', 'stop_timetable');
+        container_el.appendChild(stop_timetable);
 
-        title_div.appendChild(title_text);
+        var content_area = document.createElement('div');
+        content_area.setAttribute('class', 'content_area');
+        stop_timetable.appendChild(content_area);
 
-        container_el.appendChild(title_div);
+        var title = document.createElement('h1');
+        title.innerHTML = this.params.common_name;
+        content_area.appendChild(title);
 
-        this.departures_div = document.createElement('div');
-        this.departures_div.setAttribute('class','stop_timetable_departures_div');
-        this.departures_div.setAttribute('id', this.container+'_departures');
-        container_el.appendChild(this.departures_div);
+        this.departures = document.createElement('div');
+        content_area.appendChild(this.departures);
+
         /*
         var map_div = document.createElement('div');
         map_div.setAttribute('class','stop_bus_map_div');
@@ -165,7 +171,7 @@ function StopTimetable(container, params) {
 
         this.load_stop(this,
                        { stop_id: this.params.stop_id,
-                         common_name: 'foo',
+                         common_name: this.params.common_name,
                          lat: this.params.lat,
                          lng: this.params.lng
                        });
@@ -379,21 +385,72 @@ this.stops_cache_miss = function(parent, stop_id)
 
 this.draw_departures = function(parent, stop)
 {
+/*
+<table>
+  <tr>
+    <th>Time</th>
+    <th>Destination</th>
+    <th>Expected</th>
+  </tr>
+{% for service in data.trainServices.service %}
+  {% set dest = service.destination.location.0.locationName %}
+  {% if dest == 'London Kings Cross' %}
+    {% set dest = 'London Kings X' %}
+  {% elif dest == 'London Liverpool Street' %}
+    {% set dest = 'London Liv. St' %}
+  {% elif dest == 'Birmingham New Street' %}
+    {% set dest = "Birm'ham New St" %}
+  {% endif %}
+  {% if service.etd != 'On time' %}
+  <tr class="issue">
+  {% else %}
+  <tr>
+  {% endif %}
+    <td>{{ service.std }}</td>
+    <td>{{ dest }}</td>
+    <td>{{ service.etd }}</td>
+  </tr>
+{% endfor %}
+</table>
+*/
+
+    var table = document.createElement('table');
+
+    var heading = document.createElement('tr');
+
+    var th1 = document.createElement('th');
+    th1.innerHTML = 'Time';
+    var th2 = document.createElement('th');
+    th2.innerHTML = 'Route';
+    var th3 = document.createElement('th');
+    th3.innerHTML = 'Expected';
+
+    heading.appendChild(th1);
+    heading.appendChild(th2);
+    heading.appendChild(th3);
+    table.appendChild(heading);
+
     for (var i=0; i<stop.departures.length; i++)
     {
         var departure = stop.departures[i];
+        var journey = stop.journeys[i];
+        var last_stop = journey[journey.length-1].common_name;
 
-        var departure_div = document.createElement('div');
-        var line_div = document.createElement('div');
-        line_div.setAttribute('class', 'stop_timetable_departure_line');
-        line_div.innerHTML = departure.line_name;
-        var time_div = document.createElement('div');
-        time_div.setAttribute('class', 'stop_timetable_departure_time');
-        time_div.innerHTML = departure.time.slice(0,5);
-        departure_div.appendChild(line_div);
-        departure_div.appendChild(time_div);
+        var row = document.createElement('tr');
 
-        parent.departures_div.appendChild(departure_div);
+        var td1 = document.createElement('td');
+        td1.innerHTML = departure.time.slice(0,5);
+        var td2 = document.createElement('td');
+        td2.innerHTML = departure.line_name + ' (' + last_stop + ')';
+        var td3 = document.createElement('td');
+        td3.innerHTML = 'Sometime';
+
+        row.appendChild(td1);
+        row.appendChild(td2);
+        row.appendChild(td3);
+        table.appendChild(row);
+
+        parent.departures.appendChild(table);
     }
 }
 

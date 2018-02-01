@@ -1,27 +1,61 @@
+/* StopTimetable Lobby Screen widget CSS */
 
-/* StopTimetable Lobby Screen widget CSS
- */
+/* Styles for the station board widget */
 
-.stop_timetable_title_div {
-    position: relative;
-    height: 10%;
-    font-size: 25px;
-    font-weight: bold;
-}
-
-.stop_timetable_title_text {
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-    margin: auto;
-    text-align: center;
-    color: black;
-}
-
-.stop_timetable_div {
+.stop_timetable {
+    height: 100%;
     width: 100%;
-    height: 90%;
+    padding: 0.5em;
 }
+
+.stop_timetable .content_area {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.stop_timetable h1, .stop_timetable h2 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.stop_timetable table {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0.5em;
+    width: 100%;
+    overflow: hidden;
+}
+
+.stop_timetable th, .stop_timetable td {
+    padding-top: 0.1em;
+    padding-bottom: 0.1em;
+    padding-left: 0.4em;
+    padding-right: 0.4em;
+}
+
+.stop_timetable tr.issue {
+    background-color: #fdd;
+}
+
+.stop_timetable tr th:first-child { text-align: center; }
+.stop_timetable tr td:first-child { text-align: center; }
+.stop_timetable tr th:first-child + th { text-align: center; }
+.stop_timetable tr td:first-child + td { text-align: center; }
+.stop_timetable tr th:first-child + th + th { text-align: center; }
+.stop_timetable tr td:first-child + td + td { text-align: center; }
+
+.stop_timetable .widget_error {
+    display: none;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    background: red;
+    text-align: center;
+    color: white;
+}
+
 
 .stop_timetable_connection_div { /* connection error div */
     position: absolute;
@@ -36,14 +70,3 @@
     text-align: center;
     display: none;
 }
-
-.stop_timetable_departure_line {
-    display: inline-block;
-    margin: 2px 10px 2px 10px;
-}
-
-.stop_timetable_departure_time {
-    display: inline-block;
-    margin: 2px 10px 2px 10px;
-}
-
