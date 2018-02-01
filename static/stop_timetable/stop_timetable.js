@@ -20,13 +20,19 @@ function StopTimetable(container, params) {
     this.container = container;
     this.params = params;
 
+    /*
+
     this.sensors = {};
 
     this.progress_indicators = {}; // dictionary by VehicleRef
 
     this.RTMONITOR_URI = 'http://tfc-app2.cl.cam.ac.uk/rtmonitor/sirivm';
 
+    */
+
     this.TIMETABLE_URI = 'http://tfc-app3.cl.cam.ac.uk/transport/api';
+
+    /*
 
     this.OLD_DATA_RECORD = 70; // time (s) threshold where a data record is considered 'old'
 
@@ -81,12 +87,12 @@ function StopTimetable(container, params) {
 
     this.REFRESH_INTERVAL = 60; // seconds
 
+    */
+
     this.stops_cache = {}; // store the stops we collect from the journeys through the current stop
 
     this.init = function() {
         var self = this;
-
-        this.log("Instantiated StopBusMap", container, params);
 
         var container_el = document.getElementById(container);
 
@@ -155,7 +161,8 @@ function StopTimetable(container, params) {
                 clearInterval(self.progress_timer);
             }
         }; // end onkeydown
-        i*/
+        */
+
         this.load_stop(this,
                        { stop_id: this.params.stop_id,
                          common_name: 'foo',
@@ -165,7 +172,9 @@ function StopTimetable(container, params) {
 
         this.get_stop_journeys(this, this.params.stop_id);
 
+        /*
         this.do_load();
+        */
     }
 
     /*this.reload = function() {
@@ -173,11 +182,14 @@ function StopTimetable(container, params) {
         this.do_load();
     }*/
 
+
+    /*
     this.do_load = function () {
         var self = this;
         this.log("Running StopTimetable.do_load", this.container);
         this.log("StopTimetable.do_load done", this.container);
     }
+
 
 // Stops API shim
 //
@@ -186,6 +198,7 @@ this.stop_id_to_stop = function(stop_id)
     return { lat: 52.2113, lng: 0.091 };
 }
 
+*/
 
 // ***************************************************************************
 // *******************  Transport API     ************************************
@@ -355,10 +368,14 @@ this.load_stop = function(parent, stop)
     parent.stops_cache[stop.stop_id] = stop;
 }
 
+/*
+
 this.stops_cache_miss = function(parent, stop_id)
 {
     return !parent.stops_cache.hasOwnProperty(stop_id);
 }
+
+*/
 
 this.draw_departures = function(parent, stop)
 {
@@ -379,6 +396,8 @@ this.draw_departures = function(parent, stop)
         parent.departures_div.appendChild(departure_div);
     }
 }
+
+/*
 
 // ***************************************************************************
 // *******************  WebSocket code    ************************************
@@ -936,13 +955,15 @@ this.handle_records = function(websock_data)
     }
 } // end function handle_records
 
-this.log = function(str)
-{
-    if ((typeof DEBUG !== 'undefined') && DEBUG.indexOf('stop_bus_map_log') >= 0)
-    {
-        console.log(str);
+*/
+
+this.log = function() {
+    if ((typeof DEBUG !== 'undefined') && DEBUG.indexOf('stop_timetable_log') >= 0) {
+        console.log.apply(console, arguments);
     }
-}
+};
+
+/*
 
 // process a single data record
 this.handle_msg = function(msg, clock_time)
@@ -997,6 +1018,8 @@ this.draw_stop = function(stop_id)
      .addTo(this.map);
 }
 
+*/
+
 // return provided JS Date() as HH:MM:SS
 this.hh_mm_ss = function(datetime)
 {
@@ -1005,6 +1028,9 @@ this.hh_mm_ss = function(datetime)
     var ss = ('0'+datetime.getSeconds()).slice(-2);
     return hh+':'+mm+':'+ss;
 }
+
+
+this.log("Instantiated StopBusMap", container, params);
 
 // END of 'class' StopTimetable
 }
