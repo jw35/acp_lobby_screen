@@ -19,14 +19,14 @@
 //
 function StopBusMap(container, params) {
 
+    var self = this;
+
     this.container = container;
     this.params = params;
 
     this.sensors = {};
 
     this.progress_indicators = {}; // dictionary by VehicleRef
-
-    this.RTMONITOR_URI = 'http://tfc-app2.cl.cam.ac.uk/rtmonitor/sirivm';
 
     this.OLD_DATA_RECORD = 70; // time (s) threshold where a data record is considered 'old'
 
@@ -73,13 +73,7 @@ function StopBusMap(container, params) {
 
     this.crumbs = []; // array to hold breadcrumbs as they are drawn
 
-    this.sock = {}; // the page's WebSocket
-
-    this.sock_timer = {}; // intervalTimer we use for retries iif socket has failed
-
     this.init = function() {
-        var self = this;
-
         this.log("Instantiated StopBusMap", container, params);
 
         var container_el = document.getElementById(container);
@@ -127,7 +121,9 @@ function StopBusMap(container, params) {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(this.map);
 
-        this.sock_connect(self);
+        RTMONITOR_API.ondisconnect(this, this.rtmonitor_disconnected);
+
+        RTMONITOR_API.onconnect(this, this.rtmonitor_connected);
 
         this.draw_stop(params.stop_id);
 
@@ -135,18 +131,8 @@ function StopBusMap(container, params) {
         this.progress_timer = setInterval( (function (parent) { return function () { parent.timer_update(parent) }; })(self),
                                            1000);
 
-        // listener to detect ESC 'keydown' while in map_only mode to escape back to normal
-        document.onkeydown = function(evt) {
-            evt = evt || window.event;
-            if (evt.keyCode == 27) // ESC to escape from map-only view
-            {
-                self.sock_close();
-                clearInterval(self.progress_timer);
-            }
-        }; // end onkeydown
-
         this.do_load();
-    }
+    };
 
     /*this.reload = function() {
         this.log("Running StationBoard.reload", this.container);
@@ -157,143 +143,68 @@ function StopBusMap(container, params) {
         var self = this;
         this.log("Running StopBusMap.do_load", this.container);
         this.log("StopBusMapMap.do_load done", this.container);
-    }
+    };
+
+this.rtmonitor_disconnected = function()
+{
+    this.log('stop_bus_map rtmonitor_disconnected');
+    document.getElementById(this.container+'_connection').style.display = 'inline-block';
+}
+
+this.rtmonitor_connected = function()
+{
+    this.log('stop_bus_map rtmonitor_connected');
+    document.getElementById(this.container+'_connection').style.display = 'none';
+    this.subscribe();
+};
+
+this.subscribe = function()
+{
+    var map_bounds = this.map.getBounds();
+
+    var map_sw = map_bounds.getSouthWest();
+
+    var map_ne = map_bounds.getNorthEast();
+
+    var boundary_ns = (map_ne.lat - map_sw.lat) * 0.5; // We will subscribe to real-time data
+                                                       // In a box larger than the map bounds
+    var boundary_ew = (map_ne.lng - map_sw.lng) * 0.5;
+
+    var north = map_ne.lat + boundary_ns;
+
+    var south = map_sw.lat - boundary_ns;
+
+    var east = map_ne.lng + boundary_ew;
+
+    var west = map_sw.lng - boundary_ew;
+
+    L.rectangle([[south,west],[north,east]], { fillOpacity: 0 }).addTo(this.map);
+
+    var request_id = this.container+'_A';
+
+    // Subscribe to the real-time data INSIDE a clockwise rectangle derived from map bounds
+    var request = '{ "msg_type": "rt_subscribe", '+
+                     '  "request_id": "'+request_id+'", '+
+                     '  "filters": [ { "test": "inside", '+
+                     '                 "lat_key": "Latitude", '+
+                     '                 "lng_key": "Longitude", '+
+                     '                 "points": [ '+
+                     '                            {  "lat": '+north+', "lng": '+west+' }, '+
+                     '                            {  "lat": '+north+', "lng": '+east+' }, '+
+                     '                            {  "lat": '+south+', "lng": '+east+' }, '+
+                     '                            {  "lat": '+south+', "lng": '+west+' } '+
+                     '                          ]'+
+                     '              } ]'+
+                     '}';
+
+    RTMONITOR_API.request(this, request_id, request, this.handle_records)
+}
 
 // Stops API shim
 //
 this.stop_id_to_stop = function(stop_id)
 {
     return { lat: 52.2113, lng: 0.091 };
-}
-
-// ***************************************************************************
-// *******************  WebSocket code    ************************************
-// ***************************************************************************
-// sock_connect() will be called on startup (i.e. in init())
-// It will connect socket, when successful will
-// send { 'msg_type': 'rt_connect'} message, and should receive { 'msg_type': 'rt_connect_ok' }, then
-// send { 'msg_type': 'rt_subscribe', 'request_id' : 'A' } which subsribes to ALL records.
-this.sock_connect = function(parent)
-{
-    parent.sock = new SockJS(parent.RTMONITOR_URI);
-
-    parent.sock.onopen = function() {
-                parent.log('** socket open');
-                clearInterval(parent.sock_timer); // delete reconnect timer if it's running
-                document.getElementById(parent.container+'_connection').style.display = 'none';
-                parent.sock_send_str('{ "msg_type": "rt_connect" }');
-                };
-
-    parent.sock.onmessage = function(e) {
-                var json_msg = JSON.parse(e.data);
-                if (json_msg.msg_type != null && json_msg.msg_type == "rt_nok")
-                {
-                    parent.log('<span class="log_error">** '+e.data+'</span>');
-                    return;
-                }
-                if (json_msg.msg_type != null && json_msg.msg_type == "rt_connect_ok")
-                {
-                    parent.log('Connected OK');
-
-                    var map_bounds = parent.map.getBounds();
-
-                    var map_sw = map_bounds.getSouthWest();
-
-                    var map_ne = map_bounds.getNorthEast();
-
-                    var boundary_ns = (map_ne.lat - map_sw.lat) * 0.5; // We will subscribe to real-time data
-                                                                       // In a box larger than the map bounds
-                    var boundary_ew = (map_ne.lng - map_sw.lng) * 0.5;
-
-                    var north = map_ne.lat + boundary_ns;
-
-                    var south = map_sw.lat - boundary_ns;
-
-                    var east = map_ne.lng + boundary_ew;
-
-                    var west = map_sw.lng - boundary_ew;
-
-                    L.rectangle([[south,west],[north,east]], { fillOpacity: 0 }).addTo(parent.map);
-
-                    // Subscribe to the real-time data INSIDE a clockwise rectangle derived from map bounds
-                    var rt_request = '{ "msg_type": "rt_subscribe", '+
-                                     '  "request_id": "'+parent.container+'_A", '+
-                                     '  "filters": [ { "test": "inside", '+
-                                     '                 "lat_key": "Latitude", '+
-                                     '                 "lng_key": "Longitude", '+
-                                     '                 "points": [ '+
-                                     '                            {  "lat": '+north+', "lng": '+west+' }, '+
-                                     '                            {  "lat": '+north+', "lng": '+east+' }, '+
-                                     '                            {  "lat": '+south+', "lng": '+east+' }, '+
-                                     '                            {  "lat": '+south+', "lng": '+west+' } '+
-                                     '                          ]'+
-                                     '              } ]'+
-                                     '}';
-
-                    //parent.log(rt_request);
-
-                    parent.sock_send_str(rt_request);
-
-                    return;
-                }
-                parent.handle_records(e.data);
-                };
-
-    parent.sock.onclose = function() {
-                parent.log('** socket closed, starting reconnect timer');
-                // start interval timer trying to reconnect
-                clearInterval(parent.sock_timer);
-
-                document.getElementById(parent.container+'_connection').style.display = 'inline-block';
-                parent.sock_timer = setInterval(function (obj) { return function () { parent.sock_reconnect(parent); } }(parent), 10000);
-                };
-}
-
-this.sock_reconnect = function(parent)
-{
-    parent.log('sock_reconnect trying to connect');
-    parent.sock_connect(parent);
-}
-
-this.sock_close = function()
-{
-    this.log('** closing socket...');
-    this.sock.close();
-}
-
-this.sock_send = function(input_name)
-{
-    var msg = document.getElementById(input_name).value;
-
-    this.sock_send_str(msg);
-}
-
-this.sock_send_str = function(msg)
-{
-    if (this.sock == null)
-    {
-	    this.log('<span style="color: red;">Socket not yet connected</span>');
-	    return;
-    }
-    if (this.sock.readyState == SockJS.CONNECTING)
-    {
-	    this.log('<span style="color: red;">Socket connecting...</span>');
-  	    return;
-    }
-    if (this.sock.readyState == SockJS.CLOSING)
-    {
-	    this.log('<span style="color: red;">Socket closing...</span>');
-	    return;
-    }
-    if (this.sock.readyState == SockJS.CLOSED)
-    {
-	    this.log('<span style="color: red;">Socket closed</span>');
-	    return;
-    }
-
-    this.log('sending: '+msg);
-
-    this.sock.send(msg);
 }
 
 // We have received data from a previously unseen sensor, so initialize
@@ -712,9 +623,9 @@ this.more_content = function(sensor_id)
 // ********************************************************************************
 
 // Process websocket data
-this.handle_records = function(websock_data)
+this.handle_records = function(incoming_data)
 {
-    var incoming_data = JSON.parse(websock_data);
+    //var incoming_data = JSON.parse(websock_data);
     //this.log('handle_records'+json['request_data'].length);
     for (var i = 0; i < incoming_data[this.RECORDS_ARRAY].length; i++)
     {
@@ -724,6 +635,7 @@ this.handle_records = function(websock_data)
 
 this.log = function(str)
 {
+    //console.log(str); return;
     if ((typeof DEBUG !== 'undefined') && DEBUG.indexOf('stop_bus_map_log') >= 0)
     {
         console.log(str);
