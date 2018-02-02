@@ -111,7 +111,7 @@ function StopBusMap(container, params) {
         container_el.appendChild(map_div);
 
         var connection_div = document.createElement('div');
-        connection_div.setAttribute('class','stop_bus_map_connection_div');
+        connection_div.setAttribute('class','stop_timetable_connection_div');
         connection_div.setAttribute('id', this.container+'_connection');
         connection_div.innerHTML = "Connection issues";
         container_el.appendChild(connection_div);
