@@ -63,3 +63,20 @@
     text-align: center;
 }
 
+.marker_stop_L {
+    background-image: url("/lobby_screen/static/stop_bus_map/images/bus_stop_L.png");
+    background-size: 15px 40px;
+    background-repeat: no-repeat;
+    /* background-color: green; */
+}
+
+.marker_stop_label_L {
+    /* background-color: white; */
+    /* margin-left: 8px; */
+    margin-top: 8px;
+    margin-left: 10px;
+    font-size: 11px;
+    text-align: left;
+}
+
+

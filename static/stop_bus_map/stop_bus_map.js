@@ -125,7 +125,7 @@ function StopBusMap(container, params) {
 
         RTMONITOR_API.onconnect(this, this.rtmonitor_connected);
 
-        this.draw_stop(params.stop_id);
+        this.draw_stops(params.stops);
 
         // create a timer to update the progress indicators every second
         this.progress_timer = setInterval( (function (parent) { return function () { parent.timer_update(parent) }; })(self),
@@ -163,21 +163,15 @@ this.subscribe = function()
     var map_bounds = this.map.getBounds();
 
     var map_sw = map_bounds.getSouthWest();
-
     var map_ne = map_bounds.getNorthEast();
 
-    var boundary_ns = (map_ne.lat - map_sw.lat) * 0.5; // We will subscribe to real-time data
-                                                       // In a box larger than the map bounds
+    // We will subscribe to real-time data in a box larger than the map bounds
+    var boundary_ns = (map_ne.lat - map_sw.lat) * 0.5;
     var boundary_ew = (map_ne.lng - map_sw.lng) * 0.5;
-
     var north = map_ne.lat + boundary_ns;
-
     var south = map_sw.lat - boundary_ns;
-
     var east = map_ne.lng + boundary_ew;
-
     var west = map_sw.lng - boundary_ew;
-
     L.rectangle([[south,west],[north,east]], { fillOpacity: 0 }).addTo(this.map);
 
     var request_id = this.container+'_A';
@@ -198,13 +192,6 @@ this.subscribe = function()
                      '}';
 
     RTMONITOR_API.request(this, request_id, request, this.handle_records)
-}
-
-// Stops API shim
-//
-this.stop_id_to_stop = function(stop_id)
-{
-    return { lat: 52.2113, lng: 0.091 };
 }
 
 // We have received data from a previously unseen sensor, so initialize
@@ -583,6 +570,44 @@ this.create_sensor_icon = function(msg)
     });
 }
 
+// return a Leaflet Icon based on a 'stop'
+// { stop_id:
+//   common_name:
+//   lat:
+//   lng:
+// }
+this.create_stop_icon = function(stop)
+{
+    var common_name = '';
+
+    if (stop.common_name != null)
+    {
+        common_name = stop.common_name;
+    }
+
+    var marker_html =  '<div class="marker_stop_label_'+this.icon_size+'">'+common_name+'</div>';
+
+    var marker_size = new L.Point(30,30);
+
+    switch (this.icon_size)
+    {
+        case 'L':
+            marker_size = new L.Point(100,40);
+            break;
+
+        default:
+            break;
+    }
+
+    return L.divIcon({
+        className: 'marker_stop_'+this.icon_size,
+        iconSize: marker_size,
+        iconAnchor: L.point(3,40),
+        html: marker_html
+    });
+}
+
+
 this.tooltip_content = function(msg)
 {
     var time = this.get_msg_date(msg);
@@ -684,14 +709,22 @@ this.check_old_records = function(parent, clock_time)
     }
 }
 
+// Draw the stops given in the widget params on the map
+this.draw_stops = function(stops)
+{
+    for (var i=0; i < stops.length; i++)
+    {
+        this.draw_stop(stops[i]);
+    }
+}
+
 // Draw a stop on the map
 //
-this.draw_stop = function(stop_id)
+this.draw_stop = function(stop)
 {
-    var stop = this.stop_id_to_stop(stop_id);
-
+    var marker_icon = this.create_stop_icon(stop);
     L.marker([stop.lat, stop.lng],
-             {icon: this.bus_stop_icon})
+             {icon: marker_icon})
      .addTo(this.map);
 }
 
