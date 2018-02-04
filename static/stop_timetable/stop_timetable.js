@@ -248,11 +248,15 @@ this.add_api_stop_data = function(parent, stop_id, datetime_from, api_response)
 //
 this.update_stop = function(parent, stop_id)
 {
-    console.log('handle_stop_journeys: '+stop_id+' '+parent.stops_cache[stop_id].journeys.length);
+    // Do nothing if this stop is not in cache (an error)
+    if (!parent.stops_cache[stop_id])
+    {
+        return;
+    }
 
     var stop = parent.stops_cache[stop_id];
 
-    var journeys = stop.journeys;
+    console.log('handle_stop_journeys: '+stop_id+' journeys: '+(stop.journeys ? stop.journeys.length : 0));
 
     parent.draw_departures(parent, stop);
 
@@ -315,6 +319,16 @@ this.draw_departures = function(parent, stop)
 </table>
 */
 
+    // Handle case where the API query returned NO journeys through this stop
+    if (!stop.departures || stop.departures.length == 0)
+    {
+        var no_departures_msg = document.createElement('div');
+        no_departures_msg.innerHTML = 'No departures from this stop';
+        parent.departures.appendChild(no_departures_msg);
+        return;
+    }
+
+    // OK, we have some journeys through this stop, i.e. departures, so list them
     var table = document.createElement('table');
 
     var heading = document.createElement('tr');
