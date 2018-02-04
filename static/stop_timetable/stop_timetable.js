@@ -35,12 +35,17 @@ function StopTimetable(container, params) {
                                        // 'ISO8601' = iso-format string
     this.RECORD_LAT = 'Latitude';      // name of property containing latitude
     this.RECORD_LNG = 'Longitude';     // name of property containing longitude
+    this.RECORD_ORIGIN_STOP_ID = 'OriginRef'; // SiriVM origin stop_id
+    this.RECORD_ORIGIN_TIME = 'OriginAimedDepartureTime'; // SiriVM origin timetable departure time
+    this.RECORD_DELAY = 'Delay'; // SiriVM 'XML Duration' delay value e.g. "PT2M8S"
 
     this.refresh_timer = {};
 
     this.REFRESH_INTERVAL = 60; // seconds
 
     this.stops_cache = {}; // store the stops we collect from the journeys through the current stop
+
+    this.rtmonitor_subscriptions = {}; // Dictionary of SiriVM subscriptions indexed on <stop>_<time>
 
     this.init = function() {
         var self = this;
@@ -144,7 +149,7 @@ this.get_stop_journeys = function(parent, stop_id)
 
     var uri = parent.TIMETABLE_URI+'/journeys_by_time_and_stop/'+qs;
 
-    console.log('get_stop_journeys: getting '+stop_id+
+    parent.log('stop_timetable get_stop_journeys: getting '+stop_id+
                 ' @ '+datetime_from);
 
     var xhr = new XMLHttpRequest();
@@ -158,7 +163,7 @@ this.get_stop_journeys = function(parent, stop_id)
         {
             //console.log('got route profile for '+sensor_id);
             parent.add_api_stop_data(parent, stop_id, datetime_from, xhr.responseText);
-            parent.update_stop(parent, stop_id);
+            parent.handle_stop_journeys(parent, stop_id);
         }
     }
 }
@@ -173,9 +178,9 @@ this.add_api_stop_data = function(parent, stop_id, datetime_from, api_response)
     }
     catch (e)
     {
-        console.log('add_api_stop_journeys: failed to parse API response for '+
+        parent.log('stop_timetable add_api_stop_journeys: failed to parse API response for '+
                     stop_id+' @ '+datetime_from);
-        console.log(api_response);
+        parent.log(api_response);
         return;
     }
 
@@ -183,29 +188,29 @@ this.add_api_stop_data = function(parent, stop_id, datetime_from, api_response)
 
     if (!stop)
     {
-        console.log('add_api_stop_journeys: '+stop_id+' not in cache');
+        parent.log('stop_timetable add_api_stop_journeys: '+stop_id+' not in cache');
         return;
     }
 
     if (!api_data.results)
     {
-        console.log('add_api_stop_journeys: null results for '+
+        parent.log('stop_timetable add_api_stop_journeys: null results for '+
                     stop_id+' @ '+datetime_from);
-        console.log(api_response);
+        parent.log(api_response);
         stop.journeys = null;
         return;
     }
 
     if (!api_data.results[0])
     {
-        console.log('add_api_stop_journeys: empty results for '+
+        parent.log('stop_timetable add_api_stop_journeys: empty results for '+
                     stop_id+' @ '+datetime_from);
         stop.journeys = null;
 
         return;
     }
 
-    console.log('add_api_stop_journeys: processing '+api_data.results.length+' journeys');
+    parent.log('stop_timetable add_api_stop_journeys: processing '+api_data.results.length+' journeys');
 
     stop.journeys = [];
 
@@ -246,7 +251,7 @@ this.add_api_stop_data = function(parent, stop_id, datetime_from, api_response)
 
 // Deal with a stop that now has an updated 'journeys' property
 //
-this.update_stop = function(parent, stop_id)
+this.handle_stop_journeys = function(parent, stop_id)
 {
     // Do nothing if this stop is not in cache (an error)
     if (!parent.stops_cache[stop_id])
@@ -256,9 +261,15 @@ this.update_stop = function(parent, stop_id)
 
     var stop = parent.stops_cache[stop_id];
 
-    console.log('handle_stop_journeys: '+stop_id+' journeys: '+(stop.journeys ? stop.journeys.length : 0));
+    parent.log('stop_timetable handle_stop_journeys: '+stop_id+
+               ' journeys: '+(stop.journeys ? stop.journeys.length : 0));
 
     parent.draw_departures(parent, stop);
+
+    if (stop.journeys)
+    {
+        parent.subscribe_journeys.call(parent, stop_id);
+    }
 
 }
 
@@ -370,62 +381,98 @@ this.draw_departures = function(parent, stop)
 }
 
 // ****************************************************************************************
-// ************* REAL-TIME BUS POSITIONS   ************************************************
+// ************* REAL-TIME BUS POSITIONS  via RTMonitorAPI ********************************
 // ****************************************************************************************
 //
 
+// this function will be called by RTMonitorAPI if it DISCONNECTS from server
 this.rtmonitor_disconnected = function()
 {
     this.log('stop_timetable rtmonitor_disconnected');
     document.getElementById(this.container+'_connection').style.display = 'inline-block';
 }
 
+// this function will be called by RTMonitorAPI each time it has CONNECTED to server
 this.rtmonitor_connected = function()
 {
     this.log('stop_timetable rtmonitor_connected');
     document.getElementById(this.container+'_connection').style.display = 'none';
 };
 
-this.subscribe = function()
+// this Widget calls 'subscribe()' each time it has a new origin stop/time so that
+// it will receive real-time updates for the relevant bus
+this.subscribe = function(stop_id, time)
 {
-    var map_bounds = this.map.getBounds();
-
-    var map_sw = map_bounds.getSouthWest();
-
-    var map_ne = map_bounds.getNorthEast();
-
-    var boundary_ns = (map_ne.lat - map_sw.lat) * 0.5; // We will subscribe to real-time data
-                                                       // In a box larger than the map bounds
-    var boundary_ew = (map_ne.lng - map_sw.lng) * 0.5;
-
-    var north = map_ne.lat + boundary_ns;
-
-    var south = map_sw.lat - boundary_ns;
-
-    var east = map_ne.lng + boundary_ew;
-
-    var west = map_sw.lng - boundary_ew;
-
-    L.rectangle([[south,west],[north,east]], { fillOpacity: 0 }).addTo(this.map);
-
-    var request_id = this.container+'_A';
+    var request_id = this.container+'_'+stop_id+'_'+time;
 
     // Subscribe to the real-time data INSIDE a clockwise rectangle derived from map bounds
-    var request = '{ "msg_type": "rt_subscribe", '+
-                     '  "request_id": "'+request_id+'", '+
-                     '  "filters": [ { "test": "inside", '+
-                     '                 "lat_key": "Latitude", '+
-                     '                 "lng_key": "Longitude", '+
-                     '                 "points": [ '+
-                     '                            {  "lat": '+north+', "lng": '+west+' }, '+
-                     '                            {  "lat": '+north+', "lng": '+east+' }, '+
-                     '                            {  "lat": '+south+', "lng": '+east+' }, '+
-                     '                            {  "lat": '+south+', "lng": '+west+' } '+
-                     '                          ]'+
-                     '              } ]'+
-                     '}';
+    var request_msg = '{ "msg_type": "rt_subscribe", '+
+                        '"request_id": "'+request_id+'", '+
+                        '"filters": [ { "test": "=", '+
+                                       '"key": "'+this.RECORD_ORIGIN_STOP_ID+'", '+
+                                       '"value": "'+stop_id+'"'+
+                                     '},'+
+                                     '{ "test": "=", '+
+                                        '"key": "'+this.RECORD_ORIGIN_TIME+'", '+
+                                        '"value": "'+time+'"'+
+                                     '} ]'+
+                      '}';
 
-    RTMONITOR_API.request(this, request_id, request, this.handle_records)
+    var request_info = { stop_id: stop_id,
+                         time: time,
+                         subscribed: false
+                       };
+
+    var request_status = RTMONITOR_API.request(this, request_id, request_msg, this.handle_records);
+
+    this.rtmonitor_subscriptions[stop_id+'_'+time] = request_info;
+
+    if (request_status.status == 'rt_ok')
+    {
+        request_info.subscribed = true;
+        this.log('stop_timetable subscribed ok '+stop_id+' '+time);
+    }
+    else
+    {
+        //debug we need to implement timer to retry the request
+        // this issue is normal if stop journeys arrive before rtmonitor_api is ready
+        this.log('stop_timetable subscribe failed '+JSON.stringify(request_status));
+    }
+}
+
+// We have a new list of journeys for the current stop, so send real-time subscription requests
+this.subscribe_journeys = function(stop_id)
+{
+    var stop = this.stops_cache[stop_id];
+
+    //debug testing next 3 arrivals max
+    //
+    //var journey_count = stop.journeys.length; //Math.min(3, stop.journeys.length);
+    var journey_count = Math.min(3, stop.journeys.length);
+
+    for (var i=0; i<journey_count; i++)
+    {
+        var journey = stop.journeys[i];
+        var origin_stop_id = journey[0].stop_id;
+        var origin_time = this.time_to_iso(journey[0].time);
+        this.subscribe(origin_stop_id, origin_time);
+    }
+}
+
+// Convert timetable time (from journey origin time) to ISO today time (for SiriVM lookup)
+// e.g. "16:20:00" -> "2018-02-04T16:20:00+00:00"
+//debug we MAY need to shift to yesterday
+this.time_to_iso = function(time)
+{
+    var now = new Date();
+
+    var iso_time = now.getFullYear()+'-'+
+                  ('0' + (now.getMonth() + 1)).slice(-2)+'-'+
+                  ('0' + now.getDate()).slice(-2)+
+                  'T'+
+                  time +
+                  '+00:00';
+    return iso_time;
 }
 
 // ********************************************************************************
@@ -433,9 +480,10 @@ this.subscribe = function()
 // ********************************************************************************
 
 // Process websocket data
-this.handle_records = function(websock_data)
+this.handle_records = function(incoming_data)
 {
-    var incoming_data = JSON.parse(websock_data);
+    this.log('stop_timetable handle_records incoming data'+
+             ' ('+ incoming_data[this.RECORDS_ARRAY].length + ' records');
     //this.log('handle_records'+json['request_data'].length);
     for (var i = 0; i < incoming_data[this.RECORDS_ARRAY].length; i++)
     {
@@ -450,6 +498,8 @@ this.handle_msg = function(msg, clock_time)
     msg.received_timestamp = new Date();
 
     var sensor_id = msg[this.RECORD_INDEX];
+
+    this.log('stop_timetable handling msg for '+sensor_id);
 
     // If an existing entry in 'this.sensors' has this key, then update
     // otherwise create new entry.
@@ -466,8 +516,8 @@ this.handle_msg = function(msg, clock_time)
 // We have received data from a previously unseen sensor, so initialize
 this.create_sensor = function(msg, clock_time)
 {
-    // new sensor, create marker
-    this.log(' ** New '+msg[this.RECORD_INDEX]);
+    // new sensor
+    this.log('stop_timetable ** New '+msg[this.RECORD_INDEX]);
 
     var sensor_id = msg[this.RECORD_INDEX];
 
@@ -500,9 +550,6 @@ this.update_sensor = function(msg, clock_time)
 
             var sensor = this.sensors[sensor_id];
 
-            // move marker
-            var pos = this.get_msg_point(msg);
-
             // flag if this record is OLD or NEW
             this.update_old_status(sensor, new Date());
 
@@ -525,7 +572,7 @@ this.timer_update = function(parent)
     }
 
 }
-// Given a data record, update '.old' property t|f and reset marker icon
+// Given a data record, update '.old' property t|f
 // Note that 'current time' is the JS date value in global 'clock_time'
 // so that this function works equally well during replay of old data.
 //
@@ -550,7 +597,6 @@ this.update_old_status = function(sensor, clock_time)
     {
         if (age > this.OBSOLETE_DATA_RECORD)
         {
-            this.map.removeLayer(sensor.marker);
             sensor.state.obsolete = true;
             return;
         }
@@ -560,10 +606,10 @@ this.update_old_status = function(sensor, clock_time)
         {
             return;
         }
-        // set the 'old' flag on this record and update icon
+        // set the 'old' flag on this record
+        //
         this.log('update_old_status OLD '+sensor.msg[this.RECORD_INDEX]);
         sensor.state.old = true;
-        sensor.marker.setIcon(this.oldsensorIcon);
     }
     else
     {
@@ -573,9 +619,8 @@ this.update_old_status = function(sensor, clock_time)
         {
             return;
         }
-        // reset the 'old' flag on this data record and update icon
+        // reset the 'old' flag on this data record
         sensor.state.old = false;
-        sensor.marker.setIcon(this.create_sensor_icon(sensor.msg));
     }
 }
 

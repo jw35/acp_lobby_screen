@@ -51,24 +51,11 @@ function StopBusMap(container, params) {
 
     this.ICON_URL = this.STATIC_URL+'/stop_bus_map/images/bus-logo.png';
 
-
-    this.ICON_IMAGE = new Image();
-    this.ICON_IMAGE.src = this.ICON_URL;
-
     this.icon_size = 'L';
 
     this.oldsensorIcon = L.icon({
         iconUrl: this.ICON_URL,
         iconSize: [20, 20]
-    });
-
-    // *************************
-    // **** Routes stuff
-
-    this.bus_stop_icon = L.icon({
-        iconUrl: this.STATIC_URL+'/stop_bus_map/images/bus_stop.png',
-        iconSize: [15,40],
-        iconAnchor: [3,40]
     });
 
     this.crumbs = []; // array to hold breadcrumbs as they are drawn
@@ -191,14 +178,16 @@ this.subscribe = function()
                      '              } ]'+
                      '}';
 
-    RTMONITOR_API.request(this, request_id, request, this.handle_records)
+    var request_status = RTMONITOR_API.request(this, request_id, request, this.handle_records);
+
+    this.log('stop_bus_map request_status '+request_status.status);
 }
 
 // We have received data from a previously unseen sensor, so initialize
 this.create_sensor = function(msg, clock_time)
 {
     // new sensor, create marker
-    this.log(' ** New '+msg[this.RECORD_INDEX]);
+    this.log('stop_bus_map ** New '+msg[this.RECORD_INDEX]);
 
     var sensor_id = msg[this.RECORD_INDEX];
 

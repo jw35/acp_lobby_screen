@@ -86,7 +86,7 @@ this.connect = function()
 
                 if (msg.request_id)
                 {
-                    //self.log('RTMonitorAPI websocket message received for '+msg.request_id);
+                    self.log('RTMonitorAPI websocket message received for '+msg.request_id);
 
                     var client = self.request_callbacks[msg.request_id];
 
@@ -148,7 +148,7 @@ this.request = function(caller, request_id, msg, request_callback)
 
     this.request_callbacks[request_id] = { caller: caller, callback: request_callback } ;
 
-    this.sock_send_str(msg);
+    return this.sock_send_str(msg);
 };
 
 this.unsubscribe = function(request_id)
@@ -163,32 +163,33 @@ this.sock_send_str = function(msg)
     if (this.sock == null)
     {
 	    this.log('<span style="color: red;">Socket not yet connected</span>');
-	    return;
+	    return { status: 'rt_nok', reason: 'socket not connected' };
     }
     if (this.sock.readyState == SockJS.CONNECTING)
     {
 	    this.log('<span style="color: red;">Socket connecting...</span>');
-  	    return;
+	    return { status: 'rt_nok', reason: 'socket still connecting' };
     }
     if (this.sock.readyState == SockJS.CLOSING)
     {
 	    this.log('<span style="color: red;">Socket closing...</span>');
-	    return;
+	    return { status: 'rt_nok', reason: 'socket closing' };
     }
     if (this.sock.readyState == SockJS.CLOSED)
     {
 	    this.log('<span style="color: red;">Socket closed</span>');
-	    return;
+	    return { status: 'rt_nok', reason: 'socket closed' };
     }
 
-    this.log('sending: '+msg);
+    this.log('RTMonitorAPI sending: '+msg);
 
     this.sock.send(msg);
+
+	return { status: 'rt_ok', reason: 'sent message' };
 };
 
 this.log = function(str)
 {
-    console.log(str); return;
     if ((typeof DEBUG !== 'undefined') && DEBUG.indexOf('rtmonitor_api_log') >= 0)
     {
         console.log(str);
