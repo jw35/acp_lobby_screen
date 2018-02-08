@@ -21,6 +21,8 @@ function StopTimetable(container, params) {
 
     this.TIMETABLE_URI = 'http://tfc-app3.cl.cam.ac.uk/transport/api';
 
+    this.MAX_STOP_JOURNEYS = 15; // Limit results when requesting journeys through stop
+
     this.OLD_DATA_RECORD = 70; // time (s) threshold where a data record is considered 'old'
 
     this.OBSOLETE_DATA_RECORD = 140; // at this age, we discard the sensor
@@ -145,6 +147,7 @@ this.get_stop_journeys = function(parent, stop_id)
     var qs = '?stop_id='+encodeURIComponent(stop_id);
     qs += '&datetime_from='+encodeURIComponent(datetime_from);
     qs += '&expand_journey=true';
+    qs += '&nresults='+parent.MAX_STOP_JOURNEYS;
     // can also have "&nresults=XX" for max # of journeys to return
 
     var uri = parent.TIMETABLE_URI+'/journeys_by_time_and_stop/'+qs;
@@ -377,6 +380,22 @@ this.draw_departures = function(parent, stop)
         table.appendChild(row);
 
         parent.departures.appendChild(table);
+    }
+}
+
+this.update_departure = function(sensor)
+{
+    var origin_stop_id = sensor.msg[this.RECORD_ORIGIN_STOP_ID];
+    var origin_time = sensor.msg[this.RECORD_ORIGIN_TIME].slice(11,19);
+    var cell_id = this.container+'_'+origin_stop_id+'_'+origin_time+'_expected';
+
+    this.log('writing '+ sensor.sensor_id+' to '+cell_id);
+
+    var el = document.getElementById(cell_id);
+    if (el)
+    {
+        el.innerHTML = sensor.sensor_id;
+        el.setAttribute('class','stop_timetable_realtime');
     }
 }
 

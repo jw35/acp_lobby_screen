@@ -411,11 +411,13 @@ this.update_departure = function(sensor)
 
     this.log('writing '+ sensor.sensor_id+' to '+cell_id);
 
-    var el = document.getElementById(cell_id)
-    el.innerHTML = sensor.sensor_id;
-    el.setAttribute('class','stop_timetable_realtime');
+    var el = document.getElementById(cell_id);
+    if (el)
+    {
+        el.innerHTML = sensor.sensor_id;
+        el.setAttribute('class','stop_timetable_realtime');
+    }
 }
-
 
 // ****************************************************************************************
 // ************* REAL-TIME BUS POSITIONS  via RTMonitorAPI ********************************
