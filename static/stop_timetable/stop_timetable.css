@@ -23,7 +23,6 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: 0.5em;
-    width: 100%;
     overflow: hidden;
 }
 
@@ -40,8 +39,8 @@
 
 .stop_timetable tr th:first-child { text-align: center; }
 .stop_timetable tr td:first-child { text-align: center; }
-.stop_timetable tr th:first-child + th { text-align: center; }
-.stop_timetable tr td:first-child + td { text-align: center; }
+.stop_timetable tr th:first-child + th { text-align: left; }
+.stop_timetable tr td:first-child + td { text-align: left; }
 .stop_timetable tr th:first-child + th + th { text-align: center; }
 .stop_timetable tr td:first-child + td + td { text-align: center; }
 

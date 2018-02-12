@@ -17,6 +17,9 @@
 
     {% include 'sockjs.html' %}
 
+    <script src="{{ url_for('static', filename='js/rtmonitor_api.js') }}" type="text/javascript"></script>
+
+
     <link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='station_board/station_board.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='message_area/message_area.css') }}">
@@ -30,17 +33,20 @@
     <script src="{{ url_for('static', filename='message_area/message_area.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='iframe_area/iframe_area.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='stop_bus_map/stop_bus_map.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='stop_timetable/stop_timetable.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='stop_timetable/stop_timetable_jw35.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='twitter_timeline/twitter_timeline.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='weather/weather.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
 
-      var DEBUG = ''; // widget.log() code will check this global variable
+      var DEBUG = 'stop_timetable_log'; // widget.log() code will check this global variable
+
+      var RTMONITOR_API; // will be instantiated RTMonitorAPI object for shared API access between widgets
 
       var widget = [];
 
       widget.push(new StationBoard('station_board_1',{station: 'CBG', offset: 0}));
+      /*
       widget.push(new StopBusMap('stop_bus_map_1',
                                  { id: 'stop_bus_map_1', 
                                    static_url: '/lobby_screen/static',
@@ -50,20 +56,21 @@
                                    lat: 52.215, 
                                    lng: 0.09, 
                                    zoom: 15 }));
-
+      */
       widget.push(new StopTimetable('stop_timetable_1',
-                                 { stop_id: '0500CCITY424',
+                                 { stop_id: '0500CCITY111',
                                    common_name: 'William Gates Building',
                                    lat: 52.21129, 
                                    lng: 0.09107
                                  }));
-
+      /*
       widget.push(new StopTimetable('stop_timetable_2',
                                  { stop_id: '0500CCITY050',
                                    common_name: 'Cam Uni Vet School',
                                    lat: 52.21129, 
                                    lng: 0.09107
                                  }));
+      */
 
       widget.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
       widget.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
@@ -85,6 +92,9 @@
       }
 
       function page_load() {
+        // Note we must instatiate RTMonitorAPI before widgets
+        RTMONITOR_API = new RTMonitorAPI();
+
         for (var i = 0; i < widget.length; i++) {
           if ('init' in widget[i]) {
             console.log("Initing ", widget[i].container);
@@ -94,6 +104,10 @@
             console.log("Not initing ", widget[i].container);
           }
         }
+
+        // Now we know widgets have run 'init', we can tell RTMonitorAPI to connect and tell those widgets
+        RTMONITOR_API.init();
+
         setInterval(function() {
           //console.log("Running page-level reloader");
           reload_widgets();
@@ -119,13 +133,10 @@
       <div class="container_2_2 col_2 row_3" id="traffic_map_2">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
-      <div class="container_1_2 col_4 row_1" id="stop_timetable_1">
+      <div class="container_2_2 col_4 row_1" id="stop_timetable_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
       <div class="container_1_2 col_4 row_3" id="stop_timetable_2">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-      <div class="container_2_2 col_5 row_1" id="stop_bus_map_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
       <div class="container_2_2 col_5 row_3" id="iframe_area_1">
