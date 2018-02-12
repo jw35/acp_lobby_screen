@@ -1,0 +1,40 @@
+<html>
+
+<head>
+<title>Websocket test</title>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script type="text/javascript">
+
+// Some simple logging
+
+function init() {
+
+    var div = document.getElementById('results');
+    function say(stuff) {
+        div.innerHTML += (stuff + '<br>');
+    }
+    say('Starting...');
+
+    var skt = new SockJS("http://tfc-app2.cl.cam.ac.uk/rtmonitor/sirivm");
+    say("Created socket");
+
+    skt.onmessage = function(e) {
+        say(e.data);
+    };
+
+    skt.onopen = function() {
+        skt.send('{"msg_type": "rt_connect"}');
+        skt.send('{"msg_type": "rt_subscribe", "request_id": "Aardvark"}');
+    }
+
+
+}
+
+</script>
+</head>
+
+<body onLoad="init()">
+    <div id="results"></div>
+</body>
+
+</html>

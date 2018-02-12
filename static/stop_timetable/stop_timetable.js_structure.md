@@ -4,6 +4,7 @@ stop_timetable.js structure
 init:
     sets up container structure
     loads this stop into stops_cache
+    registers connect/disconnect handlers
     calls get_stop_journeys:
         calls API journey_by_time_and_stop
         on ready:
