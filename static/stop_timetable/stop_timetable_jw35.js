@@ -1,16 +1,30 @@
 /* Bus Stop Timetable Widget for ACP Lobby Screen */
 
+/* globals RTMONITOR_API, DEBUG */
+
 function StopTimetable(container, params) {
 
     'use strict';
 
-    //this.container = container;
-    //this.params = params;
+    // Symbolic constants
 
-    //this.sensors = {};
+    var SECONDS = 1000,
+        MINUTES = 60 * SECONDS;
+
+    // Configuration constants
 
     var TIMETABLE_URI = 'http://tfc-app3.cl.cam.ac.uk/transport/api',
-        SECONDS = 1000;
+        REFRESH_INTERVAL = 30 * SECONDS,
+        JOURNEY_BATCH_SIZE = 50;                   // Journeys to retrieve in one batch
+
+   // Global state
+
+    var departure_div,        // DOM id of the <div> that contains departure information
+        refresh_timer_id,     // The ID of the timer that will eventually update the display
+        journey_table = [],   // Master table of today's journeys - top-level keys
+                              //     timetable: TNDS timetable entry from API
+                              //     eta: current best arrival/departure time
+        journey_index = {};   // Index into journay_table by origin + departure time
 
     //this.MAX_STOP_JOURNEYS = 15; // Limit results when requesting journeys through stop
 
@@ -34,20 +48,13 @@ function StopTimetable(container, params) {
 
     //this.refresh_timer = {};
 
-    var JOURNEY_REFRESH_INTERVAL = 60,   // seconds
-        DISPLAY_REFRESH_INTERVAL = 30,   // Seconds
-        JOURNEY_TABLE_SIZE = 75;         // Target entries in the journey table
-
     //this.stops_cache = {}; // store the stops we collect from the journeys through the current stop
 
     //this.rtmonitor_subscriptions = {}; // Dictionary of SiriVM subscriptions indexed on <stop>_<time>
 
-    var departure_div, journey_table = [], journey_index = {};
-
     this.init = function() {
-        var self = this;
 
-        log("Running StopTimetable.init", container);
+        log('Running StopTimetable.init', container);
 
         // Register handlers for connect/disconnect
         RTMONITOR_API.ondisconnect(this, this.rtmonitor_disconnected);
@@ -56,12 +63,10 @@ function StopTimetable(container, params) {
         // Setup the HTML skeleton of the container
         initialise_container(container);
 
-        // Populate the journey table and arrange to keep updating it
-        refresh_journeys();
-        window.setInterval(refresh_journeys, JOURNEY_REFRESH_INTERVAL * SECONDS);
-
-        // Arrange to keep updating the display
-        window.setInterval(update_display, DISPLAY_REFRESH_INTERVAL * SECONDS);
+        // Populate the journey table. As a side effect, this updates
+        // the display, starts the refresh timer and subscribes tio
+        // real-time updates
+        populate_journeys();
 
     };
 
@@ -108,77 +113,86 @@ function StopTimetable(container, params) {
         var connection_div = document.createElement('div');
         connection_div.setAttribute('class','stop_timetable_connection_div');
         connection_div.setAttribute('id', container+'_connection');
-        connection_div.innerHTML = "Connection issues";
+        connection_div.innerHTML = 'Connection issues';
         container.appendChild(connection_div);
 
         departure_div = document.createElement('div');
         content_area.appendChild(departure_div);
     }
 
-    function refresh_journeys() {
-        // Remove old entries from the journey_table and add new
-        // ones as needed
 
-        // Remove old entries (backwards to avoid renumbering)
-        log("refresh_journey - starting with", journey_table);
-        var cutoff = new Date(new Date().getTime() - (30 * 60 * SECONDS));
-        for (var i = journey_table.length - 1; i >= 0; i--) {
-            //log("refresh_journey - doing row", i);
-            if (journey_table[i].eta < cutoff) {
-                log("refresh_journey - droping row", i);
-                journey_table.splice(i,1);
-                log("refresh_journey - leaving", journey_table);
-            }
+    function populate_journeys() {
+        // Reset journey_table and populate it with today's journeys
+
+        // Cancel any remaining subscriptions
+        for (var i = 0; i < journey_table.length; i++) {
+
         }
 
-        // Retrieve new entries for the journey_table if needed
-        var needed = JOURNEY_TABLE_SIZE - journey_table.length;
-        if (needed === 0) {
-            log('refresh journeys - no new journeys needed');
-            return;
+        journey_table = [];
+        journey_index = [];
+
+        get_journey_batch(0);
+
+    }
+
+
+    function get_journey_batch(iteration) {
+        // Trigger retrieval of a batch of journey records
+
+        log('get_journey_batch - iteration', iteration);
+        if (iteration > 100) {
+            throw 'Excessive recursion in get_journey_batch';
         }
 
-        log('refresh_journeys - need', needed, 'new journeys');
         // Start from 30 minutes ago if the table is empty,
-        // or the departure_time of the last entry
+        // or at the departure_time of the last entry
         var start_time;
         if (journey_table.length === 0) {
-            start_time = new Date();
-            start_time.setMinutes(start_time.getMinutes() - 30);
+            start_time = delta_date(new Date(), -30 * MINUTES);
             start_time = hh_mm_ss(start_time);
         }
         else {
             var last_journey = journey_table[journey_table.length - 1];
-            start_time = last_journey.timetable.journey.departure_time;
+            start_time = last_journey.timetable.time;
         }
-        log("refresh_journey - start_time:", start_time);
+        log('get_journey_batch - start_time:', start_time);
 
         var qs = '?stop_id='+encodeURIComponent(params.stop_id);
         qs += '&datetime_from='+encodeURIComponent(start_time);
         qs += '&expand_journey=true';
-        qs += '&nresults='+encodeURIComponent(needed);
+        qs += '&nresults='+encodeURIComponent(JOURNEY_BATCH_SIZE);
 
         var uri = TIMETABLE_URI + '/journeys_by_time_and_stop/' + qs;
-        log('refresh_journeys - fetching', uri);
+        log('get_journey_batch - fetching', uri);
 
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", uri, true);
+        xhr.open('GET', uri, true);
         xhr.send();
         xhr.onreadystatechange = function() {
-            if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+            if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                 //log(xhr.responseText);
                 var api_result = JSON.parse(xhr.responseText);
-                add_journeys(api_result);
+                var added = add_journeys(iteration,api_result);
+                // If we added at least one new record then update the 
+                // display and recurse to get more
+                if (added) {
+                    refresh_display();
+                    get_journey_batch(++iteration);
+                }
             }
         };
 
     }
 
-    function add_journeys(data) {
 
-        log('add_journeys - got', data.results.length, 'results', data);
+    function add_journeys(iteration,data) {
+        // Add new journeys to journey_table. Return the number of
+        // records actually added
 
-        var updated = 0;
+        log('add_journeys - got', data.results.length, 'results');
+
+        var added = 0;
 
         for (var i = 0; i < data.results.length; i++) {
             var result = data.results[i];
@@ -186,25 +200,37 @@ function StopTimetable(container, params) {
             var departure_time = result.journey.departure_time;
 
             // Have we seen it before?
-            if (journey_index.hasOwnProperty(origin_stop + ":" + departure_time)) {
-                log("add_journeys - skipping", origin_stop + ":" + departure_time)
+            if (journey_index.hasOwnProperty(origin_stop + '!' + departure_time)) {
+                log('add_journeys - skipping', origin_stop + '!' + departure_time, result.time);
                 continue;
             }
 
-            log("add_journeys - adding", origin_stop + ":" + departure_time)
-            updated++;
+            log('add_journeys - adding', origin_stop + '!' + departure_time, result.time);
+            added++;
 
             var entry = { timetable: result,
                           eta: time_to_datetime(result.time) };
 
-            journey_index[origin_stop + ":" + departure_time] = entry;
+            journey_index[origin_stop + '!' + departure_time] = entry;
             journey_table.push(entry);
 
         }
 
+        log('add_journeys - actually added', added, 'journeys');
+
+        return added;
+
     }
 
-    function update_display() {
+    function refresh_display() {
+        // Update (actually recreate and replace) the display
+
+        log('refresh_display - running');
+
+        // Cancel the update timer if it's running
+        if (refresh_timer_id) {
+            window.clearTimeout(refresh_timer_id);
+        }
 
         var table = document.createElement('table');
 
@@ -222,12 +248,11 @@ function StopTimetable(container, params) {
         heading.appendChild(th3);
         table.appendChild(heading);
 
-        log('update display - doing', journey_table.length, 'table entries')
-
         for (var i=0; i<journey_table.length; i++) {
             var entry = journey_table[i];
 
-            if (entry.eta < new Date(new Date().getTime() - (0 * 60 * SECONDS))) {
+            // Skip anything that left in the past
+            if (entry.eta < new Date()) {
                 continue;
             }
 
@@ -241,7 +266,6 @@ function StopTimetable(container, params) {
             var td2 = document.createElement('td');
             td2.innerHTML = entry.timetable.line.line_name + ' (' + last_stop + ')';
             var td3 = document.createElement('td');
-            //log('update_departures - eta as ISO', entry.eta.toISOString())
             td3.innerHTML = entry.eta.toISOString().slice(11,16);
 
             row.appendChild(td1);
@@ -261,6 +285,9 @@ function StopTimetable(container, params) {
             div.innerHTML = 'No more departures today';
             departure_div.appendChild(div);
         }
+
+        // Restart the update timer to eventually re-refresh the page
+        refresh_timer_id = window.setTimeout(refresh_display,REFRESH_INTERVAL);
 
     }
 
@@ -298,13 +325,18 @@ function StopTimetable(container, params) {
 
     }
 
+    function delta_date(date,delta) {
+        // Return date adjusted by delta milliseconds
+        return new Date(date.getTime() + delta);
+    }
+
 }
 
 // =====================================================================
 
 
     /*this.reload = function() {
-        this.log("Running StationBoard.reload", this.container);
+        this.log('Running StationBoard.reload', this.container);
         this.do_load();
     }*/
 
@@ -312,8 +344,8 @@ function StopTimetable(container, params) {
     /*
     this.do_load = function () {
         var self = this;
-        this.log("Running StopTimetable.do_load", this.container);
-        this.log("StopTimetable.do_load done", this.container);
+        this.log('Running StopTimetable.do_load', this.container);
+        this.log('StopTimetable.do_load done', this.container);
     }
 
 
@@ -335,7 +367,7 @@ this.get_stop_journeys = function(parent, stop_id)
     qs += '&datetime_from='+encodeURIComponent(datetime_from);
     qs += '&expand_journey=true';
     qs += '&nresults='+parent.MAX_STOP_JOURNEYS;
-    // can also have "&nresults=XX" for max # of journeys to return
+    // can also have '&nresults=XX' for max # of journeys to return
 
     var uri = parent.TIMETABLE_URI+'/journeys_by_time_and_stop/'+qs;
 
@@ -344,7 +376,7 @@ this.get_stop_journeys = function(parent, stop_id)
 
     var xhr = new XMLHttpRequest();
 
-    xhr.open("GET", uri, true);
+    xhr.open('GET', uri, true);
 
     xhr.send();
 
@@ -536,15 +568,15 @@ this.subscribe = function(stop_id, time)
     var request_id = this.container+'_'+stop_id+'_'+time;
 
     // Subscribe to the real-time data INSIDE a clockwise rectangle derived from map bounds
-    var request_msg = '{ "msg_type": "rt_subscribe", '+
-                        '"request_id": "'+request_id+'", '+
-                        '"filters": [ { "test": "=", '+
-                                       '"key": "'+this.RECORD_ORIGIN_STOP_ID+'", '+
-                                       '"value": "'+stop_id+'"'+
+    var request_msg = '{ 'msg_type': 'rt_subscribe', '+
+                        ''request_id': ''+request_id+'', '+
+                        ''filters': [ { 'test': '=', '+
+                                       ''key': ''+this.RECORD_ORIGIN_STOP_ID+'', '+
+                                       ''value': ''+stop_id+'''+
                                      '},'+
-                                     '{ "test": "=", '+
-                                        '"key": "'+this.RECORD_ORIGIN_TIME+'", '+
-                                        '"value": "'+time+'"'+
+                                     '{ 'test': '=', '+
+                                        ''key': ''+this.RECORD_ORIGIN_TIME+'', '+
+                                        ''value': ''+time+'''+
                                      '} ]'+
                       '}';
 
@@ -590,7 +622,7 @@ this.subscribe_journeys = function(stop_id)
 }
 
 // Convert timetable time (from journey origin time) to ISO today time (for SiriVM lookup)
-// e.g. "16:20:00" -> "2018-02-04T16:20:00+00:00"
+// e.g. '16:20:00' -> '2018-02-04T16:20:00+00:00'
 //debug we MAY need to shift to yesterday
 this.time_to_iso = function(time)
 {
@@ -879,7 +911,7 @@ this.hh_mm_ss = function(datetime)
 }
 
 
-this.log("Instantiated StopTimetable", container, params);
+this.log('Instantiated StopTimetable', container, params);
 
 // END of 'class' StopTimetable
 }
