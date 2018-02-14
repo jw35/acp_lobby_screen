@@ -58,20 +58,32 @@
                                    zoom: 15 }));
       */
 
+
+
       widget.push(new StopTimetable('stop_timetable_1',
                                  { stop_id: '0500CCITY111',
-                                   common_name: 'William Gates Building',
+                                   common_name: 'Cambridge, opp Christ\s College',
                                    lat: 52.21129, 
                                    lng: 0.09107
                                  }));
 
-      /*
+
+
       widget.push(new StopTimetable('stop_timetable_2',
-                                 { stop_id: '0500CCITY050',
-                                   common_name: 'Cam Uni Vet School',
+                                 { stop_id: '0500CCITY424',
+                                   common_name: 'Cambridge, opp William Gates Building',
                                    lat: 52.21129, 
                                    lng: 0.09107
                                  }));
+
+
+      widget.push(new StopTimetable('stop_timetable_3',
+                                 { stop_id: '0500SSAWS009',
+                                   common_name: 'Sawston, opp Water Tower',
+                                   lat: 52.21129, 
+                                   lng: 0.09107
+                                 }));
+/*
 
       widget.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
       widget.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
@@ -113,7 +125,17 @@
         setInterval(function() {
           //console.log("Running page-level reloader");
           reload_widgets();
-        }, 60000)
+        }, 60000);
+
+        setInterval(update_screen_clock, 1000);
+      }
+
+      function update_screen_clock() {
+        var datetime = new Date();
+        var hh = ('0'+datetime.getHours()).slice(-2);
+        var mm = ('0'+datetime.getMinutes()).slice(-2);
+        var ss = ('0'+datetime.getSeconds()).slice(-2);
+        document.getElementById('screen_clock').innerHTML = hh+':'+mm+':'+ss;
       }
 
     </script>
@@ -137,7 +159,13 @@
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 -->
-      <div class="container_2_2 col_4 row_1" id="stop_timetable_1">
+      <div class="container_2_4 col_1 row_1" id="stop_timetable_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_2_4 col_3 row_1" id="stop_timetable_2">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+      <div class="container_2_4 col_5 row_1" id="stop_timetable_3">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 <!--
@@ -150,6 +178,7 @@
 -->
 
       <div class="credits">
+        <div id="screen_clock"></div>
         <a href="https://www.greatercambridge.org.uk/"><img alt="Greater Cambridge Partnership" src="{{ url_for('static', filename='logo_gccd_112.png') }}"></a>
         <a href="http://www.connectingcambridgeshire.co.uk/smartcamb/"><img alt="Connecting Cambridgshire" src="{{ url_for('static', filename='logo_sc_112.png') }}" ></a>
         <a href="http://www.cam.ac.uk"><img alt="The University of Cambridge" src="{{ url_for('static', filename='logo_uc_112.png') }}"></a>

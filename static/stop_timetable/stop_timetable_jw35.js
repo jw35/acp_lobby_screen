@@ -19,7 +19,9 @@ function StopTimetable(container, params) {
     var TIMETABLE_URI = 'http://tfc-app3.cl.cam.ac.uk/transport/api',
         DISPLAY_REFRESH_INTERVAL = 30 * SECONDS,
         SUBSCRIPTION_REFRESH_INTERVAL = 60 * SECONDS,
-        JOURNEY_BATCH_SIZE = 50;                   // Journeys to retrieve in one batch
+        KEEP_OLD_BUSSES = 2 * MINUTES,             // How long to go on displaying past busses
+        MAX_LINES = 50,                            // Maximum number of departures to show
+        JOURNEY_BATCH_SIZE = 20;                   // Journeys to retrieve in one batch
 
    // Global state
 
@@ -257,14 +259,15 @@ function StopTimetable(container, params) {
 
             //log('refresh_subscriptions - processing' , origin_stop, departure_time, entry.timetable.time, entry.rtsub);
 
-            if ( (expected < delta_date(new Date(), -60 * MINUTES)) ||
-                  expected > delta_date(new Date(), +120 * MINUTES)) {
+            if ( (expected < delta_date(new Date(), -30 * MINUTES)) ||
+                  expected > delta_date(new Date(), +60 * MINUTES)) {
 
 
                 //log('refresh_subscriptions - outside window');
                 if (entry.rtsub) {
                     log('refresh_subscriptions - unsubscribing', entry.rtsub, entry.timetable.time);
                     RTMONITOR_API.unsubscribe(entry.rtsub);
+                    entry.rtsub = undefined;
                 }
                 else {
                     //log('refresh_subscriptions - not subscribed anyway');
@@ -325,13 +328,17 @@ function StopTimetable(container, params) {
         heading.appendChild(th5);
         table.appendChild(heading);
 
+        var nrows = 0;
+
         for (var i=0; i<journey_table.length; i++) {
             var entry = journey_table[i];
 
             // Skip anything that left in the past
-            if (entry.eta < new Date()) {
+            if (entry.eta < delta_date(new Date(), -KEEP_OLD_BUSSES)) {
                 continue;
             }
+
+            nrows++;
 
             var journey_timetable = entry.timetable.journey.timetable;
             var last_stop = journey_timetable[journey_timetable.length-1].stop.common_name;
@@ -366,10 +373,16 @@ function StopTimetable(container, params) {
             row.appendChild(td5);
             table.appendChild(row);
 
+            // No point adding more than MAX_LINES rows becasue they will be
+            // off the bottom of the display
+            if (nrows >= MAX_LINES) {
+                break;
+            }
+
         }
 
         empty(departure_div);
-        if (table.children.length > 0) {
+        if (nrows > 0) {
             departure_div.appendChild(table);
         }
         else {
@@ -449,7 +462,7 @@ function StopTimetable(container, params) {
 
             var origin = msg.OriginRef;
             var departure_time = msg.OriginAimedDepartureTime.slice(11,19);
-            //log('handle_records - origin', origin, 'departure_time', departure_time);
+            log('handle_records - origin', origin, 'departure_time', departure_time);
             var key = origin + '!' + departure_time;
 
             if (journey_index.hasOwnProperty(key)) {
