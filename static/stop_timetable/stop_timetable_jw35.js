@@ -1,6 +1,6 @@
 // /* Bus Stop Timetable Widget for ACP Lobby Screen */
 
-/* globals RTMONITOR_API, DEBUG */
+/* globals RTMONITOR_API, DEBUG, moment */
 /* exported StopTimetable */
 
 function StopTimetable(container, params) {
@@ -19,7 +19,6 @@ function StopTimetable(container, params) {
     var TIMETABLE_URI = 'http://tfc-app3.cl.cam.ac.uk/transport/api',
         DISPLAY_REFRESH_INTERVAL = 30 * SECONDS,
         SUBSCRIPTION_REFRESH_INTERVAL = 60 * SECONDS,
-        KEEP_OLD_BUSSES = 2 * MINUTES,             // How long to go on displaying past busses
         MAX_LINES = 50,                            // Maximum number of departures to show
         JOURNEY_BATCH_SIZE = 20;                   // Journeys to retrieve in one batch
 
@@ -30,8 +29,13 @@ function StopTimetable(container, params) {
         subscription_timer_id,// The ID of the timer that will eventually refresh the subscriptions
         journey_table = [],   // Master table of today's journeys - top-level keys
                               //     timetable: TNDS timetable entry from API
-                              //     eta: current best arrival/departure time
+                              //       origin: atcocode of origin stop
+                              //       departure: moment() of timetabled departure tine
+                              //       due: moment() of time at this stop
                               //     rt: most recent real time report for this journey
+                              //       rt_timestamp: moment() of last rt record receipt
+                              //       delay: most recent Delay as moment.duration()
+                              //       eta: moment() of current best  guess time at this stop
         journey_index = {};   // Index into journay_table by origin + departure time
 
     //this.MAX_STOP_JOURNEYS = 15; // Limit results when requesting journeys through stop
@@ -161,8 +165,7 @@ function StopTimetable(container, params) {
         // or at the departure_time of the last entry
         var start_time;
         if (journey_table.length === 0) {
-            start_time = delta_date(new Date(), -30 * MINUTES);
-            start_time = hh_mm_ss(start_time);
+            start_time = moment().subtract(30, 'seconds').format('HH:mm:ss');
         }
         else {
             var last_journey = journey_table[journey_table.length - 1];
@@ -210,24 +213,27 @@ function StopTimetable(container, params) {
         for (var i = 0; i < data.results.length; i++) {
             var result = data.results[i];
             var origin_stop = result.journey.timetable[0].stop.atco_code;
-            var departure_time = result.journey.departure_time;
+            var departure_time_str = result.journey.departure_time;
 
             // Have we seen it before?
-            if (journey_index.hasOwnProperty(origin_stop + '!' + departure_time)) {
-                log('add_journeys - skipping', origin_stop + '!' + departure_time, result.time);
+            if (journey_index.hasOwnProperty(origin_stop + '!' + departure_time_str)) {
+                log('add_journeys - skipping', origin_stop + '!' + departure_time_str, result.time);
                 continue;
             }
 
-            log('add_journeys - adding', origin_stop + '!' + departure_time, result.time);
+            log('add_journeys - adding', origin_stop + '!' + departure_time_str, result.time);
             added++;
 
             var entry = {
                 timetable: result,
-                eta: time_to_datetime(result.time),
+                origin: origin_stop,
+                departure: time_to_moment(departure_time_str),
+                due: time_to_moment(result.time),
+                eta: time_to_moment(result.time),
                 rt: {}
             };
 
-            journey_index[origin_stop + '!' + departure_time] = entry;
+            journey_index[origin_stop + '!' + departure_time_str] = entry;
             journey_table.push(entry);
 
         }
@@ -241,9 +247,10 @@ function StopTimetable(container, params) {
 
     function refresh_subscriptions() {
         // Walk journey_table, subscribe to real time updates for
-        // journeys with arrival time within -60 +120 minutes of now,
+        // journeys with due time within a window of now,
         // and unsubscribe for journeys outside these limits
-        //log('refresh_subscriptions - running');
+
+        log('refresh_subscriptions - running');
 
         // Cancel the update timer if it's running
         if (subscription_timer_id) {
@@ -253,36 +260,35 @@ function StopTimetable(container, params) {
 
         for (var i = 0; i < journey_table.length; i++) {
             var entry = journey_table[i];
-            var origin_stop = entry.timetable.journey.timetable[0].stop.atco_code;
-            var departure_time = entry.timetable.journey.departure_time;
-            var expected = time_to_datetime(entry.timetable.time);
 
-            //log('refresh_subscriptions - processing' , origin_stop, departure_time, entry.timetable.time, entry.rtsub);
+            log(entry.due.format('HH:mm:ss'));
+            log(entry.due.isBefore(moment().subtract(30, 'minutes')));
+            log(moment().add(60, 'minutes').format('HH:mm:ss'));
+            log(entry.due.isAfter(moment().add(60, 'minutes')));
 
-            if ( (expected < delta_date(new Date(), -30 * MINUTES)) ||
-                  expected > delta_date(new Date(), +60 * MINUTES)) {
+            if ( (entry.due.isBefore(moment().subtract(30, 'minutes')) ||
+                  entry.due.isAfter(moment().add(60, 'minutes'))) ) {
 
-
-                //log('refresh_subscriptions - outside window');
+                log('refresh_subscriptions - outside window');
                 if (entry.rtsub) {
-                    log('refresh_subscriptions - unsubscribing', entry.rtsub, entry.timetable.time);
+                    log('refresh_subscriptions - unsubscribing', entry.rtsub, entry.due);
                     RTMONITOR_API.unsubscribe(entry.rtsub);
                     entry.rtsub = undefined;
                 }
                 else {
-                    //log('refresh_subscriptions - not subscribed anyway');
+                    log('refresh_subscriptions - not subscribed anyway');
                 }
             }
 
             else {
 
-                //log('refresh_subscriptions - inside window');
+                log('refresh_subscriptions - inside window');
                 if (!entry.rtsub) {
-                    log('refresh_subscriptions - subscribing', origin_stop, departure_time, entry.timetable.time);
-                    entry.rtsub = subscribe(origin_stop, departure_time);
+                    log('refresh_subscriptions - subscribing', entry.origin + '!' + entry.departure.format('HH:mm:ss'), entry.due.format('HH:mm:ss'));
+                    entry.rtsub = subscribe(entry.origin, entry.departure);
                 }
                 else {
-                    //log('refresh_subscriptions - alreday subscribed');
+                    log('refresh_subscriptions - alreday subscribed');
                 }
 
             }
@@ -310,6 +316,10 @@ function StopTimetable(container, params) {
 
         var heading = document.createElement('tr');
 
+        var thx = document.createElement('th');
+        thx.innerHTML = 'OriginRef';
+        var thy = document.createElement('th');
+        thy.innerHTML = 'Dep';
         var th1 = document.createElement('th');
         th1.innerHTML = 'Time';
         var th2 = document.createElement('th');
@@ -321,6 +331,8 @@ function StopTimetable(container, params) {
         var th5 = document.createElement('th');
         th5.innerHTML = 'Delay';
 
+        heading.appendChild(thx);
+        heading.appendChild(thy);
         heading.appendChild(th1);
         heading.appendChild(th2);
         heading.appendChild(th3);
@@ -334,7 +346,7 @@ function StopTimetable(container, params) {
             var entry = journey_table[i];
 
             // Skip anything that left in the past
-            if (entry.eta < delta_date(new Date(), -KEEP_OLD_BUSSES)) {
+            if (entry.eta.isBefore(moment().subtract(5, 'minutes'))) {
                 continue;
             }
 
@@ -345,27 +357,50 @@ function StopTimetable(container, params) {
 
             var row = document.createElement('tr');
 
+            var tdx = document.createElement('td');
+            tdx.innerHTML = entry.origin;
+
+            var tdy = document.createElement('td');
+            tdy.innerHTML = entry.departure.format('HH:mm');
+
             var td1 = document.createElement('td');
-            td1.innerHTML = entry.timetable.time.slice(0,5);
+            td1.innerHTML = entry.due.format('HH:mm');
+
+            // Line name and final stop
             var td2 = document.createElement('td');
             td2.innerHTML = entry.timetable.line.line_name + ' (' + last_stop + ')';
+
+            // ETA, providing most recent RT record in the last minute
             var td3 = document.createElement('td');
-            td3.innerHTML = entry.eta.toISOString().slice(11,16);
+            if (entry.rt_timestamp &&
+                (entry.rt_timestamp.isAfter(moment().subtract(60, 'seconds')))) {
+                td3.innerHTML = entry.eta.format('HH:mm');
+            }
+            else {
+                td3.innerHTML = '';
+            }
+
+            // Most recent rt_timestamp (if we have one)
             var td4 = document.createElement('td');
-            if (entry.rt.received_timestamp) {
-                td4.innerHTML = entry.rt.received_timestamp.toISOString().slice(11,16);
+            if (entry.rt_timestamp) {
+                //log(entry.rt.received_timestamp);
+                td4.innerHTML = entry.rt_timestamp.format('HH:mm');
             }
             else {
                 td4.innerHTML = '';
             }
+
+            // Current delay
             var td5 = document.createElement('td');
-            if (entry.rt.Delay) {
-                td5.innerHTML = entry.rt.Delay;
+            if (entry.delay) {
+                td5.innerHTML = entry.delay.toISOString();
             }
             else {
                 td5.innerHTML = '';
             }
 
+            row.appendChild(tdx);
+            row.appendChild(tdy);
             row.appendChild(td1);
             row.appendChild(td2);
             row.appendChild(td3);
@@ -373,7 +408,7 @@ function StopTimetable(container, params) {
             row.appendChild(td5);
             table.appendChild(row);
 
-            // No point adding more than MAX_LINES rows becasue they will be
+            // No point adding more than MAX_LINES rows because they will be
             // off the bottom of the display
             if (nrows >= MAX_LINES) {
                 break;
@@ -415,7 +450,7 @@ function StopTimetable(container, params) {
 
     function subscribe(stop_id, time) {
         // call 'subscribe' for RT messages matching stop_id and (departure) time
-        var request_id = container+'_'+stop_id+'_'+time;
+        var request_id = container+'_'+stop_id+'_'+time.format('HH:mm:ss');
         //log('subscribe - processing for', request_id);
 
         var request_msg = JSON.stringify(
@@ -432,11 +467,13 @@ function StopTimetable(container, params) {
                         {
                             test: '=',
                             key: 'OriginAimedDepartureTime',
-                            value: time_to_iso(time)
+                            value: time.format('YYYY-MM-DDTHH:mm:ssZ')
                         }
                     ]
             }
         );
+
+        log(request_msg);
 
         var request_status = RTMONITOR_API.request(self, request_id, request_msg, self.handle_message);
 
@@ -445,7 +482,7 @@ function StopTimetable(container, params) {
             return undefined;
         }
 
-        //log('subscribe - subscribed ok for', request_id);
+        log('subscribe - subscribed ok for', request_id);
 
         return request_id;
 
@@ -458,18 +495,21 @@ function StopTimetable(container, params) {
 
         for (var i = 0; i < incoming_data.request_data.length; i++) {
             var msg = incoming_data.request_data[i];
-            msg.received_timestamp = new Date();
 
             var origin = msg.OriginRef;
-            var departure_time = msg.OriginAimedDepartureTime.slice(11,19);
-            log('handle_records - origin', origin, 'departure_time', departure_time);
-            var key = origin + '!' + departure_time;
+            var departure_time = moment(msg.OriginAimedDepartureTime);
+            var delay = moment.duration(msg.Delay);
+            var key = origin + '!' + departure_time.format('HH:mm:ss');
+            log('handle_records - key', key);
 
             if (journey_index.hasOwnProperty(key)) {
                 journey_index[key].rt = msg;
+                journey_index[key].rt_timestamp = moment();
+                journey_index[key].delay = delay;
+                journey_index[key].eta = journey_index[key].due.clone().add(delay);
             }
             else {
-                log('handle_records - message', key, 'no matched');
+                log('handle_records - message', key, 'no match');
             }
         }
 
@@ -480,13 +520,6 @@ function StopTimetable(container, params) {
 
     //==== Utilities ===================================================
 
-    // return provided JS Date() as HH:MM:SS
-    function hh_mm_ss(datetime) {
-        var hh = ('0'+datetime.getHours()).slice(-2);
-        var mm = ('0'+datetime.getMinutes()).slice(-2);
-        var ss = ('0'+datetime.getSeconds()).slice(-2);
-        return hh+':'+mm+':'+ss;
-    }
 
     function log() {
         if ((typeof DEBUG !== 'undefined') && DEBUG.indexOf('stop_timetable_log') >= 0) {
@@ -501,58 +534,21 @@ function StopTimetable(container, params) {
         }
     }
 
-    function time_to_datetime(time) {
+    function time_to_moment(time) {
         // Expand a localtime time into a full Date object based on today
-        var result = new Date();
-        result.setHours(time.slice(0,2));
-        result.setMinutes(time.slice(3,5));
-        result.setSeconds(time.slice(6,8));
+        var result = moment();
+        result.hours(time.slice(0,2));
+        result.minutes(time.slice(3,5));
+        result.seconds(time.slice(6,8));
+        result.milliseconds(0);
         return result;
-
     }
 
-    function time_to_iso(time) {
-        // Convert timetable time (from journey origin time) to ISO today time (for SiriVM lookup)
-        // e.g. '16:20:00' -> '2018-02-04T16:20:00+00:00'
-        //debug we MAY need to shift to yesterday
+    log('Instantiated StopTimetable', container, params);
 
-        var now = new Date();
-
-        var iso_time = now.getFullYear()+'-'+
-                       ('0' + (now.getMonth() + 1)).slice(-2)+'-'+
-                       ('0' + now.getDate()).slice(-2)+
-                       'T'+
-                       time +
-                       '+00:00';
-        return iso_time;
-
-    }
-
-    function delta_date(date,delta) {
-        // Return date adjusted by delta milliseconds
-        return new Date(date.getTime() + delta);
-    }
+    // END of 'class' StopTimetable
 
 }
-
-// =====================================================================
-
-
-    /*this.reload = function() {
-        this.log('Running StationBoard.reload', this.container);
-        this.do_load();
-    }*/
-
-
-    /*
-    this.do_load = function () {
-        var self = this;
-        this.log('Running StopTimetable.do_load', this.container);
-        this.log('StopTimetable.do_load done', this.container);
-    }
-
-
-*/
 
 // ***************************************************************************
 // *******************  Transport API     ************************************
@@ -561,402 +557,33 @@ function StopTimetable(container, params) {
 
 
 /*
-// Call the API to get the journeys through a given stop
-this.get_stop_journeys = function(parent, stop_id)
-{
-    var datetime_from = parent.hh_mm_ss(new Date());
-
-    var qs = '?stop_id='+encodeURIComponent(stop_id);
-    qs += '&datetime_from='+encodeURIComponent(datetime_from);
-    qs += '&expand_journey=true';
-    qs += '&nresults='+parent.MAX_STOP_JOURNEYS;
-    // can also have '&nresults=XX' for max # of journeys to return
-
-    var uri = parent.TIMETABLE_URI+'/journeys_by_time_and_stop/'+qs;
-
-    parent.log('stop_timetable get_stop_journeys: getting '+stop_id+
-                ' @ '+datetime_from);
-
-    var xhr = new XMLHttpRequest();
-
-    xhr.open('GET', uri, true);
-
-    xhr.send();
-
-    xhr.onreadystatechange = function() {//Call a function when the state changes.
-        if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200)
-        {
-            //console.log('got route profile for '+sensor_id);
-            parent.add_api_stop_data(parent, stop_id, datetime_from, xhr.responseText);
-            parent.handle_stop_journeys(parent, stop_id);
-        }
-    }
-}
-
-// Update a stop.journeys property with the data from the transport API
-this.add_api_stop_data = function(parent, stop_id, datetime_from, api_response)
-{
-    var api_data;
-    try
-    {
-        api_data = JSON.parse(api_response);
-    }
-    catch (e)
-    {
-        parent.log('stop_timetable add_api_stop_journeys: failed to parse API response for '+
-                    stop_id+' @ '+datetime_from);
-        parent.log(api_response);
-        return;
-    }
-
-    var stop = parent.stops_cache[stop_id];
-
-    if (!stop)
-    {
-        parent.log('stop_timetable add_api_stop_journeys: '+stop_id+' not in cache');
-        return;
-    }
-
-    if (!api_data.results)
-    {
-        parent.log('stop_timetable add_api_stop_journeys: null results for '+
-                    stop_id+' @ '+datetime_from);
-        parent.log(api_response);
-        stop.journeys = null;
-        return;
-    }
-
-    if (!api_data.results[0])
-    {
-        parent.log('stop_timetable add_api_stop_journeys: empty results for '+
-                    stop_id+' @ '+datetime_from);
-        stop.journeys = null;
-
-        return;
-    }
-
-    parent.log('stop_timetable add_api_stop_journeys: processing '+api_data.results.length+' journeys');
-
-    stop.journeys = [];
-
-    stop.departures = [];
-
-    for (var i=0; i<api_data.results.length; i++)
-    {
-        var result = api_data.results[i];
-
-        stop.departures.push( { time: result.time,
-                                line_name: result.line.line_name
-                              });
-
-        var journey_stops = result.journey.timetable.length;
-
-        var journey = new Array(journey_stops);
-
-        for (var j=0; j<journey_stops; j++)
-        {
-            journey[j] = result.journey.timetable[j].stop;
-
-            if (journey[j].id)
-            {
-                journey[j].stop_id = journey[j].id;
-            }
-            journey[j].time = result.journey.timetable[j].time;
-
-            // add this stop to stops_cache if it's not already in there
-            if (!parent.stops_cache.hasOwnProperty(journey[j].stop_id))
-            {
-                parent.load_stop(parent, journey[j]);
-            }
-
-        }
-        stop.journeys.push(journey);
-    }
-}
-
-// Deal with a stop that now has an updated 'journeys' property
-//
-this.handle_stop_journeys = function(parent, stop_id)
-{
-    // Do nothing if this stop is not in cache (an error)
-    if (!parent.stops_cache[stop_id])
-    {
-        return;
-    }
-
-    var stop = parent.stops_cache[stop_id];
-
-    parent.log('stop_timetable handle_stop_journeys: '+stop_id+
-               ' journeys: '+(stop.journeys ? stop.journeys.length : 0));
-
-    parent.draw_departures(parent, stop);
-
-    if (stop.journeys)
-    {
-        parent.subscribe_journeys.call(parent, stop_id);
-    }
-
-}
-
-this.load_stop = function(parent, stop)
-{
-    if (!stop.stop_id)
-    {
-        stop.stop_id = stop['atco_code'];
-    }
-
-    if (!stop.lat)
-    {
-        stop.lat = stop['latitude'];
-
-        stop.lng = stop['longitude'];
-    }
-
-    parent.stops_cache[stop.stop_id] = stop;
-}
-
-*/
-
-/*
-
-this.stops_cache_miss = function(parent, stop_id)
-{
-    return !parent.stops_cache.hasOwnProperty(stop_id);
-}
-
-*/
-
-/*
-
-
-this.update_departure = function(sensor)
-{
-    var origin_stop_id = sensor.msg[this.RECORD_ORIGIN_STOP_ID];
-    var origin_time = sensor.msg[this.RECORD_ORIGIN_TIME].slice(11,19);
-    var cell_id = this.container+'_'+origin_stop_id+'_'+origin_time+'_expected';
-
-    this.log('writing '+ sensor.sensor_id+' to '+cell_id);
-
-    var el = document.getElementById(cell_id);
-    if (el)
-    {
-        el.innerHTML = sensor.sensor_id;
-        el.setAttribute('class','stop_timetable_realtime');
-    }
-}
-
-// ****************************************************************************************
-// ************* REAL-TIME BUS POSITIONS  via RTMonitorAPI ********************************
-// ****************************************************************************************
-//
 
 
 
 
-// We have a new list of journeys for the current stop, so send real-time subscription requests
-this.subscribe_journeys = function(stop_id)
-{
-    var stop = this.stops_cache[stop_id];
 
-    //debug testing next 3 arrivals max
-    //
-    //var journey_count = stop.journeys.length; //Math.min(3, stop.journeys.length);
-    var journey_count = Math.min(3, stop.journeys.length);
 
-    for (var i=0; i<journey_count; i++)
-    {
-        var journey = stop.journeys[i];
-        var origin_stop_id = journey[0].stop_id;
-        var origin_time = this.time_to_iso(journey[0].time);
-        this.subscribe(origin_stop_id, origin_time);
-    }
-}
 
-// Convert timetable time (from journey origin time) to ISO today time (for SiriVM lookup)
-// e.g. '16:20:00' -> '2018-02-04T16:20:00+00:00'
-//debug we MAY need to shift to yesterday
-this.time_to_iso = function(time)
-{
-    var now = new Date();
 
-    var iso_time = now.getFullYear()+'-'+
-                  ('0' + (now.getMonth() + 1)).slice(-2)+'-'+
-                  ('0' + now.getDate()).slice(-2)+
-                  'T'+
-                  time +
-                  '+00:00';
-    return iso_time;
-}
+
+
+
+
+
+
+
+
+/
 
 // ********************************************************************************
 // ***********  Process the data records arrived from WebSocket or Replay *********
 // ********************************************************************************
 
-// Process websocket data
-this.handle_records = function(incoming_data)
-{
-    this.log('stop_timetable handle_records incoming data'+
-             ' ('+ incoming_data[this.RECORDS_ARRAY].length + ' records');
-    //this.log('handle_records'+json['request_data'].length);
-    for (var i = 0; i < incoming_data[this.RECORDS_ARRAY].length; i++)
-    {
-	    this.handle_msg(incoming_data[this.RECORDS_ARRAY][i], new Date());
-    }
-} // end function handle_records
 
-// process a single data record
-this.handle_msg = function(msg, clock_time)
-{
-    // Add a timestamp for when we received this data record
-    msg.received_timestamp = new Date();
 
-    var sensor_id = msg[this.RECORD_INDEX];
 
-    this.log('stop_timetable handling msg for '+sensor_id);
 
-    // If an existing entry in 'this.sensors' has this key, then update
-    // otherwise create new entry.
-    if (this.sensors.hasOwnProperty(sensor_id))
-    {
-        this.update_sensor(msg, clock_time);
-    }
-    else
-    {
-        this.create_sensor(msg, clock_time);
-    }
-}
 
-// We have received data from a previously unseen sensor, so initialize
-this.create_sensor = function(msg, clock_time)
-{
-    // new sensor
-    this.log('stop_timetable ** New '+msg[this.RECORD_INDEX]);
-
-    var sensor_id = msg[this.RECORD_INDEX];
-
-    var sensor = { sensor_id: sensor_id,
-                   msg: msg,
-                 };
-
-    sensor.state = {};
-
-    this.sensors[sensor_id] = sensor;
-
-    // flag if this record is OLD or NEW
-    this.init_old_status(sensor, new Date());
-
-}
-
-// We have received a new data message from an existing sensor, so analyze and update state
-this.update_sensor = function(msg, clock_time)
-{
-		// existing sensor data record has arrived
-
-        var sensor_id = msg[this.RECORD_INDEX];
-
-		if (this.get_msg_date(msg).getTime() != this.get_msg_date(this.sensors[sensor_id].msg).getTime())
-        {
-            // store as latest msg
-            // moving current msg to prev_msg
-            this.sensors[sensor_id].prev_msg = this.<[sensor_id].msg;
-		    this.sensors[sensor_id].msg = msg; // update entry for this msg
-
-            var sensor = this.sensors[sensor_id];
-
-            // flag if this record is OLD or NEW
-            this.update_old_status(sensor, new Date());
-
-		}
-}
-
-this.timer_update = function(parent)
-{
-    parent.check_old_records(parent, new Date());
-
-    // cull obsolete sensors
-    //
-    for (var sensor_id in parent.sensors)
-    {
-        if (parent.sensors.hasOwnProperty(sensor_id) && parent.sensors[sensor_id].state.obsolete)
-        {
-            parent.log('culling '+sensor_id);
-            delete parent.sensors[sensor_id];
-        }
-    }
-
-}
-// Given a data record, update '.old' property t|f
-// Note that 'current time' is the JS date value in global 'clock_time'
-// so that this function works equally well during replay of old data.
-//
-this.init_old_status = function(sensor, clock_time)
-{
-    this.update_old_status(sensor, clock_time);
-}
-
-this.update_old_status = function(sensor, clock_time)
-{
-    var data_timestamp = sensor.msg.received_timestamp;
-
-    //var data_timestamp = this.get_msg_date(sensor.msg); // will hold Date from sensor
-
-    // get current value of sensor.state.old flag (default false)
-    var current_old_flag = !(sensor.state.old == null) || sensor.state.old;
-
-    // calculate age of sensor (in seconds)
-    var age = (clock_time - data_timestamp) / 1000;
-
-    if (age > this.OLD_DATA_RECORD)
-    {
-        if (age > this.OBSOLETE_DATA_RECORD)
-        {
-            sensor.state.obsolete = true;
-            return;
-        }
-        // data record is OLD
-        // skip if this data record is already flagged as old
-        if (sensor.state.old != null && sensor.state.old)
-        {
-            return;
-        }
-        // set the 'old' flag on this record
-        //
-        this.log('update_old_status OLD '+sensor.msg[this.RECORD_INDEX]);
-        sensor.state.old = true;
-    }
-    else
-    {
-        // data record is NOT OLD
-        // skip if this data record is already NOT OLD
-        if (sensor.state.old != null && !sensor.state.old)
-        {
-            return;
-        }
-        // reset the 'old' flag on this data record
-        sensor.state.old = false;
-    }
-}
-
-// return {lat:, lng:} from sensor message
-this.get_msg_point = function(msg)
-{
-    return { lat: msg[this.RECORD_LAT], lng: msg[this.RECORD_LNG] };
-}
-
-// return a JS Date() from sensor message
-this.get_msg_date = function(msg)
-{
-    switch (this.RECORD_TS_FORMAT)
-    {
-        case 'ISO8601':
-            return new Date(msg[this.RECORD_TS]);
-            break;
-
-        default:
-            break;
-    }
-    return null;
-}
 
 // ***********************************************************
 // Pretty print an XML duration
@@ -1027,45 +654,9 @@ this.get_xml_digits = function(xml, units)
     return Number(xml.slice(start+1,end));
 }
 
-// End of the XML duration pretty print code
-// *************************************************************
-
-// watchdog function to flag 'old' data records
-// records are stored in 'this.sensors' object
-this.check_old_records = function(parent, clock_time)
-{
-    //parent.log('checking for old data records..,');
-
-    // do nothing if timestamp format not recognised
-    switch (parent.RECORD_TS_FORMAT)
-    {
-        case 'ISO8601':
-            break;
-
-        default:
-            return;
-    }
-
-    for (var sensor_id in parent.sensors)
-    {
-        parent.update_old_status(parent.sensors[sensor_id], clock_time);
-    }
-}
-
-// return provided JS Date() as HH:MM:SS
-this.hh_mm_ss = function(datetime)
-{
-    var hh = ('0'+datetime.getHours()).slice(-2);
-    var mm = ('0'+datetime.getMinutes()).slice(-2);
-    var ss = ('0'+datetime.getSeconds()).slice(-2);
-    return hh+':'+mm+':'+ss;
-}
 
 
-this.log('Instantiated StopTimetable', container, params);
 
-// END of 'class' StopTimetable
-}
 
 */
 
