@@ -4,8 +4,8 @@
 
 .stop_timetable {
     height: 100%;
-    width: 100%;
     padding: 0.5em;
+    width: 100%;
 }
 
 .stop_timetable .content_area {
@@ -15,11 +15,12 @@
 }
 
 .stop_timetable h1, .stop_timetable h2 {
-    margin-top: 0px;
-    margin-bottom: 0px;
+    margin-bottom: 0;
+    margin-top: 0;
 }
 
 .stop_timetable table {
+    border-collapse: collapse;
     margin-left: auto;
     margin-right: auto;
     margin-top: 0.5em;
@@ -27,47 +28,51 @@
 }
 
 .stop_timetable th, .stop_timetable td {
-    padding-top: 0.1em;
-    padding-bottom: 0.1em;
-    padding-left: 0.4em;
-    padding-right: 0.4em;
+    padding: 0.1em 0.4em;
 }
 
-.stop_timetable tr.issue {
+.stop_timetable .issue {
     background-color: #fdd;
 }
 
-.stop_timetable tr th:first-child { text-align: center; }
-.stop_timetable tr td:first-child { text-align: center; }
-.stop_timetable tr th:first-child + th { text-align: left; }
-.stop_timetable tr td:first-child + td { text-align: left; }
-.stop_timetable tr th:first-child + th + th { text-align: center; }
-.stop_timetable tr td:first-child + td + td { text-align: center; }
+.stop_timetable .seen {
+    background-color: #dfd;
+}
+
+.stop_timetable th, .stop_timetable td {
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    vertical-align: top;
+}
+
+.stop_timetable th.time, .stop_timetable td.time {
+    text-align: center;
+}
 
 .stop_timetable .widget_error {
-    display: none;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 100%;
     background: red;
-    text-align: center;
     color: white;
+    display: none;
+    left: 0;
+    position: absolute;
+    text-align: center;
+    top: 0;
+    width: 100%;
 }
 
 
 .stop_timetable_connection_div { /* connection error div */
-    position: absolute;
-    top: 10px;
-    left: 0px;
-    height: 30px;
-    width: 100%;
-    color: white;
-    font-weight: bold;
-    font-size: 25px;
     background-color: red;
-    text-align: center;
+    color: white;
     display: none;
+    font-size: 25;
+    font-weight: bold;
+    height: 30px;
+    left: 0;
+    position: absolute;
+    text-align: center;
+    top: 10px;
+    width: 100%;
 }
 
 .stop_timetable_realtime {

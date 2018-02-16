@@ -28,8 +28,10 @@ function StopTimetable(container, params) {
         subscription_timer_id,// The ID of the timer that will eventually refresh the subscriptions
         journey_table = [],   // Master table of today's journeys - top-level keys
                               //     timetable: TNDS timetable entry from API
-                              //       origin: atcocode of origin stop
+                              //       origin: stop objectof origin stop
+                              //       destination: stop object of destination stop
                               //       departure: moment() of timetabled departure tine
+                              //       arrival: moment() of timetabled arrival at last stop
                               //       due: moment() of time at this stop
                               //     rt: most recent real time report for this journey
                               //       rt_timestamp: moment() of last rt record receipt
@@ -203,28 +205,32 @@ function StopTimetable(container, params) {
 
         for (var i = 0; i < data.results.length; i++) {
             var result = data.results[i];
-            var origin_stop = result.journey.timetable[0].stop.atco_code;
+            var origin_stop = result.journey.timetable[0].stop;
+            var destination_stop = result.journey.timetable[result.journey.timetable.length-1].stop;
             var departure_time_str = result.journey.departure_time;
+            var arrival_time_str = result.journey.timetable[result.journey.timetable.length-1].time;
 
             // Have we seen it before?
-            if (journey_index.hasOwnProperty(origin_stop + '!' + departure_time_str)) {
-                log('add_journeys - skipping', origin_stop + '!' + departure_time_str, result.time);
+            if (journey_index.hasOwnProperty(origin_stop.atco_code + '!' + departure_time_str)) {
+                log('add_journeys - skipping', origin_stop.atco_code + '!' + departure_time_str, result.time);
                 continue;
             }
 
-            log('add_journeys - adding', origin_stop + '!' + departure_time_str, result.time);
+            log('add_journeys - adding', origin_stop.atco_code + '!' + departure_time_str, result.time);
             added++;
 
             var entry = {
                 timetable: result,
                 origin: origin_stop,
+                destination: destination_stop,
                 departure: time_to_moment(departure_time_str),
+                arrival: time_to_moment(arrival_time_str),
                 due: time_to_moment(result.time),
                 eta: time_to_moment(result.time),
                 rt: {}
             };
 
-            journey_index[origin_stop + '!' + departure_time_str] = entry;
+            journey_index[origin_stop.atco_code + '!' + departure_time_str] = entry;
             journey_table.push(entry);
 
         }
@@ -241,7 +247,7 @@ function StopTimetable(container, params) {
         // journeys with due time within a window of now,
         // and unsubscribe for journeys outside these limits
 
-        log('refresh_subscriptions - running');
+        //log('refresh_subscriptions - running');
 
         // Cancel the update timer if it's running
         if (subscription_timer_id) {
@@ -254,35 +260,35 @@ function StopTimetable(container, params) {
             for (var i = 0; i < journey_table.length; i++) {
                 var entry = journey_table[i];
 
-                log(entry.due.format('HH:mm:ss'));
-                log(entry.due.isBefore(moment().subtract(30, 'minutes')));
-                log(moment().add(60, 'minutes').format('HH:mm:ss'));
-                log(entry.due.isAfter(moment().add(60, 'minutes')));
+                //log(entry.due.format('HH:mm:ss'));
+                //log(entry.due.isBefore(moment().subtract(30, 'minutes')));
+                //log(moment().add(60, 'minutes').format('HH:mm:ss'));
+                //log(entry.due.isAfter(moment().add(60, 'minutes')));
 
                 if ( (entry.due.isBefore(moment().subtract(30, 'minutes')) ||
                       entry.due.isAfter(moment().add(60, 'minutes'))) ) {
 
-                    log('refresh_subscriptions - outside window');
+                    //log('refresh_subscriptions - outside window');
                     if (entry.rtsub) {
                         log('refresh_subscriptions - unsubscribing', entry.rtsub, entry.due);
                         RTMONITOR_API.unsubscribe(entry.rtsub);
                         entry.rtsub = undefined;
                     }
-                    else {
-                        log('refresh_subscriptions - not subscribed anyway');
-                    }
+                    //else {
+                        //log('refresh_subscriptions - not subscribed anyway');
+                    //}
                 }
 
                 else {
 
-                    log('refresh_subscriptions - inside window');
+                    //log('refresh_subscriptions - inside window');
                     if (!entry.rtsub) {
-                        log('refresh_subscriptions - subscribing', entry.origin + '!' + entry.departure.format('HH:mm:ss'), entry.due.format('HH:mm:ss'));
-                        entry.rtsub = subscribe(entry.origin, entry.departure);
+                        log('refresh_subscriptions - subscribing', entry.origin.atco_code + '!' + entry.departure.format('HH:mm:ss'), entry.due.format('HH:mm:ss'));
+                        entry.rtsub = subscribe(entry.origin.atco_code, entry.departure);
                     }
-                    else {
-                        log('refresh_subscriptions - alreday subscribed');
-                    }
+                    //else {
+                        //log('refresh_subscriptions - alreday subscribed');
+                    //}
 
                 }
 
@@ -337,20 +343,26 @@ function StopTimetable(container, params) {
     function display_simple() {
         // Basic departure board layout
 
+        //log('display_simple - running');
+
         var table = document.createElement('table');
 
         var heading = document.createElement('tr');
 
-        var th1 = document.createElement('th');
-        th1.innerHTML = 'Time';
-        var th2 = document.createElement('th');
-        th2.innerHTML = 'Route';
-        var th3 = document.createElement('th');
-        th3.innerHTML = 'Expected';
+        var th_due = document.createElement('th');
+        th_due.classList.add('time');
+        th_due.innerHTML = 'Due';
 
-        heading.appendChild(th1);
-        heading.appendChild(th2);
-        heading.appendChild(th3);
+        var th_expected = document.createElement('th');
+        th_expected.classList.add('time');
+        th_expected.innerHTML = 'Expected';
+
+        var th_route = document.createElement('th');
+        th_route.innerHTML = 'Route';
+
+        heading.appendChild(th_due);
+        heading.appendChild(th_expected);
+        heading.appendChild(th_route);
         table.appendChild(heading);
 
         var nrows = 0;
@@ -359,37 +371,47 @@ function StopTimetable(container, params) {
             var entry = journey_table[i];
 
             // Skip anything that left in the past
-            if (entry.eta.isBefore(moment().subtract(5, 'minutes'))) {
+            if (entry.eta.isBefore(moment().subtract(1, 'minutes'))) {
                 continue;
             }
 
             nrows++;
 
-            var journey_timetable = entry.timetable.journey.timetable;
-            var last_stop = journey_timetable[journey_timetable.length-1].stop.common_name;
+            var last_stop = entry.destination.common_name;
 
             var row = document.createElement('tr');
+            // Flag the row for buses currently over 5 minutes late
+            var thresh = entry.due.clone().add(5, 'm');
+            if (fresh_timestamp(entry) && entry.eta.isAfter(thresh)) {
+                 row.classList.add('issue');
+            }
 
-            var td1 = document.createElement('td');
-            td1.innerHTML = entry.due.format('HH:mm');
-
-            // Line name and final stop
-            var td2 = document.createElement('td');
-            td2.innerHTML = entry.timetable.line.line_name + ' (' + last_stop + ')';
+            var td_due = document.createElement('td');
+            td_due.classList.add('time');
+            td_due.innerHTML = entry.due.format('HH:mm');
 
             // ETA, providing most recent RT record in the last minute
-            var td3 = document.createElement('td');
-            if (entry.rt_timestamp &&
-                (entry.rt_timestamp.isAfter(moment().subtract(60, 'seconds')))) {
-                td3.innerHTML = entry.eta.format('HH:mm');
+            var td_expected = document.createElement('td');
+            td_expected.classList.add('time');
+            if (fresh_timestamp(entry)) {
+                if (entry.due.isSame(entry.eta,'m')) {
+                    td_expected.innerHTML = 'On time';
+                }
+                else {
+                    td_expected.innerHTML = entry.eta.format('HH:mm');
+                }
             }
             else {
-                td3.innerHTML = '';
+                td_expected.innerHTML = '';
             }
 
-            row.appendChild(td1);
-            row.appendChild(td2);
-            row.appendChild(td3);
+            // Line name and final stop
+            var td_route = document.createElement('td');
+            td_route.innerHTML = entry.timetable.line.line_name + ' (to ' + last_stop + ')';
+
+            row.appendChild(td_due);
+            row.appendChild(td_expected);
+            row.appendChild(td_route);
             table.appendChild(row);
 
             // No point adding more than MAX_LINES rows because they will be
@@ -411,35 +433,55 @@ function StopTimetable(container, params) {
 
     }
 
+    function fresh_timestamp(entry) {
+        // is the latest RT information in entry fresh?
+        return entry.rt_timestamp &&
+                (entry.rt_timestamp.isAfter(moment().subtract(60, 's')));
+    }
+
     function display_debug() {
         // Debug display board with internal data
 
+        //log('display_debug - running');
+
         var table = document.createElement('table');
-
         var heading = document.createElement('tr');
+        var cell;
 
-        var thx = document.createElement('th');
-        thx.innerHTML = 'OriginRef';
-        var thy = document.createElement('th');
-        thy.innerHTML = 'Dep';
-        var th1 = document.createElement('th');
-        th1.innerHTML = 'Time';
-        var th2 = document.createElement('th');
-        th2.innerHTML = 'Route';
-        var th3 = document.createElement('th');
-        th3.innerHTML = 'Expected';
-        var th4 = document.createElement('th');
-        th4.innerHTML = 'Seen';
-        var th5 = document.createElement('th');
-        th5.innerHTML = 'Delay';
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.appendChild(document.createTextNode('OriginRef'));
+        cell.appendChild(document.createElement('br'));
+        cell.appendChild(document.createTextNode('DestRef'));
+        heading.appendChild(cell);
 
-        heading.appendChild(thx);
-        heading.appendChild(thy);
-        heading.appendChild(th1);
-        heading.appendChild(th2);
-        heading.appendChild(th3);
-        heading.appendChild(th4);
-        heading.appendChild(th5);
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.appendChild(document.createTextNode('Dep.'));
+        cell.appendChild(document.createElement('br'));
+        cell.appendChild(document.createTextNode('Due'));
+        heading.appendChild(cell);
+
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.appendChild(document.createTextNode('Seen'));
+        cell.appendChild(document.createElement('br'));
+        cell.appendChild(document.createTextNode('Delay'));
+        heading.appendChild(cell);
+
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.appendChild(document.createTextNode('Expected'));
+        cell.appendChild(document.createElement('br'));
+        cell.appendChild(document.createTextNode('In'));
+        heading.appendChild(cell);
+
+        cell = document.createElement('th');
+        cell.appendChild(document.createTextNode('Route'));
+        cell.appendChild(document.createElement('br'));
+        cell.appendChild(document.createTextNode('Arriving'));
+        heading.appendChild(cell);
+
         table.appendChild(heading);
 
         var nrows = 0;
@@ -454,60 +496,62 @@ function StopTimetable(container, params) {
 
             nrows++;
 
-            var journey_timetable = entry.timetable.journey.timetable;
-            var last_stop = journey_timetable[journey_timetable.length-1].stop.common_name;
+            var last_stop = entry.destination.common_name;
 
             var row = document.createElement('tr');
-
-            var tdx = document.createElement('td');
-            tdx.innerHTML = entry.origin;
-
-            var tdy = document.createElement('td');
-            tdy.innerHTML = entry.departure.format('HH:mm');
-
-            var td1 = document.createElement('td');
-            td1.innerHTML = entry.due.format('HH:mm');
-
-            // Line name and final stop
-            var td2 = document.createElement('td');
-            td2.innerHTML = entry.timetable.line.line_name + ' (' + last_stop + ')';
-
-            // ETA, providing most recent RT record in the last minute
-            var td3 = document.createElement('td');
-            if (entry.rt_timestamp &&
-                (entry.rt_timestamp.isAfter(moment().subtract(60, 'seconds')))) {
-                td3.innerHTML = entry.eta.format('HH:mm');
-            }
-            else {
-                td3.innerHTML = '';
+            if (entry.rt_timestamp) {
+                row.classList.add('seen');
             }
 
-            // Most recent rt_timestamp (if we have one)
-            var td4 = document.createElement('td');
+            cell = document.createElement('td');
+            cell.appendChild(document.createTextNode(entry.origin.atco_code));
+            cell.appendChild(document.createElement('br'));
+            cell.appendChild(document.createTextNode(entry.destination.atco_code));
+            row.appendChild(cell);
+
+            cell = document.createElement('td');
+            cell.classList.add('time');
+            cell.appendChild(document.createTextNode(entry.departure.format('HH:mm')));
+            cell.appendChild(document.createElement('br'));
+            cell.appendChild(document.createTextNode(entry.due.format('HH:mm')));
+            row.appendChild(cell);
+
+            cell = document.createElement('td');
+            cell.classList.add('time');
             if (entry.rt_timestamp) {
                 //log(entry.rt.received_timestamp);
-                td4.innerHTML = entry.rt_timestamp.format('HH:mm');
+                cell.appendChild(document.createTextNode(entry.rt_timestamp.format('HH:mm')));
             }
             else {
-                td4.innerHTML = '';
+                cell.appendChild(document.createTextNode(''));
             }
-
-            // Current delay
-            var td5 = document.createElement('td');
+            cell.appendChild(document.createElement('br'));
             if (entry.delay) {
-                td5.innerHTML = entry.delay.toISOString();
+                cell.appendChild(document.createTextNode(entry.delay.toISOString()));
             }
             else {
-                td5.innerHTML = '';
+                cell.appendChild(document.createTextNode(''));
             }
+            row.appendChild(cell);
 
-            row.appendChild(tdx);
-            row.appendChild(tdy);
-            row.appendChild(td1);
-            row.appendChild(td2);
-            row.appendChild(td3);
-            row.appendChild(td4);
-            row.appendChild(td5);
+            cell = document.createElement('td');
+            cell.classList.add('time');
+            if (fresh_timestamp(entry)) {
+                cell.appendChild(document.createTextNode(entry.eta.format('HH:mm')));
+            }
+            else {
+                cell.appendChild(document.createTextNode(''));
+            }
+            cell.appendChild(document.createElement('br'));
+            cell.appendChild(document.createTextNode(entry.eta.fromNow(true)));
+            row.appendChild(cell);
+
+            cell = document.createElement('td');
+            cell.appendChild(document.createTextNode(entry.timetable.line.line_name + ' (to ' + last_stop + ')'));
+            cell.appendChild(document.createElement('br'));
+            cell.appendChild(document.createTextNode(entry.arrival.format('HH:mm')));
+            row.appendChild(cell);
+
             table.appendChild(row);
 
             // No point adding more than MAX_LINES rows because they will be
@@ -570,16 +614,12 @@ function StopTimetable(container, params) {
             }
         );
 
-        log(request_msg);
-
         var request_status = RTMONITOR_API.request(self, request_id, request_msg, self.handle_message);
 
         if (request_status.status !== 'rt_ok') {
             log('subscribe failed ', JSON.stringify(request_status));
             return undefined;
         }
-
-        log('subscribe - subscribed ok for', request_id);
 
         return request_id;
 
@@ -597,7 +637,6 @@ function StopTimetable(container, params) {
             var departure_time = moment(msg.OriginAimedDepartureTime);
             var delay = moment.duration(msg.Delay);
             var key = origin + '!' + departure_time.format('HH:mm:ss');
-            log('handle_records - key', key);
 
             if (journey_index.hasOwnProperty(key)) {
                 journey_index[key].rt = msg;
