@@ -3,18 +3,30 @@
 <html>
 
   <head>
-    <title>RTMonitor Test Page</title>
+    <title>ijl20 test v2.03</title>
 
     <script src="rtmonitor_api.js" type="text/javascript"></script>
 
     <link rel="stylesheet" href="lobby_screen.css">
     <link rel="stylesheet" href="stop_timetable.css">
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <script src="rtmonitor_test.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="/lobby_screen/static/stop_bus_map/stop_bus_map.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
 
+    <script src="/lobby_screen/static/js/MovingMarker.js" type="text/javascript"></script>
+
+    <script src="/lobby_screen/static/js/Semicircle.js" type="text/javascript"></script>
+
+    <script src="/lobby_screen/static/js/geo.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="/lobby_screen/static/js/moment-with-locales.min.js"></script>
+    <script src="/lobby_screen/static/js/moment-timezone-with-data.min.js"></script>
+    <script src="stop_timetable_ijl20.js" type="text/javascript"></script>
+
+    <script src="/lobby_screen/static/stop_bus_map/stop_bus_map.js" type="text/javascript"></script>
     <script type="text/javascript">
 
-      var DEBUG = 'stop_timetable_log stop_bus_map_log rtmonitor_api_log'; // widget.log() code will check this var
+      var DEBUG = '';//'stop_timetable_log stop_bus_map_log rtmonitor_api_log'; // widget.log() code will check this var
 
       var RTMONITOR_API;
 
@@ -69,6 +81,26 @@
                                    lat: 52.23059, 
                                    lng: 0.15139
                                  }));
+
+      widget.push(new StopBusMap('stop_bus_map_1',
+                                 { id: 'stop_bus_map_1', 
+                                   static_url: '/lobby_screen/static',
+                                   title: 'Live Buses: U and Citi4', 
+                                   stops: [ { stop_id: '0500CCITY424',
+                                              common_name: 'William Gates Building',
+                                              lat: 52.21129,
+                                              lng: 0.09107
+                                            },
+                                            { stop_id: '0500CCITY199',
+                                              common_name: 'Cam Uni Vet School',
+                                              lat: 52.21297,
+                                              lng: 0.09062
+                                            }
+                                          ],
+                                   breadcrumbs: true,
+                                   lat: 52.215, 
+                                   lng: 0.09, 
+                                   zoom: 15 }));
 
       function reload_widgets () {
         for (var i = 0; i < widget.length; i++) {
@@ -144,6 +176,8 @@
       <div class="container_2_2 col_1 row_3" id="stop_timetable_4">
       </div>
       <div class="container_2_2 col_3 row_3" id="stop_timetable_5">
+      </div>
+      <div class="container_2_2 col_5 row_3" id="stop_bus_map_1">
       </div>
 
     </div>
