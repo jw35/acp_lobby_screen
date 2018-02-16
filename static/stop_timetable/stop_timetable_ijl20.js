@@ -517,16 +517,6 @@ this.time_to_sirivm = function(timetable_time_str)
     //             ' today: '+today_str+' as UK: '+timetable_sirivm_str);
 
     return timetable_sirivm_str;
-
-    var now_old = new Date();
-
-    var iso_time = now_old.getFullYear()+'-'+
-                  ('0' + (now_old.getMonth() + 1)).slice(-2)+'-'+
-                  ('0' + now_old.getDate()).slice(-2)+
-                  'T'+
-                  timetable_time_str +
-                  '+00:00';
-    return iso_time;
 }
 
 // ********************************************************************************
