@@ -1,0 +1,9 @@
+{
+  "ignore": [
+    "qualified-headings"
+  ],
+  "warnings": [
+  ],
+  "errors": [
+  ]
+}
