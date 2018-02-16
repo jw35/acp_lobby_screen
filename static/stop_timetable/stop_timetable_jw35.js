@@ -11,8 +11,7 @@ function StopTimetable(container, params) {
 
     // Symbolic constants
 
-    var SECONDS = 1000,
-        MINUTES = 60 * SECONDS;
+    var SECONDS = 1000;
 
     // Configuration constants
 
@@ -37,14 +36,6 @@ function StopTimetable(container, params) {
                               //       delay: most recent Delay as moment.duration()
                               //       eta: moment() of current best  guess time at this stop
         journey_index = {};   // Index into journay_table by origin + departure time
-
-    //this.MAX_STOP_JOURNEYS = 15; // Limit results when requesting journeys through stop
-
-    //this.OLD_DATA_RECORD = 70; // time (s) threshold where a data record is considered 'old'
-
-    //this.OBSOLETE_DATA_RECORD = 140; // at this age, we discard the sensor
-
-    //this.CRUMB_COUNT = 400; // how many breadcrumbs to keep on the page
 
     // Here we define the 'data record format' of the incoming websocket feed
     //this.RECORD_INDEX = 'VehicleRef';  // data record property that is primary key
@@ -72,11 +63,11 @@ function StopTimetable(container, params) {
         RTMONITOR_API.ondisconnect(this, this.rtmonitor_disconnected);
         RTMONITOR_API.onconnect(this, this.rtmonitor_connected);
 
-        // Setup the HTML skeleton of the container
+        // Set up the HTML skeleton of the container
         initialise_container(container);
 
         // Populate the journey table. As a side effect, this updates
-        // the display, starts the refresh timer and subscribes tio
+        // the display, starts the refresh timer and subscribes to
         // real-time updates
         populate_journeys();
 
@@ -136,7 +127,7 @@ function StopTimetable(container, params) {
     function populate_journeys() {
         // Reset journey_table and populate it with today's journeys
 
-        // Cancel any remaining subscriptions
+        // Cancel any outstanding subscriptions
         for (var i = 0; i < journey_table.length; i++) {
             var journey = journey_table[i];
             if (journey.rtsub) {
@@ -257,47 +248,50 @@ function StopTimetable(container, params) {
             window.clearTimeout(subscription_timer_id);
         }
 
+        // Run this in try...finally to ensure the timer is reset
+        try {
 
-        for (var i = 0; i < journey_table.length; i++) {
-            var entry = journey_table[i];
+            for (var i = 0; i < journey_table.length; i++) {
+                var entry = journey_table[i];
 
-            log(entry.due.format('HH:mm:ss'));
-            log(entry.due.isBefore(moment().subtract(30, 'minutes')));
-            log(moment().add(60, 'minutes').format('HH:mm:ss'));
-            log(entry.due.isAfter(moment().add(60, 'minutes')));
+                log(entry.due.format('HH:mm:ss'));
+                log(entry.due.isBefore(moment().subtract(30, 'minutes')));
+                log(moment().add(60, 'minutes').format('HH:mm:ss'));
+                log(entry.due.isAfter(moment().add(60, 'minutes')));
 
-            if ( (entry.due.isBefore(moment().subtract(30, 'minutes')) ||
-                  entry.due.isAfter(moment().add(60, 'minutes'))) ) {
+                if ( (entry.due.isBefore(moment().subtract(30, 'minutes')) ||
+                      entry.due.isAfter(moment().add(60, 'minutes'))) ) {
 
-                log('refresh_subscriptions - outside window');
-                if (entry.rtsub) {
-                    log('refresh_subscriptions - unsubscribing', entry.rtsub, entry.due);
-                    RTMONITOR_API.unsubscribe(entry.rtsub);
-                    entry.rtsub = undefined;
+                    log('refresh_subscriptions - outside window');
+                    if (entry.rtsub) {
+                        log('refresh_subscriptions - unsubscribing', entry.rtsub, entry.due);
+                        RTMONITOR_API.unsubscribe(entry.rtsub);
+                        entry.rtsub = undefined;
+                    }
+                    else {
+                        log('refresh_subscriptions - not subscribed anyway');
+                    }
                 }
+
                 else {
-                    log('refresh_subscriptions - not subscribed anyway');
-                }
-            }
 
-            else {
+                    log('refresh_subscriptions - inside window');
+                    if (!entry.rtsub) {
+                        log('refresh_subscriptions - subscribing', entry.origin + '!' + entry.departure.format('HH:mm:ss'), entry.due.format('HH:mm:ss'));
+                        entry.rtsub = subscribe(entry.origin, entry.departure);
+                    }
+                    else {
+                        log('refresh_subscriptions - alreday subscribed');
+                    }
 
-                log('refresh_subscriptions - inside window');
-                if (!entry.rtsub) {
-                    log('refresh_subscriptions - subscribing', entry.origin + '!' + entry.departure.format('HH:mm:ss'), entry.due.format('HH:mm:ss'));
-                    entry.rtsub = subscribe(entry.origin, entry.departure);
-                }
-                else {
-                    log('refresh_subscriptions - alreday subscribed');
                 }
 
             }
-
         }
-
-        // Restart the update timer to eventually re-refresh the page
-        subscription_timer_id = window.setTimeout(refresh_subscriptions, SUBSCRIPTION_REFRESH_INTERVAL);
-
+        finally {
+            // Restart the update timer to eventually re-refresh the page
+            subscription_timer_id = window.setTimeout(refresh_subscriptions, SUBSCRIPTION_REFRESH_INTERVAL);
+        }
     }
 
 
@@ -311,6 +305,114 @@ function StopTimetable(container, params) {
         if (display_timer_id) {
             window.clearTimeout(display_timer_id);
         }
+
+        // Run this in try...finally to ensure the timer is reset
+        try {
+
+            var result;
+            switch (params.layout) {
+                case 'debug':
+                    result = display_debug();
+                    break;
+                default:
+                    if (params.layout !== 'simple') {
+                        log('refresh_display - unexpected layout', params.layout, 'using \'simple\'');
+                    }
+                    result = display_simple();
+            }
+
+            empty(departure_div);
+            if (result) {
+                departure_div.appendChild(result);
+            }
+
+        }
+        finally {
+            // Restart the update timer to eventually re-refresh the page
+            display_timer_id = window.setTimeout(refresh_display,DISPLAY_REFRESH_INTERVAL);
+        }
+    }
+
+
+    function display_simple() {
+        // Basic departure board layout
+
+        var table = document.createElement('table');
+
+        var heading = document.createElement('tr');
+
+        var th1 = document.createElement('th');
+        th1.innerHTML = 'Time';
+        var th2 = document.createElement('th');
+        th2.innerHTML = 'Route';
+        var th3 = document.createElement('th');
+        th3.innerHTML = 'Expected';
+
+        heading.appendChild(th1);
+        heading.appendChild(th2);
+        heading.appendChild(th3);
+        table.appendChild(heading);
+
+        var nrows = 0;
+
+        for (var i=0; i<journey_table.length; i++) {
+            var entry = journey_table[i];
+
+            // Skip anything that left in the past
+            if (entry.eta.isBefore(moment().subtract(5, 'minutes'))) {
+                continue;
+            }
+
+            nrows++;
+
+            var journey_timetable = entry.timetable.journey.timetable;
+            var last_stop = journey_timetable[journey_timetable.length-1].stop.common_name;
+
+            var row = document.createElement('tr');
+
+            var td1 = document.createElement('td');
+            td1.innerHTML = entry.due.format('HH:mm');
+
+            // Line name and final stop
+            var td2 = document.createElement('td');
+            td2.innerHTML = entry.timetable.line.line_name + ' (' + last_stop + ')';
+
+            // ETA, providing most recent RT record in the last minute
+            var td3 = document.createElement('td');
+            if (entry.rt_timestamp &&
+                (entry.rt_timestamp.isAfter(moment().subtract(60, 'seconds')))) {
+                td3.innerHTML = entry.eta.format('HH:mm');
+            }
+            else {
+                td3.innerHTML = '';
+            }
+
+            row.appendChild(td1);
+            row.appendChild(td2);
+            row.appendChild(td3);
+            table.appendChild(row);
+
+            // No point adding more than MAX_LINES rows because they will be
+            // off the bottom of the display
+            if (nrows >= MAX_LINES) {
+                break;
+            }
+
+        }
+
+        if (nrows === 0) {
+            var div = document.createElement('div');
+            div.setAttribute('class','no-departures');
+            div.innerHTML = 'No more departures today';
+            return div;
+        }
+
+        return table;
+
+    }
+
+    function display_debug() {
+        // Debug display board with internal data
 
         var table = document.createElement('table');
 
@@ -416,19 +518,14 @@ function StopTimetable(container, params) {
 
         }
 
-        empty(departure_div);
-        if (nrows > 0) {
-            departure_div.appendChild(table);
-        }
-        else {
+        if (nrows === 0) {
             var div = document.createElement('div');
             div.setAttribute('class','no-departures');
             div.innerHTML = 'No more departures today';
-            departure_div.appendChild(div);
+            return div;
         }
 
-        // Restart the update timer to eventually re-refresh the page
-        display_timer_id = window.setTimeout(refresh_display,DISPLAY_REFRESH_INTERVAL);
+        return table;
 
     }
 
