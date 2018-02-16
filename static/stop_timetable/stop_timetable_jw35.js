@@ -37,6 +37,7 @@ function StopTimetable(container, params) {
                               //       rt_timestamp: moment() of last rt record receipt
                               //       delay: most recent Delay as moment.duration()
                               //       eta: moment() of current best  guess time at this stop
+                              //       vehicle: id of the vehicle doing the journey
         journey_index = {};   // Index into journay_table by origin + departure time
 
     // Here we define the 'data record format' of the incoming websocket feed
@@ -453,6 +454,8 @@ function StopTimetable(container, params) {
         cell.appendChild(document.createTextNode('OriginRef'));
         cell.appendChild(document.createElement('br'));
         cell.appendChild(document.createTextNode('DestRef'));
+        cell.appendChild(document.createElement('br'));
+        cell.appendChild(document.createTextNode('Vehicle'));
         heading.appendChild(cell);
 
         cell = document.createElement('th');
@@ -507,6 +510,13 @@ function StopTimetable(container, params) {
             cell.appendChild(document.createTextNode(entry.origin.atco_code));
             cell.appendChild(document.createElement('br'));
             cell.appendChild(document.createTextNode(entry.destination.atco_code));
+            cell.appendChild(document.createElement('br'));
+            if (entry.vehicle) {
+                cell.appendChild(document.createTextNode(entry.vehicle));
+            }
+            else{
+                cell.appendChild(document.createTextNode(''));
+            }
             row.appendChild(cell);
 
             cell = document.createElement('td');
@@ -643,6 +653,7 @@ function StopTimetable(container, params) {
                 journey_index[key].rt_timestamp = moment();
                 journey_index[key].delay = delay;
                 journey_index[key].eta = journey_index[key].due.clone().add(delay);
+                journey_index[key].vehicle = msg.VehicleRef;
             }
             else {
                 log('handle_records - message', key, 'no match');
@@ -869,5 +880,33 @@ this.get_xml_digits = function(xml, units)
         }
     ]
 }
+
+        {
+            "Bearing": "12",
+            "DataFrameRef": "1",
+            "DatedVehicleJourneyRef": "32",
+            "Delay": "PT4M7S",
+            "DestinationName": "Lavender Crescent",
+            "DestinationRef": "0590PDD384",
+            "DirectionRef": "INBOUND",
+            "InPanic": "0",
+            "Latitude": "52.5558243",
+            "LineRef": "5",
+            "Longitude": "-0.2270660",
+            "Monitored": "true",
+            "OperatorRef": "SCCM",
+            "OriginAimedDepartureTime": "2018-01-22T08:30:00+00:00",
+            "OriginName": "Western Spine Road",
+            "OriginRef": "0590PSP940",
+            "PublishedLineName": "5",
+            "RecordedAtTime": "2018-01-22T08:40:07+00:00",
+            "ValidUntilTime": "2018-01-22T08:40:07+00:00",
+            "VehicleMonitoringRef": "SCCM-37222",
+            "VehicleRef": "SCCM-37222",
+            "acp_id": "SCCM-37222",
+            "acp_lat": 52.5558243,
+            "acp_lng": -0.227066,
+            "acp_ts": 1516610407
+        },
 
 */
