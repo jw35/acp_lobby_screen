@@ -21,6 +21,8 @@ function StopTimetable(container, params) {
 
     this.TIMETABLE_URI = 'http://tfc-app3.cl.cam.ac.uk/transport/api';
 
+    this.TIMETABLE_TIMEZONE = 'Europe/London'; // timezone of hh:mm:ss values returned by timetable API
+
     this.MAX_STOP_JOURNEYS = 15; // Limit results when requesting journeys through stop
 
     this.OLD_DATA_RECORD = 70; // time (s) threshold where a data record is considered 'old'
@@ -390,8 +392,8 @@ this.draw_departures = function(parent, stop)
         var td3 = document.createElement('td');
         td3.innerHTML = last_stop;
         var td4 = document.createElement('td');
-        td4.setAttribute('id',row_id+'_expected');
-        td4.innerHTML = origin_stop_id+' '+origin_time;
+        td4.setAttribute('id',row_id+'_realtime');
+        td4.innerHTML = origin_time+' '+origin_stop_id;
 
         row.appendChild(td1);
         row.appendChild(td2);
@@ -407,14 +409,14 @@ this.update_departure = function(sensor)
 {
     var origin_stop_id = sensor.msg[this.RECORD_ORIGIN_STOP_ID];
     var origin_time = sensor.msg[this.RECORD_ORIGIN_TIME].slice(11,19);
-    var cell_id = this.container+'_'+origin_stop_id+'_'+origin_time+'_expected';
+    var cell_id = this.container+'_'+origin_stop_id+'_'+origin_time+'_realtime';
 
     this.log('writing '+ sensor.sensor_id+' to '+cell_id);
 
     var el = document.getElementById(cell_id);
     if (el)
     {
-        el.innerHTML = sensor.sensor_id;
+        el.innerHTML = origin_time + ' ' + sensor.sensor_id;
         el.setAttribute('class','stop_timetable_realtime');
     }
 }
@@ -493,25 +495,28 @@ this.subscribe_journeys = function(stop_id)
     {
         var journey = stop.journeys[i];
         var origin_stop_id = journey[0].stop_id;
-        var origin_time = this.time_to_iso(journey[0].time);
+        var origin_time = this.time_to_sirivm(journey[0].time);
         this.subscribe(origin_stop_id, origin_time);
     }
 }
 
-// Convert timetable time (from journey origin time) to ISO today time (for SiriVM lookup)
-// e.g. "16:20:00" -> "2018-02-04T16:20:00+00:00"
-//debug we MAY need to shift to yesterday
-this.time_to_iso = function(time)
+// Convert timetable time (from journey origin time) to SiriVM OriginAimedDepartureTime
+// e.g. "16:20:00" -> "2018-06-04T16:20:00+01:00"
+this.time_to_sirivm = function(timetable_time_str)
 {
-    var now = new Date();
+    // set today_str as 'now' in localtime as "YYYY-MM-DD"
+    var today_str = moment().tz(this.TIMETABLE_TIMEZONE).format('YYYY-MM-DD');
 
-    var iso_time = now.getFullYear()+'-'+
-                  ('0' + (now.getMonth() + 1)).slice(-2)+'-'+
-                  ('0' + now.getDate()).slice(-2)+
-                  'T'+
-                  time +
-                  '+00:00';
-    return iso_time;
+    // Create new 'moment' UK datetime from today[T]timetable_time
+    var timetable_moment = moment.tz(today_str+'T'+timetable_time_str, this.TIMETABLE_TIMEZONE);
+
+    // Format this moment as SiriVM OriginAimedDepartureTime e.g. "2017-11-05T19:53:00+00:00"
+    var timetable_sirivm_str = timetable_moment.format('YYYY[-]MM[-]DD[T]HH[:]mm[:]ssZ');
+
+    // console.log('MOMENT DATE: '+timetable_moment.toISOString()+
+    //             ' today: '+today_str+' as UK: '+timetable_sirivm_str);
+
+    return timetable_sirivm_str;
 }
 
 // ********************************************************************************
