@@ -11,21 +11,17 @@ function StopTimetable(container, params) {
 
     // Symbolic constants
 
-    var SECONDS = 1000,
-        // NapTAN common_name qualiiers that go before he name
-        // http://naptan.dft.gov.uk/naptan/schema/2.5/doc/NaPTANSchemaGuide-2.5-v0.67.pdf, p71
-        RELATION_INDICATORS = ['opp', 'outside', 'o/s', 'adj', 'near',
-                               'nr', 'behind', 'inside', 'by', 'in',
-                               'at', 'on', 'before' ,'just before',
-                               'afte', 'just after', 'corner of'];
-
+    var SECONDS = 1000;
+ 
     // Configuration constants
 
     var TIMETABLE_URI = 'http://tfc-app3.cl.cam.ac.uk/transport/api',
         DISPLAY_REFRESH_INTERVAL = 30 * SECONDS,
         SUBSCRIPTION_REFRESH_INTERVAL = 60 * SECONDS,
         MAX_LINES = 50,                            // Maximum number of departures to show
-        JOURNEY_BATCH_SIZE = 20;                   // Journeys to retrieve in one batch
+        JOURNEY_BATCH_SIZE = 20,                   // Journeys to retrieve in one batch
+        TIMETABLE_TIMEZONE = 'Europe/London', // The time zone of raw times in the timetable API
+        REALTIME_TIMEZONE = 'Europe/London';  // The time zone needed for real time subscription requests
 
    // Global state
 
@@ -82,6 +78,7 @@ function StopTimetable(container, params) {
 
     };
 
+
     function initialise_container(id) {
 
         var container = document.getElementById(id);
@@ -135,20 +132,33 @@ function StopTimetable(container, params) {
 
     function populate_journeys() {
         // Reset journey_table and populate it with today's journeys
+        // And schedule ourself to run early tomorrow morning
+        try {
 
-        // Cancel any outstanding subscriptions
-        for (var i = 0; i < journey_table.length; i++) {
-            var journey = journey_table[i];
-            if (journey.rtsub) {
-                log('populate_journeys - unsubscribing', journey.rtsub);
-                RTMONITOR_API.unsubscribe(journey.rtsub);
+            // Cancel any outstanding subscriptions
+            for (var i = 0; i < journey_table.length; i++) {
+                var journey = journey_table[i];
+                if (journey.rtsub) {
+                    log('populate_journeys - unsubscribing', journey.rtsub);
+                    RTMONITOR_API.unsubscribe(journey.rtsub);
+                }
             }
+
+            journey_table = [];
+            journey_index = [];
+
+            get_journey_batch(0);
+
         }
-
-        journey_table = [];
-        journey_index = [];
-
-        get_journey_batch(0);
+        finally {
+            // Tomorrow morning, sometime between 04:00:00 and 04:14:59.9999
+            var minutes = Math.random()*15;
+            var tomorrow = moment().add(1, 'd').hour(4).minute(minutes);
+            var delta = tomorrow.toDate() - moment().toDate();
+            console.log('Scheduling next populate_journeys for', tomorrow.format());
+            console.log('Scheduling next populate_journeys in', delta, 'ms');
+            window.setTimeout(populate_journeys, tomorrow.toDate() - moment().toDate());
+        }
 
     }
 
@@ -165,7 +175,8 @@ function StopTimetable(container, params) {
         // or at the departure_time of the last entry
         var start_time;
         if (journey_table.length === 0) {
-            start_time = moment().subtract(30, 'seconds').format('HH:mm:ss');
+            start_time = moment().tz(TIMETABLE_TIMEZONE)
+                                 .subtract(30, 'm').format('HH:mm:ss');
         }
         else {
             var last_journey = journey_table[journey_table.length - 1];
@@ -230,10 +241,10 @@ function StopTimetable(container, params) {
                 timetable: result,
                 origin: origin_stop,
                 destination: destination_stop,
-                departure: time_to_moment(departure_time_str),
-                arrival: time_to_moment(arrival_time_str),
-                due: time_to_moment(result.time),
-                eta: time_to_moment(result.time),
+                departure: timetable_time_to_moment(departure_time_str),
+                arrival: timetable_time_to_moment(arrival_time_str),
+                due: timetable_time_to_moment(result.time),
+                eta: timetable_time_to_moment(result.time),
                 rt: {}
             };
 
@@ -290,7 +301,7 @@ function StopTimetable(container, params) {
 
                     //log('refresh_subscriptions - inside window');
                     if (!entry.rtsub) {
-                        log('refresh_subscriptions - subscribing', entry.origin.atco_code + '!' + entry.departure.format('HH:mm:ss'), entry.due.format('HH:mm:ss'));
+                        //log('refresh_subscriptions - subscribing', entry.origin.atco_code + '!' + entry.departure.format(), entry.due.format());
                         entry.rtsub = subscribe(entry.origin.atco_code, entry.departure);
                     }
                     //else {
@@ -345,6 +356,7 @@ function StopTimetable(container, params) {
             display_timer_id = window.setTimeout(refresh_display,DISPLAY_REFRESH_INTERVAL);
         }
     }
+
 
     function display_simple() {
         // Basic departure board layout
@@ -432,7 +444,12 @@ function StopTimetable(container, params) {
             row.appendChild(cell);
 
             cell = document.createElement('td');
-            cell.innerHTML = entry.due.format('HH:mm');
+            if (fresh_timestamp(entry)) {
+                cell.innerHTML = entry.arrival.clone().add(entry.delay).format('HH:mm');
+            }
+            else {
+                cell.innerHTML = entry.arrival.format('HH:mm');
+            }
             row.appendChild(cell);
 
             table.appendChild(row);
@@ -456,11 +473,6 @@ function StopTimetable(container, params) {
 
     }
 
-    function fresh_timestamp(entry) {
-        // is the latest RT information in entry fresh?
-        return entry.rt_timestamp &&
-                (entry.rt_timestamp.isAfter(moment().subtract(60, 's')));
-    }
 
     function display_debug() {
         // Debug display board with internal data
@@ -616,12 +628,18 @@ function StopTimetable(container, params) {
 
     //==== RT Monitor interface ========================================
 
+
+    // This has to be a method because that's what the RTmonitor
+    // API expects as a callback
     this.rtmonitor_disconnected = function() {
         // this function will be called by RTMonitorAPI if it DISCONNECTS from server
         log('stop_timetable rtmonitor_disconnected');
         document.getElementById(container+'_connection').style.display = 'inline-block';
     };
 
+
+    // This has to be a method because that's what the RTmonitor
+    // API expects as a callback
     this.rtmonitor_connected = function() {
         // this function will be called by RTMonitorAPI each time it has CONNECTED to server
         log('stop_timetable rtmonitor_connected');
@@ -632,7 +650,7 @@ function StopTimetable(container, params) {
     function subscribe(stop_id, time) {
         // call 'subscribe' for RT messages matching stop_id and (departure) time
         var request_id = container+'_'+stop_id+'_'+time.format('HH:mm:ss');
-        //log('subscribe - processing for', request_id);
+        log('subscribe - subscribing to', request_id);
 
         var request_msg = JSON.stringify(
             {
@@ -648,7 +666,7 @@ function StopTimetable(container, params) {
                         {
                             test: '=',
                             key: 'OriginAimedDepartureTime',
-                            value: time.format('YYYY-MM-DDTHH:mm:ssZ')
+                            value: time.tz(REALTIME_TIMEZONE).format('YYYY[-]MM[-]DDTHH[:]mm[:]ssZ')
                         }
                     ]
             }
@@ -666,8 +684,11 @@ function StopTimetable(container, params) {
     }
 
 
+    // This has to be a method because that's what the RTmonitor
+    // API expects as a callback
     this.handle_message = function(incoming_data) {
         // Process incoming Web Socket messages
+
         //log('handle_records - incoming data with', incoming_data.request_data.length, 'records');
 
         for (var i = 0; i < incoming_data.request_data.length; i++) {
@@ -676,7 +697,7 @@ function StopTimetable(container, params) {
             var origin = msg.OriginRef;
             var departure_time = moment(msg.OriginAimedDepartureTime);
             var delay = moment.duration(msg.Delay);
-            var key = origin + '!' + departure_time.format('HH:mm:ss');
+            var key = origin + '!' + departure_time.clone().tz(TIMETABLE_TIMEZONE).format('HH:mm:ss');
 
             if (journey_index.hasOwnProperty(key)) {
                 journey_index[key].rt = msg;
@@ -711,15 +732,17 @@ function StopTimetable(container, params) {
         }
     }
 
-    function time_to_moment(time) {
-        // Expand a localtime time into a full Date object based on today
-        var result = moment();
+
+    function timetable_time_to_moment(time) {
+        // Expand a UK localtime time into a full Date object based on today
+        var result = moment().tz(TIMETABLE_TIMEZONE);
         result.hours(time.slice(0,2));
         result.minutes(time.slice(3,5));
         result.seconds(time.slice(6,8));
         result.milliseconds(0);
         return result;
     }
+
 
     function describe_stop(stop) {
         // Given a stop from the timetable, return a usable description
@@ -738,6 +761,13 @@ function StopTimetable(container, params) {
             //}
         }
         return result;
+    }
+
+
+    function fresh_timestamp(entry) {
+        // is the latest RT information in entry fresh?
+        return entry.rt_timestamp &&
+                (entry.rt_timestamp.isAfter(moment().subtract(60, 's')));
     }
 
 
