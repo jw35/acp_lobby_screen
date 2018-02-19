@@ -11,7 +11,13 @@ function StopTimetable(container, params) {
 
     // Symbolic constants
 
-    var SECONDS = 1000;
+    var SECONDS = 1000,
+        // NapTAN common_name qualiiers that go before he name
+        // http://naptan.dft.gov.uk/naptan/schema/2.5/doc/NaPTANSchemaGuide-2.5-v0.67.pdf, p71
+        RELATION_INDICATORS = ['opp', 'outside', 'o/s', 'adj', 'near',
+                               'nr', 'behind', 'inside', 'by', 'in',
+                               'at', 'on', 'before' ,'just before',
+                               'afte', 'just after', 'corner of'];
 
     // Configuration constants
 
@@ -340,30 +346,38 @@ function StopTimetable(container, params) {
         }
     }
 
-
     function display_simple() {
         // Basic departure board layout
 
         //log('display_simple - running');
 
         var table = document.createElement('table');
-
         var heading = document.createElement('tr');
+        var cell;
 
-        var th_due = document.createElement('th');
-        th_due.classList.add('time');
-        th_due.innerHTML = 'Due';
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.innerHTML = 'Due';
+        heading.appendChild(cell);
 
-        var th_expected = document.createElement('th');
-        th_expected.classList.add('time');
-        th_expected.innerHTML = 'Expected';
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.innerHTML = 'Expected';
+        heading.appendChild(cell);
 
-        var th_route = document.createElement('th');
-        th_route.innerHTML = 'Route';
+        cell = document.createElement('th');
+        cell.innerHTML = 'Route';
+        heading.appendChild(cell);
 
-        heading.appendChild(th_due);
-        heading.appendChild(th_expected);
-        heading.appendChild(th_route);
+        cell = document.createElement('th');
+        cell.innerHTML = 'Destination';
+        heading.appendChild(cell);
+
+        cell = document.createElement('th');
+        cell.innerHTML = 'Arriving';
+        heading.appendChild(cell);
+
+
         table.appendChild(heading);
 
         var nrows = 0;
@@ -378,7 +392,7 @@ function StopTimetable(container, params) {
 
             nrows++;
 
-            var last_stop = entry.destination.common_name;
+            var last_stop = describe_stop(entry.destination);
 
             var row = document.createElement('tr');
             // Flag the row for buses currently over 5 minutes late
@@ -387,32 +401,40 @@ function StopTimetable(container, params) {
                  row.classList.add('issue');
             }
 
-            var td_due = document.createElement('td');
-            td_due.classList.add('time');
-            td_due.innerHTML = entry.due.format('HH:mm');
+            cell = document.createElement('td');
+            cell.classList.add('time');
+            cell.innerHTML = entry.due.format('HH:mm');
+            row.appendChild(cell);
 
             // ETA, providing most recent RT record in the last minute
-            var td_expected = document.createElement('td');
-            td_expected.classList.add('time');
+            cell = document.createElement('td');
+            cell.classList.add('time');
             if (fresh_timestamp(entry)) {
                 if (entry.due.isSame(entry.eta,'m')) {
-                    td_expected.innerHTML = 'On time';
+                    cell.innerHTML = 'On time';
                 }
                 else {
-                    td_expected.innerHTML = entry.eta.format('HH:mm');
+                    cell.innerHTML = entry.eta.format('HH:mm');
                 }
             }
             else {
-                td_expected.innerHTML = '';
+                cell.innerHTML = '';
             }
+            row.appendChild(cell);
 
             // Line name and final stop
-            var td_route = document.createElement('td');
-            td_route.innerHTML = entry.timetable.line.line_name + ' (to ' + last_stop + ')';
+            cell = document.createElement('td');
+            cell.innerHTML = entry.timetable.line.line_name;
+            row.appendChild(cell);
 
-            row.appendChild(td_due);
-            row.appendChild(td_expected);
-            row.appendChild(td_route);
+            cell = document.createElement('td');
+            cell.innerHTML = last_stop;
+            row.appendChild(cell);
+
+            cell = document.createElement('td');
+            cell.innerHTML = entry.due.format('HH:mm');
+            row.appendChild(cell);
+
             table.appendChild(row);
 
             // No point adding more than MAX_LINES rows because they will be
@@ -485,6 +507,10 @@ function StopTimetable(container, params) {
         cell.appendChild(document.createTextNode('Arriving'));
         heading.appendChild(cell);
 
+        cell = document.createElement('th');
+        cell.appendChild(document.createTextNode('To'));
+        heading.appendChild(cell);
+
         table.appendChild(heading);
 
         var nrows = 0;
@@ -499,7 +525,7 @@ function StopTimetable(container, params) {
 
             nrows++;
 
-            var last_stop = entry.destination.common_name;
+            var last_stop = describe_stop(entry.destination);
 
             var row = document.createElement('tr');
             if (entry.rt_timestamp) {
@@ -515,7 +541,7 @@ function StopTimetable(container, params) {
                 cell.appendChild(document.createTextNode(entry.vehicle));
             }
             else{
-                cell.appendChild(document.createTextNode(''));
+                cell.appendChild(document.createTextNode('-'));
             }
             row.appendChild(cell);
 
@@ -557,9 +583,13 @@ function StopTimetable(container, params) {
             row.appendChild(cell);
 
             cell = document.createElement('td');
-            cell.appendChild(document.createTextNode(entry.timetable.line.line_name + ' (to ' + last_stop + ')'));
+            cell.appendChild(document.createTextNode(entry.timetable.line.line_name));
             cell.appendChild(document.createElement('br'));
             cell.appendChild(document.createTextNode(entry.arrival.format('HH:mm')));
+            row.appendChild(cell);
+
+            cell = document.createElement('td');
+            cell.appendChild(document.createTextNode(last_stop));
             row.appendChild(cell);
 
             table.appendChild(row);
@@ -690,6 +720,26 @@ function StopTimetable(container, params) {
         result.milliseconds(0);
         return result;
     }
+
+    function describe_stop(stop) {
+        // Given a stop from the timetable, return a usable description
+
+        var result = '';
+        if (stop.locality_name.toLowerCase() !== 'cambridge') {
+            result = stop.locality_name;
+        }
+        else {
+            //if (stop.indicator.toLowerCase() in RELATION_INDICATORS) {
+            //    result = stop.indicator + ' ';
+            //}
+            result = result + stop.common_name;
+            //if (!(stop.indicator.toLowerCase() in RELATION_INDICATORS)) {
+            //    result = result + ' ' + stop.indicator;
+            //}
+        }
+        return result;
+    }
+
 
     log('Instantiated StopTimetable', container, params);
 
