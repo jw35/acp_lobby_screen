@@ -423,6 +423,9 @@ function StopTimetable(container, params) {
                 case 'debug':
                     result = display_debug();
                     break;
+                case 'nextbus':
+                    result = display_nextbus();
+                    break;
                 default:
                     if (params.layout !== 'simple') {
                         log('refresh_display - unexpected layout', params.layout, 'using \'simple\'');
@@ -724,6 +727,156 @@ function StopTimetable(container, params) {
     }
 
 
+    function display_nextbus() {
+        // Layout showing next bus to selected destinations
+
+        log('display_nextbus - running');
+
+        var result = document.createElement('div');
+
+        // Standard table heading
+        var heading = document.createElement('tr');
+        var cell;
+
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.innerHTML = 'Due';
+        heading.appendChild(cell);
+
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.innerHTML = 'Expected';
+        heading.appendChild(cell);
+
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.innerHTML = 'Route';
+        heading.appendChild(cell);
+
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.innerHTML = 'Arriving';
+        heading.appendChild(cell);
+
+        cell = document.createElement('th');
+        cell.classList.add('time');
+        cell.innerHTML = 'Expected';
+        heading.appendChild(cell);
+
+        var h2 = document.createElement('h2');
+        h2.innerHTML = 'Next bus to:';
+        result.appendChild(h2);
+
+        // For each destination...
+        for (var d = 0; d < params.destinations.length; d++) {
+            var destination = params.destinations[d];
+            var nrows = 0;
+
+            var h3 = document.createElement('h3');
+            h3.innerHTML = destination.description;
+            result.appendChild(h3);
+
+            var table = document.createElement('table');
+            table.appendChild(heading.cloneNode(true));
+
+            // ...for each journey...
+            for (var j=0; j<journey_table.length; j++) {
+                var journey = journey_table[j];
+
+                // Skip anything that left in the past
+                if (journey.eta.isBefore(moment())) {
+                    continue;
+                }
+
+                // ...for each stop...
+                var found = false;
+                var entry;
+                for (var s = 0; s < journey.timetable.journey.timetable.length; s++) {
+                    entry = journey.timetable.journey.timetable[s];
+                    if (destination.stop_ids.indexOf(entry.stop.atco_code) !== -1) {
+                        found = true;
+                        break;
+                    }
+                } // END for each stop
+
+                // If we found something
+                if (found) {
+                    var row = document.createElement('tr');
+                    var arrival = timetable_time_to_moment(entry.time);
+
+                    // Due time
+                    cell = document.createElement('td');
+                    cell.classList.add('time');
+                    cell.innerHTML = journey.due.format('HH:mm');
+                    row.append(cell);
+
+                    // ETA
+                    cell = document.createElement('td');
+                    cell.classList.add('time');
+                    if (fresh_timestamp(journey)) {
+                        if (journey.due.isSame(journey.eta,'m')) {
+                           cell.innerHTML = 'On time';
+                        }
+                        else {
+                            cell.innerHTML = journey.eta.format('HH:mm');
+                        }
+                    }
+                    else {
+                        cell.innerHTML = '';
+                    }
+                    row.appendChild(cell);
+
+                    // Line name
+                    cell = document.createElement('td');
+                    cell.innerHTML = fixup(journey.timetable.line.line_name);
+                    row.appendChild(cell);
+
+                    // Scheduled arrival
+                    cell = document.createElement('td');
+                    cell.classList.add('time');
+                    cell.innerHTML = arrival.format('HH:mm');
+                    row.append(cell);
+
+                    cell = document.createElement('td');
+                    if (fresh_timestamp(journey)) {
+                        if (journey.due.isSame(journey.eta,'m')) {
+                            cell.innerHTML = 'On time';
+                        }
+                        else {
+                            cell.innerHTML = arrival.clone().add(journey.delay).format('HH:mm');
+                        }
+                    }
+                    else {
+                        cell.innerHTML = '';
+                    }
+                    row.appendChild(cell);
+                    table.appendChild(row);
+                    nrows++;
+                    if (nrows >= 2) {
+                        break;
+                    }
+
+                } // END if we found something
+
+            } // END for each journey
+
+            if (nrows === 0) {
+                var div = document.createElement('div');
+                div.setAttribute('class','no-departures');
+                div.innerHTML = 'No more departures today';
+                result.appendChild(div);
+            }
+            else {
+                result.append(table);
+            }
+
+        } // END for each destination
+
+        return result;
+
+    }
+
+
     //==== Utilities ===================================================
 
 
@@ -782,7 +935,7 @@ function StopTimetable(container, params) {
     function fixup(name) {
         // Fix assorted problems with bus and line names
         name = name.replace(/Cambridge North Railway Station/i, 'Cambridge Nth Stn');
-        name = name.replace(/Park[ -]and[ -]Ride/i, 'P&R');
+        name = name.replace(/Park[ -](and|&)[ -]Ride/i, 'P&R');
         return name;
     }
 
