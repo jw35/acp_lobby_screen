@@ -369,6 +369,11 @@ function StopTimetable(container, params) {
 
         cell = document.createElement('th');
         cell.classList.add('time');
+        cell.innerHTML = 'Departs';
+        heading.appendChild(cell);
+
+        cell = document.createElement('th');
+        cell.classList.add('time');
         cell.innerHTML = 'Due';
         heading.appendChild(cell);
 
@@ -412,6 +417,11 @@ function StopTimetable(container, params) {
             if (fresh_timestamp(entry) && entry.eta.isAfter(thresh)) {
                  row.classList.add('issue');
             }
+
+            cell = document.createElement('td');
+            cell.classList.add('time');
+            cell.innerHTML = entry.departure.format('HH:mm');
+            row.appendChild(cell);
 
             cell = document.createElement('td');
             cell.classList.add('time');
