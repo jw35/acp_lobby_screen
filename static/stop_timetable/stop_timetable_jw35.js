@@ -935,6 +935,7 @@ function StopTimetable(container, params) {
     function fixup(name) {
         // Fix assorted problems with bus and line names
         name = name.replace(/Cambridge North Railway Station/i, 'Cambridge Nth Stn');
+        name = name.replace(/Road Park[ -](and|&)[ -]Ride/i, 'Rd P&R');
         name = name.replace(/Park[ -](and|&)[ -]Ride/i, 'P&R');
         return name;
     }
