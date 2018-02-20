@@ -11,54 +11,51 @@ function StopTimetable(container, params) {
 
     // Symbolic constants
 
-    var SECONDS = 1000;
- 
+    var SECONDS = 1000,
+
     // Configuration constants
 
-    var TIMETABLE_URI = 'http://tfc-app3.cl.cam.ac.uk/transport/api',
-        DISPLAY_REFRESH_INTERVAL = 30 * SECONDS,
+        // Endpoint for the timetable API
+        TIMETABLE_URI                 = 'http://tfc-app3.cl.cam.ac.uk/transport/api',
+        // Maximum refresh interval for the display
+        DISPLAY_REFRESH_INTERVAL      = 30 * SECONDS,
+        // MAximum refresh interval for real-time subscriptions
         SUBSCRIPTION_REFRESH_INTERVAL = 60 * SECONDS,
-        MAX_LINES = 50,                            // Maximum number of departures to show
-        JOURNEY_BATCH_SIZE = 20,                   // Journeys to retrieve in one batch
-        TIMETABLE_TIMEZONE = 'Europe/London', // The time zone of raw times in the timetable API
-        REALTIME_TIMEZONE = 'Europe/London';  // The time zone needed for real time subscription requests
+        // Maximum number of departures to add to the table
+        MAX_LINES                     = 50,
+        // Number of timetable journeys to retrieve in one batch
+        JOURNEY_BATCH_SIZE            = 20,
+        // The time zone of raw times in the timetable API
+        TIMETABLE_TIMEZONE            = 'Europe/London',
+        // The time zone needed for real time subscription requests
+        REALTIME_TIMEZONE             = 'Europe/London',
 
    // Global state
 
-    var departure_div,        // DOM id of the <div> that contains departure information
-        display_timer_id,     // The ID of the timer that will eventually update the display
-        subscription_timer_id,// The ID of the timer that will eventually refresh the subscriptions
-        journey_table = [],   // Master table of today's journeys - top-level keys
-                              //     timetable: TNDS timetable entry from API
-                              //       origin: stop objectof origin stop
-                              //       destination: stop object of destination stop
-                              //       departure: moment() of timetabled departure tine
-                              //       arrival: moment() of timetabled arrival at last stop
-                              //       due: moment() of time at this stop
-                              //     rt: most recent real time report for this journey
-                              //       rt_timestamp: moment() of last rt record receipt
-                              //       delay: most recent Delay as moment.duration()
-                              //       eta: moment() of current best  guess time at this stop
-                              //       vehicle: id of the vehicle doing the journey
-        journey_index = {};   // Index into journay_table by origin + departure time
+        // DOM id of the <div> that contains departure information
+        departure_div,
+        // The ID of the timer that will eventually update the display
+        display_timer_id,
+        // The ID of the timer that will eventually refresh the subscriptions
+        subscription_timer_id,
+        // Master table of today's journeys - top-level keys
+        //     timetable: TNDS timetable entry from API
+        //       origin: stop object of origin stop
+        //       destination: stop object of destination stop
+        //       departure: moment() of timetabled departure tine
+        //       arrival: moment() of timetabled arrival at last stop
+        //       due: moment() of time at this stop
+        //     rt: most recent real time report for this journey
+        //       rt_timestamp: moment() of last rt record receipt
+        //       delay: moment.duration() of the most recent Delay
+        //       eta: moment() of current best  guess time at this stop
+        //       vehicle: id of the vehicle doing the journey
+        journey_table = [],
+        // Index into journay_table by origin + departure time
+        journey_index = {}
+    ;
 
-    // Here we define the 'data record format' of the incoming websocket feed
-    //this.RECORD_INDEX = 'VehicleRef';  // data record property that is primary key
-    //this.RECORDS_ARRAY = 'request_data'; // incoming socket data property containing data records
-    //this.RECORD_TS = 'RecordedAtTime'; // data record property containing timestamp
-    //this.RECORD_TS_FORMAT = 'ISO8601'; // data record timestamp format
-                                       // 'ISO8601' = iso-format string
-    //this.RECORD_LAT = 'Latitude';      // name of property containing latitude
-    //this.RECORD_LNG = 'Longitude';     // name of property containing longitude
-    //this.RECORD_ORIGIN_STOP_ID = 'OriginRef'; // SiriVM origin stop_id
-    //this.RECORD_ORIGIN_TIME = 'OriginAimedDepartureTime'; // SiriVM origin timetable departure time
-    //this.RECORD_DELAY = 'Delay'; // SiriVM 'XML Duration' delay value e.g. "PT2M8S"
-
-    //this.refresh_timer = {};
-
-    //this.stops_cache = {}; // store the stops we collect from the journeys through the current stop
-
-    //this.rtmonitor_subscriptions = {}; // Dictionary of SiriVM subscriptions indexed on <stop>_<time>
+    // ==== Initialisation/startup functions ===========================
 
     this.init = function() {
 
@@ -129,17 +126,18 @@ function StopTimetable(container, params) {
         content_area.appendChild(departure_div);
     }
 
+    // ==== Timetable API functions ====================================
 
     function populate_journeys() {
-        // Reset journey_table and populate it with today's journeys
-        // And schedule ourself to run early tomorrow morning
+        // Reset journey_table, populate it with today's journeys, and
+        // schedule ourself to run again early tomorrow morning
         try {
 
             // Cancel any outstanding subscriptions
             for (var i = 0; i < journey_table.length; i++) {
                 var journey = journey_table[i];
                 if (journey.rtsub) {
-                    log('populate_journeys - unsubscribing', journey.rtsub);
+                    log('populate_journeys - un-subscribing', journey.rtsub);
                     RTMONITOR_API.unsubscribe(journey.rtsub);
                 }
             }
@@ -259,6 +257,7 @@ function StopTimetable(container, params) {
 
     }
 
+    // ==== Real-time subscription functions ===========================
 
     function refresh_subscriptions() {
         // Walk journey_table, subscribe to real time updates for
@@ -318,6 +317,95 @@ function StopTimetable(container, params) {
         }
     }
 
+
+    // This has to be a method because that's what the RTmonitor
+    // API expects as a callback
+    this.rtmonitor_disconnected = function() {
+        // this function will be called by RTMonitorAPI if it DISCONNECTS from server
+        log('stop_timetable rtmonitor_disconnected');
+        document.getElementById(container+'_connection').style.display = 'inline-block';
+    };
+
+
+    // This has to be a method because that's what the RTmonitor
+    // API expects as a callback
+    this.rtmonitor_connected = function() {
+        // this function will be called by RTMonitorAPI each time it has CONNECTED to server
+        log('stop_timetable rtmonitor_connected');
+        document.getElementById(container+'_connection').style.display = 'none';
+    };
+
+
+    function subscribe(stop_id, time) {
+        // call 'subscribe' for RT messages matching stop_id and (departure) time
+        var request_id = container+'_'+stop_id+'_'+time.format('HH:mm:ss');
+        log('subscribe - subscribing to', request_id);
+
+        var request_msg = JSON.stringify(
+            {
+                msg_type: 'rt_subscribe',
+                request_id: request_id,
+                filters:
+                    [
+                        {
+                            test: '=',
+                            key: 'OriginRef',
+                            value: stop_id
+                        },
+                        {
+                            test: '=',
+                            key: 'OriginAimedDepartureTime',
+                            value: time.tz(REALTIME_TIMEZONE).format('YYYY[-]MM[-]DDTHH[:]mm[:]ssZ')
+                        }
+                    ]
+            }
+        );
+
+        var request_status = RTMONITOR_API.request(self, request_id, request_msg, self.handle_message);
+
+        if (request_status.status !== 'rt_ok') {
+            log('subscribe failed ', JSON.stringify(request_status));
+            return undefined;
+        }
+
+        return request_id;
+
+    }
+
+
+    // This has to be a method because that's what the RTmonitor
+    // API expects as a callback
+    this.handle_message = function(incoming_data) {
+        // Process incoming Web Socket messages
+
+        //log('handle_records - incoming data with', incoming_data.request_data.length, 'records');
+
+        for (var i = 0; i < incoming_data.request_data.length; i++) {
+            var msg = incoming_data.request_data[i];
+
+            var origin = msg.OriginRef;
+            var departure_time = moment(msg.OriginAimedDepartureTime);
+            var delay = moment.duration(msg.Delay);
+            var key = origin + '!' + departure_time.clone().tz(TIMETABLE_TIMEZONE).format('HH:mm:ss');
+
+            if (journey_index.hasOwnProperty(key)) {
+                journey_index[key].rt = msg;
+                journey_index[key].rt_timestamp = moment();
+                journey_index[key].delay = delay;
+                journey_index[key].eta = journey_index[key].due.clone().add(delay);
+                journey_index[key].vehicle = msg.VehicleRef;
+            }
+            else {
+                log('handle_records - message', key, 'no match');
+            }
+        }
+
+        // Refresh the display to allow for any changes
+        refresh_display();
+
+    };
+
+    // ==== Display management =========================================
 
     function refresh_display() {
         // Update (actually recreate and replace) the display by
@@ -639,96 +727,6 @@ function StopTimetable(container, params) {
     }
 
 
-    //==== RT Monitor interface ========================================
-
-
-    // This has to be a method because that's what the RTmonitor
-    // API expects as a callback
-    this.rtmonitor_disconnected = function() {
-        // this function will be called by RTMonitorAPI if it DISCONNECTS from server
-        log('stop_timetable rtmonitor_disconnected');
-        document.getElementById(container+'_connection').style.display = 'inline-block';
-    };
-
-
-    // This has to be a method because that's what the RTmonitor
-    // API expects as a callback
-    this.rtmonitor_connected = function() {
-        // this function will be called by RTMonitorAPI each time it has CONNECTED to server
-        log('stop_timetable rtmonitor_connected');
-        document.getElementById(container+'_connection').style.display = 'none';
-    };
-
-
-    function subscribe(stop_id, time) {
-        // call 'subscribe' for RT messages matching stop_id and (departure) time
-        var request_id = container+'_'+stop_id+'_'+time.format('HH:mm:ss');
-        log('subscribe - subscribing to', request_id);
-
-        var request_msg = JSON.stringify(
-            {
-                msg_type: 'rt_subscribe',
-                request_id: request_id,
-                filters:
-                    [
-                        {
-                            test: '=',
-                            key: 'OriginRef',
-                            value: stop_id
-                        },
-                        {
-                            test: '=',
-                            key: 'OriginAimedDepartureTime',
-                            value: time.tz(REALTIME_TIMEZONE).format('YYYY[-]MM[-]DDTHH[:]mm[:]ssZ')
-                        }
-                    ]
-            }
-        );
-
-        var request_status = RTMONITOR_API.request(self, request_id, request_msg, self.handle_message);
-
-        if (request_status.status !== 'rt_ok') {
-            log('subscribe failed ', JSON.stringify(request_status));
-            return undefined;
-        }
-
-        return request_id;
-
-    }
-
-
-    // This has to be a method because that's what the RTmonitor
-    // API expects as a callback
-    this.handle_message = function(incoming_data) {
-        // Process incoming Web Socket messages
-
-        //log('handle_records - incoming data with', incoming_data.request_data.length, 'records');
-
-        for (var i = 0; i < incoming_data.request_data.length; i++) {
-            var msg = incoming_data.request_data[i];
-
-            var origin = msg.OriginRef;
-            var departure_time = moment(msg.OriginAimedDepartureTime);
-            var delay = moment.duration(msg.Delay);
-            var key = origin + '!' + departure_time.clone().tz(TIMETABLE_TIMEZONE).format('HH:mm:ss');
-
-            if (journey_index.hasOwnProperty(key)) {
-                journey_index[key].rt = msg;
-                journey_index[key].rt_timestamp = moment();
-                journey_index[key].delay = delay;
-                journey_index[key].eta = journey_index[key].due.clone().add(delay);
-                journey_index[key].vehicle = msg.VehicleRef;
-            }
-            else {
-                log('handle_records - message', key, 'no match');
-            }
-        }
-
-        // Refresh the display to allow for any changes
-        refresh_display();
-
-    };
-
     //==== Utilities ===================================================
 
 
@@ -783,6 +781,7 @@ function StopTimetable(container, params) {
                 (entry.rt_timestamp.isAfter(moment().subtract(60, 's')));
     }
 
+
     function fixup(name) {
         // Fix assorted problems with bus and line names
         name = name.replace(/Cambridge North Railway Station/i, 'Cambridge Nth Stn');
@@ -797,117 +796,9 @@ function StopTimetable(container, params) {
 
 }
 
-// ***************************************************************************
-// *******************  Transport API     ************************************
-// **********************************i****************************************
-//
-
-
 /*
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/
-
-// ********************************************************************************
-// ***********  Process the data records arrived from WebSocket or Replay *********
-// ********************************************************************************
-
-
-
-
-
-
-
-// ***********************************************************
-// Pretty print an XML duration
-// Convert '-PT1H2M33S' to '-1:02:33'
-this.xml_duration_to_string = function(xml)
-{
-    var seconds = this.xml_duration_to_seconds(xml);
-
-    var sign = (seconds < 0) ? '-' : '+';
-
-    seconds = Math.abs(seconds);
-
-    if (seconds < 60)
-    {
-        return sign + seconds + 's';
-    }
-
-    var minutes = Math.floor(seconds / 60);
-
-    var remainder_seconds = ('0' + (seconds - minutes * 60)).slice(-2);
-
-    if (minutes < 60)
-    {
-        return sign + minutes + ':' + remainder_seconds;
-    }
-
-    var hours = Math.floor(minutes / 60);
-
-    var remainder_minutes = ('0' + (minutes - hours * 60)).slice(-2);
-
-    return sign + hours + ':' + remainder_minutes + ':' + remainder_seconds;
-}
-
-// Parse an XML duration like '-PT1H2M33S' (minus 1:02:33) into seconds
-this.xml_duration_to_seconds = function(xml)
-{
-    if (!xml || xml == '')
-    {
-        return 0;
-    }
-    var sign = 1;
-    if (xml.slice(0,1) == '-')
-    {
-        sign = -1;
-    }
-    var hours = this.get_xml_digits(xml,'H');
-    var minutes = this.get_xml_digits(xml,'M');
-    var seconds = this.get_xml_digits(xml,'S');
-
-    return sign * (hours * 3600 + minutes * 60 + seconds);
-}
-
-// Given '-PT1H2M33S' and 'S', return 33
-this.get_xml_digits = function(xml, units)
-{
-    var end = xml.indexOf(units);
-    if (end < 0)
-    {
-        return 0;
-    }
-    var start = end - 1;
-    // slide 'start' backwards until it points to non-digit
-    while (/[0-9]/.test(xml.slice(start, start+1)))
-    {
-        start--;
-    }
-
-    return Number(xml.slice(start+1,end));
-}
-
-
-
-
-
-*/
-
-/*
+Example timetable API result:
 
 {
     "results": [
@@ -981,32 +872,34 @@ this.get_xml_digits = function(xml, units)
     ]
 }
 
-        {
-            "Bearing": "12",
-            "DataFrameRef": "1",
-            "DatedVehicleJourneyRef": "32",
-            "Delay": "PT4M7S",
-            "DestinationName": "Lavender Crescent",
-            "DestinationRef": "0590PDD384",
-            "DirectionRef": "INBOUND",
-            "InPanic": "0",
-            "Latitude": "52.5558243",
-            "LineRef": "5",
-            "Longitude": "-0.2270660",
-            "Monitored": "true",
-            "OperatorRef": "SCCM",
-            "OriginAimedDepartureTime": "2018-01-22T08:30:00+00:00",
-            "OriginName": "Western Spine Road",
-            "OriginRef": "0590PSP940",
-            "PublishedLineName": "5",
-            "RecordedAtTime": "2018-01-22T08:40:07+00:00",
-            "ValidUntilTime": "2018-01-22T08:40:07+00:00",
-            "VehicleMonitoringRef": "SCCM-37222",
-            "VehicleRef": "SCCM-37222",
-            "acp_id": "SCCM-37222",
-            "acp_lat": 52.5558243,
-            "acp_lng": -0.227066,
-            "acp_ts": 1516610407
-        },
+Example real time monitoring record:
+
+{
+    "Bearing": "12",
+    "DataFrameRef": "1",
+    "DatedVehicleJourneyRef": "32",
+    "Delay": "PT4M7S",
+    "DestinationName": "Lavender Crescent",
+    "DestinationRef": "0590PDD384",
+    "DirectionRef": "INBOUND",
+    "InPanic": "0",
+    "Latitude": "52.5558243",
+    "LineRef": "5",
+    "Longitude": "-0.2270660",
+    "Monitored": "true",
+    "OperatorRef": "SCCM",
+    "OriginAimedDepartureTime": "2018-01-22T08:30:00+00:00",
+    "OriginName": "Western Spine Road",
+    "OriginRef": "0590PSP940",
+    "PublishedLineName": "5",
+    "RecordedAtTime": "2018-01-22T08:40:07+00:00",
+    "ValidUntilTime": "2018-01-22T08:40:07+00:00",
+    "VehicleMonitoringRef": "SCCM-37222",
+    "VehicleRef": "SCCM-37222",
+    "acp_id": "SCCM-37222",
+    "acp_lat": 52.5558243,
+    "acp_lng": -0.227066,
+    "acp_ts": 1516610407
+},
 
 */
