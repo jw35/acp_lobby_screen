@@ -758,11 +758,6 @@ function StopTimetable(container, params) {
         cell.innerHTML = 'Arriving';
         heading.appendChild(cell);
 
-        cell = document.createElement('th');
-        cell.classList.add('time');
-        cell.innerHTML = 'Expected';
-        heading.appendChild(cell);
-
         var h2 = document.createElement('h2');
         h2.innerHTML = 'Next bus to:';
         result.appendChild(h2);
@@ -839,17 +834,13 @@ function StopTimetable(container, params) {
 
                     cell = document.createElement('td');
                     if (fresh_timestamp(journey)) {
-                        if (journey.due.isSame(journey.eta,'m')) {
-                            cell.innerHTML = 'On time';
-                        }
-                        else {
-                            cell.innerHTML = arrival.clone().add(journey.delay).format('HH:mm');
-                        }
+                        cell.innerHTML = arrival.clone().add(journey.delay).format('HH:mm');
                     }
                     else {
-                        cell.innerHTML = '';
+                        cell.innerHTML = arrival.format('HH:mm');
                     }
                     row.appendChild(cell);
+
                     table.appendChild(row);
                     nrows++;
                     if (nrows >= 2) {
