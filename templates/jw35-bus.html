@@ -76,22 +76,27 @@
                                    lng: 0.09107
                                  }));
 
-
-      widget.push(new IframeArea('iframe_1',{url: 'http://www.cambridgeshirebus.info/Text/WebDisplay.aspx?stopRef=0500CCITY111&stopName=Christ%27s+College'}));
-
-
-
       widget.push(new StopTimetable('stop_timetable_2',
-                                 { stop_id: '0500CCITY424',
-                                   common_name: 'Cambridge, opp William Gates Building',
+                                 { stop_id: '0500CCITY111',
+                                   common_name: 'Cambridge, opp Christ\s College',
                                    layout: 'debug',
                                    lat: 52.21129, 
                                    lng: 0.09107
                                  }));
 
-      widget.push(new IframeArea('iframe_2',{url: 'http://www.cambridgeshirebus.info/Basic/WebDisplay.aspx?stopRef=0500CCITY424&stopName=JJ+Thompson+Avenue&stopPac=CMBDGDMT'}));
+
+      widget.push(new IframeArea('iframe_1',{url: 'http://www.cambridgeshirebus.info/Text/WebDisplay.aspx?stopRef=0500CCITY111&stopName=Christ%27s+College'}));
 
       widget.push(new StopTimetable('stop_timetable_3',
+                                 { stop_id: '0500CCITY199',
+                                   common_name: 'Cambridge, opp Cam Uni Vet School',
+                                   layout: 'simple',
+                                   lat: 52.21129, 
+                                   lng: 0.09107
+                                }));
+
+
+      widget.push(new StopTimetable('stop_timetable_4',
                                  { stop_id: '0500CCITY199',
                                    common_name: 'Cambridge, opp Cam Uni Vet School',
                                    layout: 'debug',
@@ -99,7 +104,7 @@
                                    lng: 0.09107
                                 }));
 
-      widget.push(new IframeArea('iframe_3',{url: 'http://www.cambridgeshirebus.info/Text/WebDisplay.aspx?stopRef=0500CCITY199&stopName=Cam+Uni+Vet+School'}));
+      widget.push(new IframeArea('iframe_2',{url: 'http://www.cambridgeshirebus.info/Text/WebDisplay.aspx?stopRef=0500CCITY199&stopName=Cam+Uni+Vet+School'}));
 
 
       /* 
@@ -191,11 +196,11 @@
       <div class="container_2_2 col_1 row_1" id="stop_timetable_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
-      <div class="container_2_2 col_1 row_3" id="iframe_1">
+      <div class="container_2_2 col_1 row_3" id="stop_timetable_2">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_2 col_3 row_1" id="stop_timetable_2">
+      <div class="container_2_2 col_3 row_1" id="iframe_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
       <div class="container_2_2 col_3 row_3" id="iframe_2">
@@ -205,7 +210,7 @@
       <div class="container_2_2 col_5 row_1" id="stop_timetable_3">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
-      <div class="container_2_2 col_5 row_3" id="iframe_3">
+      <div class="container_2_2 col_5 row_3" id="stop_timetable_4">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 <!--
