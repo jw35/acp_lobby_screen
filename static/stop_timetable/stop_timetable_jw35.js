@@ -541,7 +541,7 @@ function StopTimetable(container, params) {
             var entry = journey_table[i];
 
             // Skip anything that left in the past
-            if (entry.eta.isBefore(moment().subtract(5, 'minutes'))) {
+            if (entry.eta.isBefore(moment().subtract(1, 'minutes'))) {
                 continue;
             }
 
@@ -550,8 +550,11 @@ function StopTimetable(container, params) {
             var last_stop = describe_stop(entry.destination);
 
             var row = document.createElement('tr');
-            if (entry.rt_timestamp) {
+            if (fresh_timestamp(entry)) {
                 row.classList.add('seen');
+            }
+            else if (entry.departure.isBefore(moment())) {
+                row.classList.add('issue');
             }
 
             cell = document.createElement('td');
