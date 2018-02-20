@@ -8,6 +8,8 @@ function StopTimetable(container, params) {
     'use strict';
 
     var self = this;
+    this.container = container;
+    this.params = params;
 
     // Symbolic constants
 
@@ -54,6 +56,7 @@ function StopTimetable(container, params) {
         // Index into journay_table by origin + departure time
         journey_index = {}
     ;
+
 
     // ==== Initialisation/startup functions ===========================
 
@@ -126,6 +129,7 @@ function StopTimetable(container, params) {
         content_area.appendChild(departure_div);
     }
 
+
     // ==== Timetable API functions ====================================
 
     function populate_journeys() {
@@ -133,6 +137,7 @@ function StopTimetable(container, params) {
         // schedule ourself to run again early tomorrow morning
         try {
 
+            // This shouldn't happen
             // Cancel any outstanding subscriptions
             for (var i = 0; i < journey_table.length; i++) {
                 var journey = journey_table[i];
@@ -154,8 +159,7 @@ function StopTimetable(container, params) {
             var tomorrow = moment().add(1, 'd').hour(4).minute(minutes);
             var delta = tomorrow.toDate() - moment().toDate();
             console.log('Scheduling next populate_journeys for', tomorrow.format());
-            console.log('Scheduling next populate_journeys in', delta, 'ms');
-            window.setTimeout(populate_journeys, tomorrow.toDate() - moment().toDate());
+            window.setTimeout(populate_journeys, delta);
         }
 
     }
@@ -165,8 +169,10 @@ function StopTimetable(container, params) {
         // Trigger retrieval of a batch of journey records
 
         log('get_journey_batch - iteration', iteration);
+        // This shouldn't happen
         if (iteration > 100) {
-            throw 'Excessive recursion in get_journey_batch';
+            log('Excessive recursion in get_journey_batch');
+            return;
         }
 
         // Start from 30 minutes ago if the table is empty,
@@ -195,11 +201,10 @@ function StopTimetable(container, params) {
         xhr.send();
         xhr.onreadystatechange = function() {
             if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                //log(xhr.responseText);
                 var api_result = JSON.parse(xhr.responseText);
                 var added = add_journeys(iteration,api_result);
                 // If we added at least one new record then update the
-                // display and recurse to get more
+                // display and our subscriptions and recurse to get more
                 if (added) {
                     refresh_display();
                     refresh_subscriptions();
@@ -226,13 +231,15 @@ function StopTimetable(container, params) {
             var departure_time_str = result.journey.departure_time;
             var arrival_time_str = result.journey.timetable[result.journey.timetable.length-1].time;
 
+            var journey_key = origin_stop.atco_code + '!' + departure_time_str;
+
             // Have we seen it before?
-            if (journey_index.hasOwnProperty(origin_stop.atco_code + '!' + departure_time_str)) {
-                log('add_journeys - skipping', origin_stop.atco_code + '!' + departure_time_str, result.time);
+            if (journey_index.hasOwnProperty(journey_key)) {
+                log('add_journeys - skipping', journey_key, result.time);
                 continue;
             }
 
-            log('add_journeys - adding', origin_stop.atco_code + '!' + departure_time_str, result.time);
+            log('add_journeys - adding', journey_key, result.time);
             added++;
 
             var entry = {
@@ -246,7 +253,7 @@ function StopTimetable(container, params) {
                 rt: {}
             };
 
-            journey_index[origin_stop.atco_code + '!' + departure_time_str] = entry;
+            journey_index[journey_key] = entry;
             journey_table.push(entry);
 
         }
@@ -257,12 +264,31 @@ function StopTimetable(container, params) {
 
     }
 
+
     // ==== Real-time subscription functions ===========================
+
+    // This has to be a method because that's what the RTmonitor
+    // API expects as a callback
+    this.rtmonitor_disconnected = function() {
+        // this function is called by RTMonitorAPI if it DISCONNECTS from server
+        log('stop_timetable rtmonitor_disconnected');
+        document.getElementById(container+'_connection').style.display = 'inline-block';
+    };
+
+
+    // This has to be a method because that's what the RTmonitor
+    // API expects as a callback
+    this.rtmonitor_connected = function() {
+        // this function is called by RTMonitorAPI each time it has CONNECTED to server
+        log('stop_timetable rtmonitor_connected');
+        document.getElementById(container+'_connection').style.display = 'none';
+    };
+
 
     function refresh_subscriptions() {
         // Walk journey_table, subscribe to real time updates for
         // journeys with due time within a window of now,
-        // and unsubscribe for journeys outside these limits
+        // and un-subscribe for journeys outside these limits
 
         //log('refresh_subscriptions - running');
 
@@ -277,35 +303,21 @@ function StopTimetable(container, params) {
             for (var i = 0; i < journey_table.length; i++) {
                 var entry = journey_table[i];
 
-                //log(entry.due.format('HH:mm:ss'));
-                //log(entry.due.isBefore(moment().subtract(30, 'minutes')));
-                //log(moment().add(60, 'minutes').format('HH:mm:ss'));
-                //log(entry.due.isAfter(moment().add(60, 'minutes')));
-
                 if ( (entry.due.isBefore(moment().subtract(30, 'minutes')) ||
                       entry.due.isAfter(moment().add(60, 'minutes'))) ) {
 
-                    //log('refresh_subscriptions - outside window');
                     if (entry.rtsub) {
-                        log('refresh_subscriptions - unsubscribing', entry.rtsub, entry.due);
+                        log('refresh_subscriptions - unsubscribing', entry.rtsub);
                         RTMONITOR_API.unsubscribe(entry.rtsub);
                         entry.rtsub = undefined;
                     }
-                    //else {
-                        //log('refresh_subscriptions - not subscribed anyway');
-                    //}
-                }
 
+                }
                 else {
 
-                    //log('refresh_subscriptions - inside window');
                     if (!entry.rtsub) {
-                        //log('refresh_subscriptions - subscribing', entry.origin.atco_code + '!' + entry.departure.format(), entry.due.format());
                         entry.rtsub = subscribe(entry.origin.atco_code, entry.departure);
                     }
-                    //else {
-                        //log('refresh_subscriptions - alreday subscribed');
-                    //}
 
                 }
 
@@ -318,27 +330,12 @@ function StopTimetable(container, params) {
     }
 
 
-    // This has to be a method because that's what the RTmonitor
-    // API expects as a callback
-    this.rtmonitor_disconnected = function() {
-        // this function will be called by RTMonitorAPI if it DISCONNECTS from server
-        log('stop_timetable rtmonitor_disconnected');
-        document.getElementById(container+'_connection').style.display = 'inline-block';
-    };
-
-
-    // This has to be a method because that's what the RTmonitor
-    // API expects as a callback
-    this.rtmonitor_connected = function() {
-        // this function will be called by RTMonitorAPI each time it has CONNECTED to server
-        log('stop_timetable rtmonitor_connected');
-        document.getElementById(container+'_connection').style.display = 'none';
-    };
-
-
     function subscribe(stop_id, time) {
         // call 'subscribe' for RT messages matching stop_id and (departure) time
-        var request_id = container+'_'+stop_id+'_'+time.format('HH:mm:ss');
+
+        var timetable_time = time.clone().tz(TIMETABLE_TIMEZONE);
+        var realtime_time = time.clone().tz(REALTIME_TIMEZONE);
+        var request_id = container+'_'+stop_id+'_'+timetable_time.format('HH:mm:ss');
         log('subscribe - subscribing to', request_id);
 
         var request_msg = JSON.stringify(
@@ -355,7 +352,7 @@ function StopTimetable(container, params) {
                         {
                             test: '=',
                             key: 'OriginAimedDepartureTime',
-                            value: time.tz(REALTIME_TIMEZONE).format('YYYY[-]MM[-]DDTHH[:]mm[:]ssZ')
+                            value: realtime_time.format('YYYY[-]MM[-]DDTHH[:]mm[:]ssZ')
                         }
                     ]
             }
@@ -378,24 +375,24 @@ function StopTimetable(container, params) {
     this.handle_message = function(incoming_data) {
         // Process incoming Web Socket messages
 
-        //log('handle_records - incoming data with', incoming_data.request_data.length, 'records');
-
         for (var i = 0; i < incoming_data.request_data.length; i++) {
             var msg = incoming_data.request_data[i];
 
             var origin = msg.OriginRef;
-            var departure_time = moment(msg.OriginAimedDepartureTime);
-            var delay = moment.duration(msg.Delay);
-            var key = origin + '!' + departure_time.clone().tz(TIMETABLE_TIMEZONE).format('HH:mm:ss');
+            var departure_time_str = moment(msg.OriginAimedDepartureTime).tz(TIMETABLE_TIMEZONE).format('HH:mm:ss');
+            var key = origin + '!' + departure_time_str;
 
             if (journey_index.hasOwnProperty(key)) {
+                var due = journey_index[key].due;
+                var delay = moment.duration(msg.Delay);
                 journey_index[key].rt = msg;
                 journey_index[key].rt_timestamp = moment();
                 journey_index[key].delay = delay;
-                journey_index[key].eta = journey_index[key].due.clone().add(delay);
+                journey_index[key].eta = due.clone().add(delay);
                 journey_index[key].vehicle = msg.VehicleRef;
             }
             else {
+                /// This shouldn't happen
                 log('handle_records - message', key, 'no match');
             }
         }
