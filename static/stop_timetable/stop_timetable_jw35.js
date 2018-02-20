@@ -446,11 +446,11 @@ function StopTimetable(container, params) {
 
             // Line name and final stop
             cell = document.createElement('td');
-            cell.innerHTML = entry.timetable.line.line_name;
+            cell.innerHTML = fixup(entry.timetable.line.line_name);
             row.appendChild(cell);
 
             cell = document.createElement('td');
-            cell.innerHTML = last_stop;
+            cell.innerHTML = fixup(last_stop);
             row.appendChild(cell);
 
             cell = document.createElement('td');
@@ -608,13 +608,13 @@ function StopTimetable(container, params) {
             row.appendChild(cell);
 
             cell = document.createElement('td');
-            cell.appendChild(document.createTextNode(entry.timetable.line.line_name));
+            cell.appendChild(document.createTextNode(fixup(entry.timetable.line.line_name)));
             cell.appendChild(document.createElement('br'));
             cell.appendChild(document.createTextNode(entry.arrival.format('HH:mm')));
             row.appendChild(cell);
 
             cell = document.createElement('td');
-            cell.appendChild(document.createTextNode(last_stop));
+            cell.appendChild(document.createTextNode(fixup(last_stop)));
             row.appendChild(cell);
 
             table.appendChild(row);
@@ -781,6 +781,13 @@ function StopTimetable(container, params) {
         // is the latest RT information in entry fresh?
         return entry.rt_timestamp &&
                 (entry.rt_timestamp.isAfter(moment().subtract(60, 's')));
+    }
+
+    function fixup(name) {
+        // Fix assorted problems with bus and line names
+        name = name.replace(/Cambridge North Railway Station/i, 'Cambridge Nth Stn');
+        name = name.replace(/Park[ -]and[ -]Ride/i, 'P&R');
+        return name;
     }
 
 
