@@ -1,0 +1,25 @@
+/* StopTimetable Lobby Screen widget CSS */
+
+.traffic_map {
+    height: 100%;
+    width: 100%;
+}
+
+.traffic_map .map {
+    height: 100%;
+    width: 100%;
+}
+
+.traffic_map h1 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-bottom: 0;
+    margin-top: 0;
+    padding: 0.5rem;
+    background-color: white;
+}
+
+.traffic_map h1 img {
+    height: 0.8em; 
+}

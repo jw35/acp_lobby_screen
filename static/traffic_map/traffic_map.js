@@ -34,8 +34,28 @@ function TrafficMap(config, params) {
 
         var container = document.getElementById(this.container);
 
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+
+        var widget_area = document.createElement('div');
+        widget_area.classList.add('traffic_map');
+        container.appendChild(widget_area);
+
+        var map_area = document.createElement('div');
+        map_area.classList.add('map');
+        widget_area.appendChild(map_area);
+
+        var title = document.createElement('h1');
+        var img = document.createElement('img');
+        img.setAttribute('src', config.static_url + 'car.png');
+        title.appendChild(img);
+        title.appendChild(document.createTextNode(' '));
+        title.appendChild(document.createTextNode('Road Traffic'));
+        widget_area.appendChild(title);
+
         var map, trafficLayer;
-        map = new google.maps.Map(container, {
+        map = new google.maps.Map(map_area, {
             zoom: this.params.zoom,
             center: {lat: this.params.lat, lng: this.params.lng},
             disableDefaultUI: true
@@ -45,6 +65,7 @@ function TrafficMap(config, params) {
         });
         trafficLayer.setMap(map);
         this.log('TragfficMap.do_load done', this.container);
+
     };
 
     this.log = function() {

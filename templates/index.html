@@ -38,6 +38,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='stop_bus_map/stop_bus_map.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='stop_timetable/stop_timetable.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='weather/weather.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='traffic_map/traffic_map.css') }}">
 
     <!-- Widget Javascript -->
     <script src="{{ url_for('static', filename='station_board/station_board.js') }}" type="text/javascript">
@@ -171,7 +172,7 @@ example of a locally-configured static message.</p>
 
       widget.push(new TrafficMap(
         { container: 'traffic_map_1',
-          statuc_url: '{{ url_for('static', filename='traffic_map/') }}'
+          static_url: '{{ url_for('static', filename='traffic_map/') }}'
         },
         { lat: 52.204684,
           lng: 0.124622,
