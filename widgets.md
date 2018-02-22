@@ -37,17 +37,20 @@ are optional, but a widget with no files won't do anything!
         * A constructor which is invoked by `new` and which takes
           two parameters:
 
-          * The DOM `id` of an page element into which the widget's
-            content will be placed
+          * A JavaScript Object containing static configuration
+            parameters for the widgit:
+
+                * container: The string DOM `id` of an page element
+                  into which the widget's content should be placed
+
+                * static_url: the URL of the widget directory (i.e.
+                  the one containing the JavaScript file). This allow
+                  the JavaScript to access other resources in the widget
+                  directory without having to hard-code URLs
+
           * A JavaScript object containing `name:value` pairs
             representing parameters for a particular instance of the
             widget.
-
-          [[JW: we might need to add a third parameter to supply the
-          URL of the widget directory (i.e. the one containing the
-          JavaScript file). This would allow the JavaScript to access
-          other resources in the widget directory without having to
-          hard-code URLs]]
 
           The constructor may be called before DOM construction is
           complete and so shouldn't reference any DOM objects.
@@ -66,7 +69,9 @@ are optional, but a widget with no files won't do anything!
           typically arrange to update the widget's content.
 
         The JavaScript can assume the availability of the Jquery
-        library.
+        library, along with moment.js and moment-timezone.js (with
+        current time zone information for at least the 'europe/london'
+        timezone).
 
     2. __`<name>.css`__
 
@@ -163,38 +168,54 @@ arranges its own reloads (but has commented-out code to implement a
 `reload()` method):
 
 ```javascript
-/* Station Board widget for ACP Lobby Screen */
+function StationBoard(config, params) {
 
-function StationBoard(container, params) {
+    'use strict';
 
+    var container;
+    this.config = config;
+    container = config.container;
     this.container = container;
+
     this.params = params;
-    console.log("Instantiated StationBoard", container, params);
 
-    this.init = function() {
-        console.log("Running Station_board.init", this.container);
+    this.init = function () {
+        this.log('Running init', this.container);
         this.do_load();
-    }
+    };
 
-    /*
-    this.reload = function() {
-        console.log("Running StationBoard.reload", this.container);
+    /*this.reload = function() {
+        this.log("Running StationBoard.reload", this.container);
         this.do_load();
-    }
-    */
+    }*/
 
-    this.do_load = function myself() {
-        var self = this;
-        console.log("Running StationBoard.do_load", this.container);
-        var url = "station_board?station=" + this.params.station +
-          "&offset=" + this.params.offset + " .station_board";
-        console.log("StationBoard.do_load URI", url);
-        console.log("Container", '#' + this.container)
-        $('#' + this.container).load(url, function() {
-            setTimeout(function() { self.do_load() }, 60000);
+    this.do_load = function () {
+        this.log('Running StationBoard.do_load', this.container);
+        var self = this,
+            url = 'widget/station_board?station=' + this.params.station +
+                '&offset=' + this.params.offset + ' .station_board';
+        this.log('do_load URI', url);
+        this.log('Container', '#' + this.container);
+        $('#' + this.container).load(url, function (response, status, xhr) {
+            if (status === 'error') {
+                self.log('Error loading station board', xhr.status, xhr.statusText);
+                $('#' + self.container + ' .widget_error').show();
+            }
+            else {
+                $('#' + self.container + ' .widget_error').hide();
+            }
+            setTimeout(function () { self.do_load(); }, 60000);
         });
-        console.log("StationBoard.do_load done", this.container);
-    }
+        this.log('do_load done', this.container);
+    };
+
+    this.log = function() {
+        if ((typeof DEBUG !== 'undefined') && DEBUG.indexOf('station_board_log') >= 0) {
+            console.log.apply(console, arguments);
+        }
+    };
+
+    this.log('Instantiated StationBoard', container, params);
 
 }
 ```
@@ -230,6 +251,14 @@ An example page, containing multiple instances of the
             integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
             crossorigin="anonymous"></script>
 
+    <!-- Moment and MomentTZ-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"
+            integrity="sha256-ABVkpwb9K9PxubvRrHMkk6wmWcIHUE9eBxNZLXYQ84k="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.14/moment-timezone-with-data.min.js"
+            integrity="sha256-FJZOELgwnfQRdG8KZUSWCYgucECDf4w5kfQdQSGbVpI="
+            crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
 
     <script src="{{ url_for('static', filename='station_board.js') }}" type="text/javascript"></script>
@@ -238,10 +267,38 @@ An example page, containing multiple instances of the
 
       var widget = [];
 
-      widget.push(new StationBoard('station_board_1',{'station': 'CBG', 'offset': 0}));
-      widget.push(new StationBoard('station_board_2',{'station': 'CMB', 'offset': 0}));
-      widget.push(new StationBoard('station_board_3',{'station': 'CBG', 'offset': 0}));
-      widget.push(new StationBoard('station_board_4',{'station': 'PAD', 'offset': 0}));
+      widget.push(new StationBoard(
+        { container: 'station_board_1',
+          static_url: '{{ url_for('static', filename='station_board/') }}',
+        },
+        {'station': 'CBG',
+        'offset': 0
+        }
+      ));
+      widget.push(new StationBoard(
+        { container: 'station_board_2',
+          static_url: '{{ url_for('static', filename='station_board/') }}',
+        },
+        { 'station': 'CMB',
+          'offset': 0
+        }
+      ));
+      widget.push(new StationBoard(
+        { container: 'station_board_3',
+          static_url: '{{ url_for('static', filename='station_board/') }}',
+        },
+        { 'station': 'CBG',
+          'offset': 0
+        }
+      ));
+      widget.push(new StationBoard(
+        { container: 'station_board_4',
+          static_url: '{{ url_for('static', filename='station_board/') }}',
+        },
+        { 'station': 'PAD',
+          'offset': 0
+        }
+      ));
 
       function reload_widgets () {
         for (var i = 0; i < widget.length; i++) {
