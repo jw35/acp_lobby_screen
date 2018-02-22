@@ -40,10 +40,6 @@
         margin-top: 0.3em;
 }
 
-.stop_timetable th, .stop_timetable td {
-    padding: 0.3em 0.2em;
-}
-
 .stop_timetable .issue {
     background-color: #fdd;
 }
@@ -54,6 +50,7 @@
 
 .stop_timetable th, .stop_timetable td {
     border-bottom: 1px solid #ddd;
+    padding: 0.3em 0.2em;
     text-align: left;
     vertical-align: top;
 }

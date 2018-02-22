@@ -24,9 +24,9 @@
 
 <table>
   <tr>
-    <th>Time</th>
+    <th class="time">Due</th>
+    <th class="time">Expected</th>
     <th>Destination</th>
-    <th>Expected</th>
   </tr>
 {% for service in data.trainServices.service %}
   {% set dest = service.destination.location.0.locationName %}
@@ -42,9 +42,9 @@
   {% else %}
   <tr>
   {% endif %}
-    <td>{{ service.std }}</td>
+    <td class="time">{{ service.std }}</td>
+    <td class="time">{{ service.etd }}</td>
     <td>{{ dest }}</td>
-    <td>{{ service.etd }}</td>
   </tr>
 {% endfor %}
 </table>
