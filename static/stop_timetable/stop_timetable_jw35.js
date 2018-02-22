@@ -8,8 +8,16 @@ function StopTimetable(config, params) {
     'use strict';
 
     var self = this;
-    this.config = config;
-    this.container = config.container;  // Backwards compatibility
+    // Backwards compatibility or first argument
+    var container;
+    if (typeof(config) === 'string') {
+        container = config;
+    }
+    else {
+        this.config = config;
+        container = config.container;
+    }
+    this.container = container;
     this.params = params;
 
     // Symbolic constants
@@ -70,7 +78,7 @@ function StopTimetable(config, params) {
         RTMONITOR_API.onconnect(this, this.rtmonitor_connected);
 
         // Set up the HTML skeleton of the container
-        initialise_container(config.container);
+        initialise_container(container);
 
         // Populate the journey table. As a side effect, this updates
         // the display, starts the refresh timer and subscribes to

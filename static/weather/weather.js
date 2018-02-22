@@ -1,16 +1,26 @@
 /* Weather Widget for ACP Lobby Screen */
 
-/*global $ */
+/* global $, DEBUG */
+/* exported Weather */
 
-function Weather(container, params) {
+function Weather(config, params) {
 
     'use strict';
 
+    // Backwards compatibility or first argument
+    var container;
+    if (typeof(config) === 'string') {
+        container = config;
+    }
+    else {
+        this.config = config;
+        container = config.container;
+    }
     this.container = container;
     this.params = params;
 
     this.init = function () {
-        this.log("Running init", this.container);
+        this.log('Running init', this.container);
         this.do_load();
     };
 
@@ -20,15 +30,15 @@ function Weather(container, params) {
     }*/
 
     this.do_load = function () {
-        this.log("Running Weather.do_load", this.container);
+        this.log('Running Weather.do_load', this.container);
         var self = this,
-            url = "widget/weather?location=" + this.params.location +
-                " .weather";
-        this.log("do_load URI", url);
-        this.log("Container", '#' + this.container);
+            url = 'widget/weather?location=' + this.params.location +
+                ' .weather';
+        this.log('do_load URI', url);
+        this.log('Container', '#' + this.container);
         $('#' + this.container).load(url, function (response, status, xhr) {
             if (status === 'error') {
-                self.log("Error loading station board", xhr.status, xhr.statusText);
+                self.log('Error loading station board', xhr.status, xhr.statusText);
                 $('#' + self.container + ' .widget_error').show();
             }
             else {
@@ -36,7 +46,7 @@ function Weather(container, params) {
             }
             setTimeout(function () { self.do_load(); }, 60000);
         });
-        this.log("do_load done", this.container);
+        this.log('do_load done', this.container);
     };
 
     this.log = function() {
@@ -45,6 +55,6 @@ function Weather(container, params) {
         }
     };
 
-    this.log("Instantiated Weather", container, params);
+    this.log('Instantiated Weather', container, params);
 
 }

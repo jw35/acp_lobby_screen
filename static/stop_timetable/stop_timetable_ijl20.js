@@ -12,8 +12,17 @@
 //                       lng: 0.09107                           // Dito
 //                      });
 //
-function StopTimetable(container, params) {
+function StopTimetable(config, params) {
 
+    // Backwards compatibility or first argument
+    var container;
+    if (typeof(config) === 'string') {
+        container = config;
+    }
+    else {
+        this.config = config;
+        container = config.container;
+    }
     this.container = container;
     this.params = params;
 

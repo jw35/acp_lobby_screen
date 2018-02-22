@@ -49,8 +49,12 @@
       widget.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
       widget.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
 
-      widget.push(new MessageArea('message_area_1',{message:
-        '<h1>Message area</h1>' +
+      widget.push(new MessageArea(
+        { container: 'message_area_1',
+          static_url: '{{ url_for('static', filename='message_area/') }}',
+        },
+        { title: 'Message area',
+          message:
         '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod ' +
         'tempor incididunt ut labore et dolore magna aliqua. </p>' +
         '<p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ' +

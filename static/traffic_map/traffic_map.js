@@ -7,8 +7,16 @@ function TrafficMap(config, params) {
 
     'use strict';
 
-    this.config = config;
-    this.container = config.container;  // Backwards compatibility
+    // Backwards compatibility or first argument
+    var container;
+    if (typeof(config) === 'string') {
+        container = config;
+    }
+    else {
+        this.config = config;
+        container = config.container;
+    }
+    this.container = container;
     this.params = params;
 
     this.init = function () {

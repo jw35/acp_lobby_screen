@@ -1,17 +1,28 @@
 /* Message Area Widget for ACP Lobby Screen */
 
-/*global $ */
+/*global $, DEBUG */
 
-'use strict';
+/* exported MessageArea */
 
 function MessageArea(config, params) {
 
-    this.config = config;
-    this.container = config.container;   // For backwards compatibility
+    'use strict';
+
+    // Backwards compatibility or first argument
+    var container;
+    if (typeof(config) === 'string') {
+        container = config;
+    }
+    else {
+        this.config = config;
+        container = config.container;
+    }
+    this.container = container;
+
     this.params = params;
 
     this.init = function () {
-        this.log("Running init", this.container);
+        this.log('Running init', this.container);
         this.do_load();
     };
 
@@ -21,7 +32,7 @@ function MessageArea(config, params) {
     }*/
 
     this.do_load = function () {
-        this.log("Running do_load", this.container);
+        this.log('Running do_load', this.container);
         $('#' + this.container).html(
             '<div class="message_area">' +
             '<h1>' +
@@ -30,7 +41,7 @@ function MessageArea(config, params) {
             '</h1>' +
             params.message +
             '</div>');
-        this.log("do_load done", this.container);
+        this.log('do_load done', this.container);
     };
 
     this.log = function() {
@@ -39,6 +50,6 @@ function MessageArea(config, params) {
         }
     };
 
-    this.log("Instantiated MessageArea", this.container, params);
+    this.log('Instantiated MessageArea', this.container, params);
 
 }
