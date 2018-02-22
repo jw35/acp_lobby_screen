@@ -435,6 +435,9 @@ function StopTimetable(container, params) {
 
             empty(departure_div);
             if (result) {
+                var updated = document  .createElement('h2');
+                updated.innerHTML = 'Updated ' + moment().format('HH:mm');
+                departure_div.append(updated);
                 departure_div.appendChild(result);
             }
 
@@ -457,11 +460,6 @@ function StopTimetable(container, params) {
 
         cell = document.createElement('th');
         cell.classList.add('time');
-        cell.innerHTML = 'Departs';
-        heading.appendChild(cell);
-
-        cell = document.createElement('th');
-        cell.classList.add('time');
         cell.innerHTML = 'Due';
         heading.appendChild(cell);
 
@@ -479,6 +477,7 @@ function StopTimetable(container, params) {
         heading.appendChild(cell);
 
         cell = document.createElement('th');
+        cell.classList.add('time');
         cell.innerHTML = 'Arriving';
         heading.appendChild(cell);
 
@@ -505,11 +504,6 @@ function StopTimetable(container, params) {
             if (fresh_timestamp(entry) && entry.eta.isAfter(thresh)) {
                  row.classList.add('issue');
             }
-
-            cell = document.createElement('td');
-            cell.classList.add('time');
-            cell.innerHTML = entry.departure.format('HH:mm');
-            row.appendChild(cell);
 
             cell = document.createElement('td');
             cell.classList.add('time');
@@ -542,6 +536,7 @@ function StopTimetable(container, params) {
             row.appendChild(cell);
 
             cell = document.createElement('td');
+            cell.classList.add('time');
             if (fresh_timestamp(entry)) {
                 cell.innerHTML = entry.arrival.clone().add(entry.delay).format('HH:mm');
             }
@@ -733,6 +728,7 @@ function StopTimetable(container, params) {
         log('display_nextbus - running');
 
         var result = document.createElement('div');
+        result.classList.add('nextbus');
 
         // Standard table heading
         var heading = document.createElement('tr');
@@ -757,10 +753,6 @@ function StopTimetable(container, params) {
         cell.classList.add('time');
         cell.innerHTML = 'Arriving';
         heading.appendChild(cell);
-
-        var h2 = document.createElement('h2');
-        h2.innerHTML = 'Next bus to:';
-        result.appendChild(h2);
 
         // For each destination...
         for (var d = 0; d < params.destinations.length; d++) {
@@ -828,6 +820,7 @@ function StopTimetable(container, params) {
 
                     // Expected arrival
                     cell = document.createElement('td');
+                    cell.classList.add('time');
                     if (fresh_timestamp(journey)) {
                         cell.innerHTML = arrival.clone().add(journey.delay).format('HH:mm');
                     }
