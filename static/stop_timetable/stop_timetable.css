@@ -24,6 +24,10 @@
     margin-top: 0.6em;
 }
 
+.stop_timetable h1 img {
+    height: 0.8em; 
+}
+
 .stop_timetable table {
     border-collapse: collapse;
     margin-left: auto;

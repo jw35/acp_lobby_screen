@@ -3,12 +3,13 @@
 /* globals RTMONITOR_API, DEBUG, moment */
 /* exported StopTimetable */
 
-function StopTimetable(container, params) {
+function StopTimetable(config, params) {
 
     'use strict';
 
     var self = this;
-    this.container = container;
+    this.config = config;
+    this.container = config.container;  // Backwards compatibility
     this.params = params;
 
     // Symbolic constants
@@ -62,14 +63,14 @@ function StopTimetable(container, params) {
 
     this.init = function() {
 
-        log('Running StopTimetable.init', container);
+        log('Running StopTimetable.init', config.container);
 
         // Register handlers for connect/disconnect
         RTMONITOR_API.ondisconnect(this, this.rtmonitor_disconnected);
         RTMONITOR_API.onconnect(this, this.rtmonitor_connected);
 
         // Set up the HTML skeleton of the container
-        initialise_container(container);
+        initialise_container(config.container);
 
         // Populate the journey table. As a side effect, this updates
         // the display, starts the refresh timer and subscribes to
@@ -116,7 +117,11 @@ function StopTimetable(container, params) {
         stop_timetable.appendChild(content_area);
 
         var title = document.createElement('h1');
-        title.innerHTML = params.common_name;
+        var img = document.createElement('img');
+        img.setAttribute('src', config.static_url + 'bus.png');
+        title.appendChild(img);
+        title.appendChild(document.createTextNode(' '));
+        title.appendChild(document.createTextNode(params.common_name));
         content_area.appendChild(title);
 
         var connection_div = document.createElement('div');
@@ -272,7 +277,7 @@ function StopTimetable(container, params) {
     this.rtmonitor_disconnected = function() {
         // this function is called by RTMonitorAPI if it DISCONNECTS from server
         log('stop_timetable rtmonitor_disconnected');
-        document.getElementById(container+'_connection').style.display = 'inline-block';
+        document.getElementById(config.container+'_connection').style.display = 'inline-block';
     };
 
 
@@ -281,7 +286,7 @@ function StopTimetable(container, params) {
     this.rtmonitor_connected = function() {
         // this function is called by RTMonitorAPI each time it has CONNECTED to server
         log('stop_timetable rtmonitor_connected');
-        document.getElementById(container+'_connection').style.display = 'none';
+        document.getElementById(config.container+'_connection').style.display = 'none';
     };
 
 
@@ -335,7 +340,7 @@ function StopTimetable(container, params) {
 
         var timetable_time = time.clone().tz(TIMETABLE_TIMEZONE);
         var realtime_time = time.clone().tz(REALTIME_TIMEZONE);
-        var request_id = container+'_'+stop_id+'_'+timetable_time.format('HH:mm:ss');
+        var request_id = config.container+'_'+stop_id+'_'+timetable_time.format('HH:mm:ss');
         log('subscribe - subscribing to', request_id);
 
         var request_msg = JSON.stringify(
@@ -920,7 +925,7 @@ function StopTimetable(container, params) {
     }
 
 
-    log('Instantiated StopTimetable', container, params);
+    log('Instantiated StopTimetable', config.container, params);
 
     // END of 'class' StopTimetable
 

@@ -1,16 +1,18 @@
 /* Traffic Map Widget for ACP Lobby Screen */
 
-/*global $, google, document */
+/*global google, document, DEBUG */
+/*exported TrafficMap */
 
-function TrafficMap(container, params) {
+function TrafficMap(config, params) {
 
     'use strict';
 
-    this.container = container;
+    this.config = config;
+    this.container = config.container;  // Backwards compatibility
     this.params = params;
 
     this.init = function () {
-        this.log("Running init", this.container);
+        this.log('Running init', this.container);
         this.do_load();
     };
 
@@ -20,9 +22,12 @@ function TrafficMap(container, params) {
     }*/
 
     this.do_load = function () {
-        this.log("Running do_load", this.container);
+        this.log('Running do_load', this.container);
+
+        var container = document.getElementById(this.container);
+
         var map, trafficLayer;
-        map = new google.maps.Map(document.getElementById(this.container), {
+        map = new google.maps.Map(container, {
             zoom: this.params.zoom,
             center: {lat: this.params.lat, lng: this.params.lng},
             disableDefaultUI: true
@@ -31,7 +36,7 @@ function TrafficMap(container, params) {
             autoRefresh: true
         });
         trafficLayer.setMap(map);
-        this.log("TragfficMap.do_load done", this.container);
+        this.log('TragfficMap.do_load done', this.container);
     };
 
     this.log = function() {
@@ -40,6 +45,6 @@ function TrafficMap(container, params) {
         }
     };
 
-    this.log("Instantiated TrafficMap", container, params);
+    this.log('Instantiated TrafficMap', this.container, params);
 
 }

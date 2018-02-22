@@ -36,6 +36,13 @@
     margin-bottom: 0px;
 }
 
+.weather h1 img {
+    float: none;
+    height: 0.8em; 
+    width: auto; 
+    
+}
+
 .weather h2 {
     margin-top: 0px;
     margin-bottom: 0px;

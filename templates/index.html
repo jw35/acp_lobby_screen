@@ -65,9 +65,12 @@
 
       var widget = [];
 
-      widget.push(new MessageArea('message_area_1',{message: `
-<h1>Lobby Screen</h1>
-
+      widget.push(new MessageArea(
+        { container: 'message_area_1',
+          static_url: '{{ url_for('static', filename='message_area/') }}',
+        },
+        { title: 'Lobby Screen',
+          message: `
 <p>This is an early preview of an <em>Adaptive Cities</em> <strong>Lobby Screen</strong>.
 These screens display real-time travel information in the lobbies of
 public buildings to inform travel choices.</p>
@@ -87,60 +90,94 @@ example of a locally-configured static message.</p>
   <li>Static messages</li>
   <li>Other web pages</li>
 </ul>
-`     }))
+`       }
+      ))
 
-      widget.push(new Weather('weather_area_1', {location: '310042'}))
+      widget.push(new Weather(
+        'weather_area_1',
+        { location: '310042'
+        }
+      ))
 
-      widget.push(new StopTimetable('stop_timetable_1',
-                           { stop_id: '0500CCITY424',
-                             common_name: 'William Gates Building',
-                             layout: 'nextbus',
-                             destinations: [
-                                 { description: 'City Centre',
-                                   stop_ids: ['0500CCITY419']
-                                 },
-                                 { description: 'Station',
-                                   stop_ids: ['0500CCITY507', '0500CCITY530']
-                                 },
-                                 { description: 'Hospital',
-                                   stop_ids: ['0500CCITY517']
-                                 },
-                             ]
-                           }));
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_1',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY424',
+          common_name: 'William Gates Building',
+          layout: 'nextbus',
+          destinations: [
+            { description: 'City Centre',
+              stop_ids: ['0500CCITY419']
+            },
+            { description: 'Station',
+              stop_ids: ['0500CCITY507', '0500CCITY530']
+            },
+            { description: 'Hospital',
+              stop_ids: ['0500CCITY517']
+            },
+          ]
+        }
+      ));
 
-      widget.push(new StopTimetable('stop_timetable_2',
-                                 { stop_id: '0500CCITY199',
-                                   common_name: 'Cam Uni Vet School',
-                                   layout: 'simple',
-                                   lat: 52.21129, 
-                                   lng: 0.09107
-                                }));
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_2',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY199',
+          common_name: 'Cam Uni Vet School',
+          layout: 'simple',
+          lat: 52.21129,
+          lng: 0.09107
+        }
+      ));
 
-      widget.push(new StopBusMap('stop_bus_map_1',
-                                 { id: 'stop_bus_map_1', 
-                                   static_url: '/lobby_screen/static',
-                                   title: 'Live Buses: U and Citi4', 
-                                   stops: [ { stop_id: '0500CCITY424',
-                                              common_name: 'William Gates Building',
-                                              lat: 52.21129,
-                                              lng: 0.09107
-                                            },
-                                            { stop_id: '0500CCITY199',
-                                              common_name: 'Cam Uni Vet School',
-                                              lat: 52.21297,
-                                              lng: 0.09062
-                                            }
-                                          ],
-                                   breadcrumbs: true,
-                                   lat: 52.215, 
-                                   lng: 0.09, 
-                                   zoom: 15 }));
+      widget.push(new StopBusMap(
+        'stop_bus_map_1',
+        { id: 'stop_bus_map_1',
+          static_url: '/lobby_screen/static',
+          title: 'Live Buses: U and Citi4',
+          stops: [
+            { stop_id: '0500CCITY424',
+              common_name: 'William Gates Building',
+              lat: 52.21129,
+              lng: 0.09107
+            },
+            { stop_id: '0500CCITY199',
+              common_name: 'Cam Uni Vet School',
+              lat: 52.21297,
+              lng: 0.09062
+            }
+          ],
+          breadcrumbs: true,
+          lat: 52.215,
+          lng: 0.09,
+          zoom: 15
+        }
+      ));
 
-      widget.push(new StationBoard('station_board_1',{station: 'CBG', offset: 0}));
+      widget.push(new StationBoard(
+        'station_board_1',
+        { station: 'CBG',
+          offset: 0
+        }
+      ));
 
-      widget.push(new TwitterTimeline('twitter_timeline_1',{who: 'Cambs_Traffic'}));
+      widget.push(new TwitterTimeline(
+        'twitter_timeline_1',
+        { who: 'Cambs_Traffic'
+      }
+      ));
 
-      widget.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 12}));
+      widget.push(new TrafficMap(
+        { container: 'traffic_map_1',
+          statuc_url: '{{ url_for('static', filename='traffic_map/') }}'
+        },
+        { lat: 52.204684,
+          lng: 0.124622,
+          zoom: 12
+        }
+      ));
 
       // Generic framework - init and refresh handling
 
@@ -159,7 +196,7 @@ example of a locally-configured static message.</p>
       function page_load() {
         // Note we must instatiate RTMonitorAPI before widgets
         RTMONITOR_API = new RTMonitorAPI();
-    
+
         for (var i = 0; i < widget.length; i++) {
           if ('init' in widget[i]) {
             console.log("Initing ", widget[i].container);

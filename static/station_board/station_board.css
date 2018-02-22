@@ -32,6 +32,10 @@
     margin-bottom: 0px;
 }
 
+.station_board h1 img {
+    height: 0.8em; 
+}
+
 .station_board .message {
     background-color: #fdd;
     padding: 0.5em;

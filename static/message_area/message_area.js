@@ -4,9 +4,10 @@
 
 'use strict';
 
-function MessageArea(container, params) {
+function MessageArea(config, params) {
 
-    this.container = container;
+    this.config = config;
+    this.container = config.container;   // For backwards compatibility
     this.params = params;
 
     this.init = function () {
@@ -21,7 +22,14 @@ function MessageArea(container, params) {
 
     this.do_load = function () {
         this.log("Running do_load", this.container);
-        $('#' + this.container).html('<div class="message_area">' + params.message + '</div>');
+        $('#' + this.container).html(
+            '<div class="message_area">' +
+            '<h1>' +
+            '<img src="' + config.static_url + 'black-bubble-speech.png" alt=""> '+
+            params.title +
+            '</h1>' +
+            params.message +
+            '</div>');
         this.log("do_load done", this.container);
     };
 
@@ -31,6 +39,6 @@ function MessageArea(container, params) {
         }
     };
 
-    this.log("Instantiated MessageArea", container, params);
+    this.log("Instantiated MessageArea", this.container, params);
 
 }

@@ -11,7 +11,7 @@
 
 <h1 class="widget_error">Connection issues</h1>
 
-<h1>{{ data.locationName }}</h1>
+<h1><img src="{{ url_for('static', filename='station_board/train.png') }}"> {{ data.locationName }}</h1>
 <h2>Updated {{ data.generatedAt.strftime("%H:%M") }}</h2>
 
 {% if data.nrccMessages %}

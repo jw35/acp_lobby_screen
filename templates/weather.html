@@ -12,7 +12,7 @@
 
 <h1 class="widget_error">Connection issues</h1>
 
-<h1>{{ data.location.title() }}</h1>
+<h1><img src="{{ url_for('static', filename='weather/weather.png') }}" alt=""> {{ data.location.title() }}</h1>
 <h2>Issued {{ data.issued.astimezone(tz=None).strftime("%H:%M") }}</h2>
 {% for result in data.results %}
 
