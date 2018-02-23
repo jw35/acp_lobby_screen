@@ -17,9 +17,19 @@
 //                       lng: 0.09,
 //                       zoom: 15 });
 //
-function StopBusMap(container, params) {
+function StopBusMap(config, params) {
 
     var self = this;
+
+    // Backwards compatibility or first argument
+    var container;
+    if (typeof(config) === 'string') {
+        container = config;
+    }
+    else {
+        this.config = config;
+        container = config.container;
+    }
 
     this.container = container;
     this.params = params;
@@ -79,18 +89,16 @@ function StopBusMap(container, params) {
         // </div>
         //<div id="<container>_map">MAP WILL GO HERE</div>
         //
-        var title_div = document.createElement('div');
-        title_div.setAttribute('class', 'stop_bus_map_title_div');
-        title_div.setAttribute('id', this.container+'_title_div');
+        var title_h1 = document.createElement('h1');
+        title_h1.setAttribute('class', 'stop_bus_map_title_h1');
+        title_h1.setAttribute('id', this.container+'_title_h1');
+        var img = document.createElement('img');
+        img.setAttribute('src', config.static_url + 'images/bus.png');
+        title_h1.appendChild(img);
+        title_h1.appendChild(document.createTextNode(' '));
+        title_h1.appendChild(document.createTextNode(params.title));
 
-        var title_text = document.createElement('div');
-        title_text.setAttribute('class', 'stop_bus_map_title_text');
-        title_text.setAttribute('id', this.container+'_title_text');
-        title_text.innerHTML = params.title;
-
-        title_div.appendChild(title_text);
-
-        container_el.appendChild(title_div);
+        container_el.appendChild(title_h1);
 
         var map_div = document.createElement('div');
         map_div.setAttribute('class','stop_bus_map_div');

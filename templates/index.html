@@ -134,7 +134,9 @@ example of a locally-configured static message.</p>
       ));
 
       widget.push(new StopBusMap(
-        'stop_bus_map_1',
+        { container: 'stop_bus_map_1',
+          static_url: '{{ url_for('static', filename='stop_bus_map/') }}'
+        },
         { id: 'stop_bus_map_1',
           static_url: '/lobby_screen/static',
           title: 'Live Buses: U and Citi4',
