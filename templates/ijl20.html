@@ -17,7 +17,7 @@
 
     {% include 'sockjs.html' %}
 
-    <script src="{{ url_for('static', filename='js/rtmonitor_api.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/rtmonitor_api_v2.js') }}" type="text/javascript"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='station_board/station_board.css') }}">
@@ -44,27 +44,27 @@
 
       var widget = [];
 
-      widget.push(new StationBoard('station_board_1',{station: 'CBG', offset: 0}));
-      widget.push(new StopBusMap('stop_bus_map_1',
-                                 { id: 'stop_bus_map_1', 
-                                   static_url: '/lobby_screen/static',
-                                   title: 'Live Buses: U and Citi4', 
-                                   stops: [ { stop_id: '0500CCITY424',
-                                              common_name: 'William Gates Building',
-                                              lat: 52.21129,
-                                              lng: 0.09107
-                                            },
-                                            { stop_id: '0500CCITY199',
-                                              common_name: 'Cam Uni Vet School',
-                                              lat: 52.21297,
-                                              lng: 0.09062
-                                            }
-                                          ],
-                                   breadcrumbs: true,
-                                   lat: 52.215, 
-                                   lng: 0.09, 
-                                   zoom: 15 }));
-
+      widget.push(new StopBusMap(
+         { container: 'stop_bus_map_1',
+           static_url: '{{ url_for('static', filename='stop_bus_map/') }}'
+         },
+         { title: 'Live Buses: U and Citi4', 
+           stops: [ { stop_id: '0500CCITY424',
+                      common_name: 'William Gates Building',
+                      lat: 52.21129,
+                      lng: 0.09107
+                    },
+                    { stop_id: '0500CCITY199',
+                      common_name: 'Cam Uni Vet School',
+                      lat: 52.21297,
+                      lng: 0.09062
+                    }
+                  ],
+           breadcrumbs: true,
+           lat: 52.215, 
+           lng: 0.09, 
+           zoom: 15 }));
+/*
       widget.push(new StopTimetable('stop_timetable_1',
                                  { id: 'stop_timetable_1', 
                                    static_url: '/lobby_screen/static',
@@ -103,7 +103,7 @@
       widget.push(new Weather('weather_area_1', {location: '310042'}));
 
       //widget.push(new TwitterTimeline('twitter_timeline_1',{who: 'Cambs_Traffic'}));
-
+*/
       function reload_widgets () {
         for (var i = 0; i < widget.length; i++) {
           if ('reload' in widget[i]) {
@@ -160,9 +160,6 @@
       <div class="credits">
         <div id="screen_clock"></div>
 
-        <a href="https://www.greatercambridge.org.uk/">
-            <img alt="Greater Cambridge Partnership" src="{{ url_for('static', filename='logo_gccd_112.png') }}">
-        </a>
         <a href="http://www.connectingcambridgeshire.co.uk/smartcamb/">
             <img alt="Connecting Cambridgshire" src="{{ url_for('static', filename='logo_sc_112.png') }}" >
         </a>
