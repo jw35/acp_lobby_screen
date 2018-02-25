@@ -10,6 +10,14 @@
             integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
             crossorigin="anonymous"></script>
 
+    <!-- Moment and MomentTZ-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"
+            integrity="sha256-ABVkpwb9K9PxubvRrHMkk6wmWcIHUE9eBxNZLXYQ84k="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.14/moment-timezone-with-data.min.js"
+            integrity="sha256-FJZOELgwnfQRdG8KZUSWCYgucECDf4w5kfQdQSGbVpI="
+            crossorigin="anonymous"></script>
+
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEkMI-ZAAt1kjv668jfBXhNB1-odv5m3g"></script>
 
 
@@ -32,7 +40,7 @@
     <script src="{{ url_for('static', filename='message_area/message_area.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='iframe_area/iframe_area.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='stop_bus_map/stop_bus_map.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='stop_timetable/stop_timetable.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='stop_timetable/stop_timetable_jw35_v2.js') }}" type="text/javascript"></script>
     <!-- <script src="{{ url_for('static', filename='twitter_timeline/twitter_timeline.js') }}" type="text/javascript"></script> -->
     <script src="{{ url_for('static', filename='weather/weather.js') }}" type="text/javascript"></script>
 
@@ -44,6 +52,64 @@
 
       var widget = [];
 
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_1',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY199',
+          common_name: 'Cam Uni Vet School',
+          layout: 'nextbus',
+          destinations: [
+            { description: 'City Centre',
+              stop_ids: ['0500CCITY419',
+                         '0500CCITY119', // Drummer St Bay 3
+                         '0500CCITY484', // Drummer St Stop D3
+                         '0500CCITY119' // Drummer St Bay 3
+              ]
+            },
+            { description: 'Station',
+              stop_ids: ['0500CCITY507', '0500CCITY530']
+            },
+            { description: 'Hospital',
+              stop_ids: ['0500CCITY517']
+            },
+          ]
+        }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_2',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY199',
+          common_name: 'Cam Uni Vet School',
+          layout: 'simple',
+          lat: 52.21129,
+          lng: 0.09107
+        }
+      ));
+
+      widget.push(new StopBusMap(
+         { container: 'stop_bus_map_1',
+           static_url: '{{ url_for('static', filename='stop_bus_map/') }}'
+         },
+         { title: 'Christ\'s College', 
+           stops: [ { stop_id: '0500CCITY111',
+                      common_name: 'Christ\'s College',
+                      lat: 52.20636,
+                      lng: 0.121531
+                    },
+                    { stop_id: '0500CCITY119',
+                      common_name: 'Drummer St',
+                      lat: 52.20539,
+                      lng: 0.123926
+                    }
+                  ],
+           breadcrumbs: true,
+           lat: 52.206, 
+           lng: 0.12, 
+           zoom: 15 }));
+/*
       widget.push(new StopBusMap(
          { container: 'stop_bus_map_1',
            static_url: '{{ url_for('static', filename='stop_bus_map/') }}'
@@ -64,7 +130,7 @@
            lat: 52.215, 
            lng: 0.09, 
            zoom: 15 }));
-/*
+
       widget.push(new StopTimetable('stop_timetable_1',
                                  { id: 'stop_timetable_1', 
                                    static_url: '/lobby_screen/static',
@@ -169,31 +235,15 @@
         <span>Adaptive Cities Platform</span>
       </div>
 
-      <div class="container_1_2 col_4 row_1" id="station_board_1">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-      <div class="container_1_2 col_4 row_3" id="weather_area_1">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-      <div class="container_2_2 col_5 row_1" id="traffic_map_1">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-      <div class="container_2_2 col_5 row_3" id="traffic_map_2">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-      <div class="container_1_2 col_1 row_3" id="stop_timetable_2">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
       <div class="container_1_2 col_1 row_1" id="stop_timetable_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
+
+      <div class="container_2_2 col_1 row_3" id="stop_timetable_2">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
       <div class="container_2_2 col_2 row_1" id="stop_bus_map_1">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-      <div class="container_1_2 col_2 row_3" id="stop_timetable_3">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-      <div class="container_1_2 col_3 row_3" id="iframe_area_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
