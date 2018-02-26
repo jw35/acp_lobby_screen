@@ -31,16 +31,15 @@
 
 .stop_bus_map_connection_div { /* connection error div */
     position: absolute;
-    top: 10px;
-    left: 0px;
-    height: 30px;
+    top: 0;
+    left: 0;
     width: 100%;
     color: white;
-    font-weight: bold;
-    font-size: 25px;
+    font-size: 2em;
     background-color: red;
     text-align: center;
     display: none;
+    z-index: 1010;
 }
 
 .sensor-popup {

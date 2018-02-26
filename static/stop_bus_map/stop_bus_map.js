@@ -94,6 +94,13 @@ function StopBusMap(config, params) {
         // </div>
         //<div id="<container>_map">MAP WILL GO HERE</div>
         //
+
+        var connection_div = document.createElement('div');
+        connection_div.setAttribute('class','stop_bus_map_connection_div');
+        connection_div.setAttribute('id', container+'_connection');
+        connection_div.innerHTML = "Connection issues";
+        container_el.appendChild(connection_div);
+
         var title_h1 = document.createElement('h1');
         title_h1.setAttribute('class', 'stop_bus_map_title_h1');
         title_h1.setAttribute('id', container+'_title_h1');
@@ -109,12 +116,6 @@ function StopBusMap(config, params) {
         map_div.setAttribute('class','stop_bus_map_div');
         map_div.setAttribute('id', container+'_map');
         container_el.appendChild(map_div);
-
-        var connection_div = document.createElement('div');
-        connection_div.setAttribute('class','stop_timetable_connection_div');
-        connection_div.setAttribute('id', container+'_connection');
-        connection_div.innerHTML = "Connection issues";
-        container_el.appendChild(connection_div);
 
         map = L.map(map_div, { zoomControl:false }).setView([params.lat, params.lng], params.zoom);
         map_tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
