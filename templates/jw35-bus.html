@@ -11,11 +11,11 @@
             crossorigin="anonymous"></script>
 
     <!-- Moment and MomentTZ-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js" 
-            integrity="sha256-ABVkpwb9K9PxubvRrHMkk6wmWcIHUE9eBxNZLXYQ84k=" 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"
+            integrity="sha256-ABVkpwb9K9PxubvRrHMkk6wmWcIHUE9eBxNZLXYQ84k="
             crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.14/moment-timezone-with-data.min.js" 
-            integrity="sha256-FJZOELgwnfQRdG8KZUSWCYgucECDf4w5kfQdQSGbVpI=" 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.14/moment-timezone-with-data.min.js"
+            integrity="sha256-FJZOELgwnfQRdG8KZUSWCYgucECDf4w5kfQdQSGbVpI="
             crossorigin="anonymous"></script>
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEkMI-ZAAt1kjv668jfBXhNB1-odv5m3g"></script>
@@ -53,79 +53,69 @@
 
       var widget = [];
 
-      /*
-      widget.push(new StationBoard('station_board_1',{station: 'CBG', offset: 0}));
-      widget.push(new StopBusMap('stop_bus_map_1',
-                                 { id: 'stop_bus_map_1', 
-                                   static_url: '/lobby_screen/static',
-                                   title: 'Live Buses: U and Citi4', 
-                                   stop_id: 'XXYYZZ', 
-                                   breadcrumbs: true,
-                                   lat: 52.215, 
-                                   lng: 0.09, 
-                                   zoom: 15 }));
-      */
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_1',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY111',
+          common_name: 'Cambridge, opp Christ\s College',
+          layout: 'simple',
+          lat: 52.21129,
+          lng: 0.09107
+        }
+      ));
 
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_2',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY111',
+          common_name: 'Cambridge, opp Christ\s College',
+          layout: 'debug',
+          lat: 52.21129,
+          lng: 0.09107
+        }
+      ));
 
+      widget.push(new IframeArea(
+        { container: 'iframe_1',
+          static_url: '{{ url_for('static', filename='iframe_area/') }}'
+        },
+        {url: 'http://www.cambridgeshirebus.info/Text/WebDisplay.aspx?stopRef=0500CCITY111&stopName=Christ%27s+College'
+        }
+      ));
 
-      widget.push(new StopTimetable('stop_timetable_1',
-                                 { stop_id: '0500CCITY111',
-                                   common_name: 'Cambridge, opp Christ\s College',
-                                   layout: 'simple',
-                                   lat: 52.21129, 
-                                   lng: 0.09107
-                                 }));
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_3',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY199',
+          common_name: 'Cambridge, opp Cam Uni Vet School',
+          layout: 'simple',
+          lat: 52.21129,
+          lng: 0.09107
+        }
+      ));
 
-      widget.push(new StopTimetable('stop_timetable_2',
-                                 { stop_id: '0500CCITY111',
-                                   common_name: 'Cambridge, opp Christ\s College',
-                                   layout: 'debug',
-                                   lat: 52.21129, 
-                                   lng: 0.09107
-                                 }));
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_4',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY199',
+          common_name: 'Cambridge, opp Cam Uni Vet School',
+          layout: 'debug',
+          lat: 52.21129,
+          lng: 0.09107
+       }
+      ));
 
-
-      widget.push(new IframeArea('iframe_1',{url: 'http://www.cambridgeshirebus.info/Text/WebDisplay.aspx?stopRef=0500CCITY111&stopName=Christ%27s+College'}));
-
-      widget.push(new StopTimetable('stop_timetable_3',
-                                 { stop_id: '0500CCITY199',
-                                   common_name: 'Cambridge, opp Cam Uni Vet School',
-                                   layout: 'simple',
-                                   lat: 52.21129, 
-                                   lng: 0.09107
-                                }));
-
-
-      widget.push(new StopTimetable('stop_timetable_4',
-                                 { stop_id: '0500CCITY199',
-                                   common_name: 'Cambridge, opp Cam Uni Vet School',
-                                   layout: 'debug',
-                                   lat: 52.21129, 
-                                   lng: 0.09107
-                                }));
-
-      widget.push(new IframeArea('iframe_2',{url: 'http://www.cambridgeshirebus.info/Text/WebDisplay.aspx?stopRef=0500CCITY199&stopName=Cam+Uni+Vet+School'}));
-
-
-      /* 
-      widget.push(new StopTimetable('stop_timetable_3',
-                                 { stop_id: '0500SSAWS009',
-                                   common_name: 'Sawston, opp Water Tower',
-                                   layout: 'aardvark',
-                                   lat: 52.21129, 
-                                   lng: 0.09107
- 
-                                }));
-      */
-
-/*
-
-      widget.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
-      widget.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
-
-
-      widget.push(new Weather('weather_area_1', {location: '310042'}));
-*/
+      widget.push(new IframeArea(
+        { container: 'iframe_2',
+          tatic_url: '{{ url_for('static', filename='iframe_area/') }}'
+        },
+        { url: 'http://www.cambridgeshirebus.info/Text/WebDisplay.aspx?stopRef=0500CCITY199&stopName=Cam+Uni+Vet+School'
+        }
+      ));
 
       function reload_widgets () {
         for (var i = 0; i < widget.length; i++) {

@@ -95,7 +95,9 @@ example of a locally-configured static message.</p>
       ))
 
       widget.push(new Weather(
-        'weather_area_1',
+        { container: 'weather_area_1',
+          static_url: '{{ url_for('static', filename='weather/') }}'
+        },
         { location: '310042'
         }
       ))
@@ -160,16 +162,20 @@ example of a locally-configured static message.</p>
       ));
 
       widget.push(new StationBoard(
-        'station_board_1',
+        { container: 'station_board_1',
+          static_url: '{{ url_for('static', filename='station_+board/') }}'
+        },
         { station: 'CBG',
           offset: 0
         }
       ));
 
       widget.push(new TwitterTimeline(
-        'twitter_timeline_1',
+        { container: 'twitter_timeline_1',
+          static_url: '{{ url_for('static', filename='twitter_timeline/') }}'
+        },
         { who: 'Cambs_Traffic'
-      }
+        }
       ));
 
       widget.push(new TrafficMap(

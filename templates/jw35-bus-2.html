@@ -68,51 +68,67 @@
 
 
 
-      widget.push(new StopTimetable('stop_timetable_1',
-                                 { stop_id: '0500CCITY424',
-                                   common_name: 'Cambridge, opp William Gates Building',
-                                   layout: 'nextbus',
-                                   destinations: [
-                                       { description: 'City Centre',
-                                         stop_ids: ['0500CCITY419']
-                                       },
-                                       { description: 'Station',
-                                         stop_ids: ['0500CCITY507', '0500CCITY530']
-                                       },
-                                       { description: 'Hospital',
-                                         stop_ids: ['0500CCITY517']
-                                       },
-                                   ]
-                                 }));
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_1',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY424',
+          common_name: 'Cambridge, opp William Gates Building',
+          layout: 'nextbus',
+          destinations: [
+            { description: 'City Centre',
+              stop_ids: ['0500CCITY419']
+            },
+            { description: 'Station',
+              stop_ids: ['0500CCITY507', '0500CCITY530']
+            },
+            { description: 'Hospital',
+              stop_ids: ['0500CCITY517']
+            },
+        ]
+      }
+      ));
 
-      widget.push(new StopTimetable('stop_timetable_2',
-                                 { stop_id: '0500CCITY424',
-                                   common_name: 'Cambridge, opp William Gates Building',
-                                   layout: 'debug'
-                                 }));
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_2',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY424',
+          common_name: 'Cambridge, opp William Gates Building',
+          layout: 'debug'
+        }
+      ));
 
-      widget.push(new StopTimetable('stop_timetable_3',
-                                 { stop_id: '0500CCITY199',
-                                   common_name: 'Cambridge, opp Cam Uni Vet School',
-                                   layout: 'nextbus',
-                                   destinations: [
-                                       { description: 'City Centre',
-                                         stop_ids: ['0500CCITY419', '0500CCITY484', '0500CCITY119', '0500CCITY494']
-                                       },
-                                       { description: 'Station',
-                                         stop_ids: ['0500CCITY507', '0500CCITY530']
-                                       },
-                                       { description: 'Hospital',
-                                         stop_ids: ['0500CCITY517']
-                                       },
-                                   ]
-                                 }));
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_3',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY199',
+          common_name: 'Cambridge, opp Cam Uni Vet School',
+          layout: 'nextbus',
+          destinations: [
+            { description: 'City Centre',
+              stop_ids: ['0500CCITY419', '0500CCITY484', '0500CCITY119', '0500CCITY494']
+            },
+            { description: 'Station',
+              stop_ids: ['0500CCITY507', '0500CCITY530']
+            },
+            { description: 'Hospital',
+              stop_ids: ['0500CCITY517']
+            },
+          ]
+        }
+      ));
 
-      widget.push(new StopTimetable('stop_timetable_4',
-                                 { stop_id: '0500CCITY199',
-                                   common_name: 'Cambridge, opp Cam Uni Vet School',
-                                   layout: 'debug'
-                                 }));
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_4',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY199',
+          common_name: 'Cambridge, opp Cam Uni Vet School',
+          layout: 'debug'
+        }
+      ));
 
       function reload_widgets () {
         for (var i = 0; i < widget.length; i++) {

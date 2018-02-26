@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='message_area/message_area.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='iframe_area/iframe_area.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='weather/weather.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='traffic_map/traffic_map.css') }}">
 
     <!-- Widget Javascript -->
     <script src="{{ url_for('static', filename='station_board/station_board.js') }}" type="text/javascript"></script>
@@ -40,14 +41,60 @@
 
       var widget = [];
 
-      widget.push(new StationBoard('station_board_1',{station: 'CBG', offset: 0}));
-      widget.push(new StationBoard('station_board_2',{station: 'CBG', offset: 30}));
-      widget.push(new StationBoard('station_board_3',{station: 'CMB', offset: 0}));
+      widget.push(new StationBoard(
+        { container: 'station_board_1',
+          static_url: '{{ url_for('static', filename='station_board/') }}',
+        },
+        { station: 'CBG',
+          offset: 0
+        }
+      ));
 
-      widget.push(new Weather('weather_area_1', {location: '310042'}))
+      widget.push(new StationBoard(
+        { container: 'station_board_2',
+          static_url: '{{ url_for('static', filename='station_board/') }}',
+        },
+        { station: 'CBG',
+          offset: 30
+        }
+        ));
 
-      widget.push(new TrafficMap('traffic_map_1', {lat: 52.204684, lng: 0.124622, zoom: 10}));
-      widget.push(new TrafficMap('traffic_map_2', {lat: 52.204684, lng: 0.124622, zoom: 12}));
+      widget.push(new StationBoard(
+        { container: 'station_board_3',
+          static_url: '{{ url_for('static', filename='station_board/') }}',
+        },
+        { station: 'CMB',
+          offset: 0
+        }
+      ));
+
+      widget.push(new Weather(
+        { container: 'weather_area_1',
+          static_url: '{{ url_for('static', filename='weather/') }}',
+        },
+        { location: '310042'
+        }
+      ))
+
+      widget.push(new TrafficMap(
+        { container: 'traffic_map_1',
+          static_url: '{{ url_for('static', filename='traffic_map/') }}',
+        },
+        { lat: 52.204684,
+          lng: 0.124622,
+          zoom: 10
+        }
+      ));
+
+      widget.push(new TrafficMap(
+        { container: 'traffic_map_2',
+          static_url: '{{ url_for('static', filename='traffic_map/') }}',
+        },
+        { lat: 52.204684,
+          lng: 0.124622,
+          zoom: 12
+        }
+      ));
 
       widget.push(new MessageArea(
         { container: 'message_area_1',
@@ -71,10 +118,22 @@
         'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>'
       }))
 
-      widget.push(new IframeArea('iframe_area_1',{url: 'http://people.ds.cam.ac.uk/jw35/',
-                                                  scale: 0.5}));
+      widget.push(new IframeArea(
+        { container: 'iframe_area_1',
+          static_url: '{{ url_for('static', filename='iframe_area/') }}',
+        },
+        { url: 'http://people.ds.cam.ac.uk/jw35/',
+          scale: 0.5
+        }
+      ));
 
-      widget.push(new TwitterTimeline('twitter_timeline_1',{who: 'Cambs_Traffic'}));
+      widget.push(new TwitterTimeline(
+        { container: 'twitter_timeline_1',
+          static_url: '{{ url_for('static', filename='twitter_timeline/') }}',
+        },
+        { who: 'Cambs_Traffic'
+        }
+      ));
 
       // Generic framework - init and refresh handling
 
