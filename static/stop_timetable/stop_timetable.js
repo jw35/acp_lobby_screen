@@ -7,7 +7,6 @@ function StopTimetable(config, params) {
 
     'use strict';
 
-    var self = this;
     // Backwards compatibility or first argument
     var container;
     if (typeof(config) === 'string') {
@@ -74,9 +73,7 @@ function StopTimetable(config, params) {
         log('Running StopTimetable.init', container);
 
         // Register handlers for connect/disconnect
-        //ijl20 removed 'this' reference in init RTMONITOR_API.ondisconnect call
         RTMONITOR_API.ondisconnect(rtmonitor_disconnected);
-        //ijl20 removed 'this' reference in init RTMONITOR_API.onconnect call
         RTMONITOR_API.onconnect(rtmonitor_connected);
 
         // Set up the HTML skeleton of the container
@@ -282,9 +279,6 @@ function StopTimetable(config, params) {
 
     // ==== Real-time subscription functions ===========================
 
-    // This has to be a method because that's what the RTmonitor
-    // API expects as a callback
-    //ijl20 changed "this.rtmonitor_disconnected = function()" to "function rtmonitor_disconnected()"
     function rtmonitor_disconnected() {
         // this function is called by RTMonitorAPI if it DISCONNECTS from server
         log('stop_timetable rtmonitor_disconnected');
@@ -292,9 +286,6 @@ function StopTimetable(config, params) {
     }
 
 
-    // This has to be a method because that's what the RTmonitor
-    // API expects as a callback
-    //ijl20 changed "this.rtmonitor_connected = function()" to "function rtmonitor_connected()"
     function rtmonitor_connected() {
         // this function is called by RTMonitorAPI each time it has CONNECTED to server
         log('stop_timetable rtmonitor_connected');
@@ -352,11 +343,9 @@ function StopTimetable(config, params) {
 
         var timetable_time = time.clone().tz(TIMETABLE_TIMEZONE);
         var realtime_time = time.clone().tz(REALTIME_TIMEZONE);
-        //ijl20 subscribe(stop_id, time) removed config.container from request_id
         var request_id = stop_id+'_'+timetable_time.format('HH:mm:ss');
         log('subscribe - caller '+container+' subscribing to', request_id);
 
-        //ijl20 subscribe(stop_id, time) changed request_msg from string to object, omitting msg_type and request_id
         var request_obj = {
                 filters:
                     [
@@ -373,7 +362,6 @@ function StopTimetable(config, params) {
                     ]
             };
 
-        //ijl20 subscribe(stop_id, time) RTMONITOR_API.request -> RTMONITOR_API.subscribe adding container, removing self
         var request_status = RTMONITOR_API.subscribe(container, request_id, request_obj, handle_message);
 
         if (request_status.status !== 'rt_ok') {
@@ -386,9 +374,6 @@ function StopTimetable(config, params) {
     }
 
 
-    // This has to be a method because that's what the RTmonitor
-    // API expects as a callback
-    //ijl20 "this.handle_message = function(...)" -> "function handle_message(...)"
     function handle_message(incoming_data) {
         // Process incoming Web Socket messages
 
@@ -417,7 +402,7 @@ function StopTimetable(config, params) {
         // Refresh the display to allow for any changes
         refresh_display();
 
-    };
+    }
 
     // ==== Display management =========================================
 
