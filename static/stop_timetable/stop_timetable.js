@@ -71,7 +71,7 @@ function StopTimetable(config, params) {
 
     this.init = function() {
 
-        log('Running StopTimetable.init', config.container);
+        log('Running StopTimetable.init', container);
 
         // Register handlers for connect/disconnect
         //ijl20 removed 'this' reference in init RTMONITOR_API.ondisconnect call
@@ -288,8 +288,8 @@ function StopTimetable(config, params) {
     function rtmonitor_disconnected() {
         // this function is called by RTMonitorAPI if it DISCONNECTS from server
         log('stop_timetable rtmonitor_disconnected');
-        document.getElementById(config.container+'_connection').style.display = 'inline-block';
-    };
+        document.getElementById(container+'_connection').style.display = 'inline-block';
+    }
 
 
     // This has to be a method because that's what the RTmonitor
@@ -298,8 +298,8 @@ function StopTimetable(config, params) {
     function rtmonitor_connected() {
         // this function is called by RTMonitorAPI each time it has CONNECTED to server
         log('stop_timetable rtmonitor_connected');
-        document.getElementById(config.container+'_connection').style.display = 'none';
-    };
+        document.getElementById(container+'_connection').style.display = 'none';
+    }
 
 
     function refresh_subscriptions() {
@@ -354,7 +354,7 @@ function StopTimetable(config, params) {
         var realtime_time = time.clone().tz(REALTIME_TIMEZONE);
         //ijl20 subscribe(stop_id, time) removed config.container from request_id
         var request_id = stop_id+'_'+timetable_time.format('HH:mm:ss');
-        log('subscribe - caller '+config.container+' subscribing to', request_id);
+        log('subscribe - caller '+container+' subscribing to', request_id);
 
         //ijl20 subscribe(stop_id, time) changed request_msg from string to object, omitting msg_type and request_id
         var request_obj = {
@@ -374,7 +374,7 @@ function StopTimetable(config, params) {
             };
 
         //ijl20 subscribe(stop_id, time) RTMONITOR_API.request -> RTMONITOR_API.subscribe adding container, removing self
-        var request_status = RTMONITOR_API.subscribe(config.container, request_id, request_obj, handle_message);
+        var request_status = RTMONITOR_API.subscribe(container, request_id, request_obj, handle_message);
 
         if (request_status.status !== 'rt_ok') {
             log('subscribe failed ', JSON.stringify(request_status));
@@ -937,7 +937,7 @@ function StopTimetable(config, params) {
     }
 
 
-    log('Instantiated StopTimetable', config.container, params);
+    log('Instantiated StopTimetable', container, params);
 
     // END of 'class' StopTimetable
 
