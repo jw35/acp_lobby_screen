@@ -283,6 +283,11 @@ function StopTimetable(config, params) {
         // this function is called by RTMonitorAPI if it DISCONNECTS from server
         log('stop_timetable rtmonitor_disconnected');
         document.getElementById(container+'_connection').style.display = 'inline-block';
+        // Drop our record of the subscriptions that just evaporated
+        for (var i = 0; i < journey_table.length; i++) {
+            var entry = journey_table[i];
+            entry.rtsub = undefined;
+        }
     }
 
 
@@ -290,6 +295,8 @@ function StopTimetable(config, params) {
         // this function is called by RTMonitorAPI each time it has CONNECTED to server
         log('stop_timetable rtmonitor_connected');
         document.getElementById(container+'_connection').style.display = 'none';
+        // Re-establish all the subscriptions that we need
+        refresh_subscriptions();
     }
 
 
