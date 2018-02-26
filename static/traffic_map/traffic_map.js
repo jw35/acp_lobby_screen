@@ -47,6 +47,7 @@ function TrafficMap(config, params) {
         widget_area.appendChild(map_area);
 
         var title = document.createElement('h1');
+        title.classList.add('translucent');
         var img = document.createElement('img');
         img.setAttribute('src', config.static_url + 'car.png');
         title.appendChild(img);

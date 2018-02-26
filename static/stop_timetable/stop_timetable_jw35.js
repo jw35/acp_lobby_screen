@@ -133,7 +133,7 @@ function StopTimetable(config, params) {
         content_area.appendChild(title);
 
         var connection_div = document.createElement('div');
-        connection_div.setAttribute('class','stop_timetable_connection_div');
+        connection_div.setAttribute('class','widget_error');
         connection_div.setAttribute('id', id + '_connection');
         connection_div.innerHTML = 'Connection issues';
         container.appendChild(connection_div);
@@ -448,7 +448,8 @@ function StopTimetable(config, params) {
 
             empty(departure_div);
             if (result) {
-                var updated = document  .createElement('h2');
+                var updated = document  .createElement('div');
+                updated.classList.add('timestamp');
                 updated.innerHTML = 'Updated ' + moment().format('HH:mm');
                 departure_div.append(updated);
                 departure_div.appendChild(result);

@@ -1,4 +1,4 @@
-/* StopTimetable Lobby Screen widget CSS */
+/* raffic_map Lobby Screen widget CSS */
 
 .traffic_map {
     height: 100%;
@@ -8,20 +8,4 @@
 .traffic_map .map {
     height: 100%;
     width: 100%;
-}
-
-.traffic_map h1 {
-    background-color: white;
-    background-color: rgba(255, 255, 255, 0.7);
-    color: black;
-    left: 0;
-    margin-bottom: 0;
-    margin-top: 0;
-    padding: 0.5rem;
-    position: absolute;
-    top: 0;
-}
-
-.traffic_map h1 img {
-    height: 0.8em; 
 }

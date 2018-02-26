@@ -7,6 +7,10 @@
    Row heights are ((1080-60)/4) = 255px. Column widths are 1920/6 = 320px
 */
 
+
+/* =================================================================== */
+/* General styling for use by widgets
+
 /* Force box-sizing: border-box everywhere. Note that this may break
    some 3rd-party styling in which case it may need to be forced back to
    content-box there */
@@ -21,6 +25,96 @@ body {
   font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Generic styles for Lobby Screen widgets */
+
+/* General styling */
+
+h1, h2 {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+h1 img {
+    height: 0.8em;
+}
+
+/* Translucent box to left for labelling maps */
+h1.translucent {
+    background-color: white;
+    background-color: rgba(255, 255, 255, 0.7);
+    color: black;
+    left: 0;
+    padding: 0.5rem;
+    position: absolute;
+    top: 0;
+}
+
+table {
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0.5em;
+    overflow: hidden;
+}
+
+th, td {
+    border-bottom: 1px solid #ddd;
+    padding: 0.3em 0.2em;
+    text-align: left;
+    vertical-align: top;
+}
+
+/* Dedicated classes */
+
+/* .timestamp for 'Last updated hh:mm', etc. */
+
+.timestamp {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* .message for 'message of the day' boxes, etc */
+
+.message {
+    background-color: #fdd;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+    padding: 0.5em;
+}
+
+.message p {
+    margin: 0;
+}
+
+/* .time for table cellls containing HH:MM times */
+
+th.time, td.time {
+    text-align: center;
+}
+
+/* .issue for hilighting things with issues, like late trains */
+
+.issue {
+    background-color: #fdd;
+}
+
+/* .widget_error for 'connection problems' banner */
+
+.widget_error {
+    background: red;
+    color: white;
+    display: none;
+    left: 0;
+    position: absolute;
+    text-align: center;
+    font-size: 2em;
+    top: 0;
+    width: 100%;
+}
+
+/* ================================================================== */
+/* Proto-framework styling
+
 /* For debugging, create a 1920 x 1080 *inside* a 1px border */
 .wrapper {
     width: 1920px;
@@ -28,17 +122,17 @@ body {
     overflow: hidden;
     /* border: 1px solid red; */
     position: absolute;
-    left: 0px;
-    top: 0px;
+    left: 0;
+    top: 0;
 }
 
 .credits {
-    position: absolute;
-    left: 0px;
-    top:  0px;
     height: 60px;
-    width: 1920px;
+    left: 0;
     overflow: hidden;
+    position: absolute;
+    top:  0;
+    width: 1920px;
     /*border: 1px solid green; */
 }
 
@@ -49,8 +143,8 @@ body {
 }
 
 .credits span {
-    font-weight: bold;
     font-size: 50px;
+    font-weight: bold;
     position: absolute;
     right: 0.5em;
 }
@@ -59,85 +153,85 @@ body {
     display: inline-block;
     font-size: 50px;
     font-weight: bold;
-    width: 200px;
     height: 50px;
     margin-left: 20px;
     vertical-align: top;
+    width: 200px;
 }
 
 /* Basic container boxes for 1x1, 1x2, 2x1 amd 2x2 display areas. */
 .container_1_1 {
-    height: 255px;
-    width: 320px;
     border: 1px solid black;
+    height: 255px;
     overflow: hidden;
+    width: 320px;
 }
 
 .container_1_2 {
-    height: 510px;
-    width: 320px;
     border: 1px solid black;
+    height: 510px;
     overflow: hidden;
+    width: 320px;
 }
 
 .container_2_1 {
-    height: 255px;
-    width: 640px;
     border: 1px solid black;
+    height: 255px;
     overflow: hidden;
+    width: 640px;
 }
 
 .container_2_2 {
-    height: 510px;
-    width: 640px;
     border: 1px solid black;
+    height: 510px;
     overflow: hidden;
+    width: 640px;
 }
 
 .container_1_4 {
-    height: 1020px;
-    width: 320px;
     border: 1px solid black;
+    height: 1020px;
     overflow: hidden;
+    width: 320px;
 }
 
 .container_2_4 {
-    height: 1020px;
-    width: 640px;
     border: 1px solid black;
+    height: 1020px;
     overflow: hidden;
+    width: 640px;
 }
 
 
 /* Column positions */
 .col_1 {
+    left: 0;
     position: absolute;
-    left: 0px;
 }
 
 .col_2 {
-    position: absolute;
     left: 320px;
+    position: absolute;
 }
 
 .col_3 {
-    position: absolute;
     left: 640px;
+    position: absolute;
 }
 
 .col_4 {
-    position: absolute;
     left: 960px;
+    position: absolute;
 }
 
 .col_5 {
-    position: absolute;
     left: 1280px;
+    position: absolute;
 }
 
 .col_6 {
-    position: absolute;
     left: 1600px;
+    position: absolute;
 }
 
 /* Row positions */
@@ -164,7 +258,9 @@ body {
 .spinner {
     display: block;
     height: 24px;
-    width: 24px;
     margin: auto;
     margin-top: 115px;
+    width: 24px;
 }
+
+/* ================================================================== */
