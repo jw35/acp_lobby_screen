@@ -5,7 +5,7 @@ function RTMonitorAPI() {
 
     var self = this;
 
-    console.log('RTMonitorAPI instantiation');
+    console.log('RTMonitorAPI V2 instantiation');
 
     this.RTMONITOR_URI = 'http://tfc-app2.cl.cam.ac.uk/rtmonitor/sirivm';
 
@@ -78,8 +78,8 @@ this.connect = function()
                     self.log('RTMonitorAPI connected OK ('+self.connect_callbacks.length+' clients)');
                     for (var i=0; i<self.connect_callbacks.length; i++)
                     {
-                        var client = self.connect_callbacks[i]; // { caller: xx, callback: yy }
-                        client.callback.call(client.caller);
+                        var caller = self.connect_callbacks[i]; // { caller: xx, callback: yy }
+                        caller.callback();
                     }
                     return;
                 }
@@ -87,10 +87,11 @@ this.connect = function()
                 if (msg.request_id)
                 {
                     self.log('RTMonitorAPI websocket message received for '+msg.request_id);
+                    //self.log(e.data);
 
-                    var client = self.request_callbacks[msg.request_id];
+                    var caller = self.request_callbacks[msg.request_id];
 
-                    client.callback.call(client.caller, msg);
+                    caller.callback(msg);
                 }
                 else
                 {
@@ -114,14 +115,14 @@ this.connect = function()
     };
 };
 
-this.ondisconnect = function (caller, callback)
+this.ondisconnect = function (callback)
 {
-    self.disconnect_callbacks.push({ caller: caller, callback: callback });
+    self.disconnect_callbacks.push({ callback: callback });
 };
 
-this.onconnect = function(caller, callback)
+this.onconnect = function(callback)
 {
-    self.connect_callbacks.push({ caller: caller, callback: callback });
+    self.connect_callbacks.push({ callback: callback });
     self.log('RTMonitorAPI onconnect '+self.connect_callbacks.length);
 };
 
@@ -142,11 +143,32 @@ this.disconnect = function()
     self.sock.close();
 };
 
-this.request = function(caller, request_id, msg, request_callback)
+// Caller has issued a request for one-time return of sensor data
+this.request = function(caller, caller_id, request_id, msg, request_callback)
 {
-    this.log('RTMonitorAPI request_id '+request_id);
+    var caller_request_id = caller_id+'_'+request_id;
+    this.log('RTMonitorAPI request request_id '+caller_request_id);
 
-    this.request_callbacks[request_id] = { caller: caller, callback: request_callback } ;
+    this.request_callbacks[caller_request_id] = { caller: caller, callback: request_callback } ;
+
+    return this.sock_send_str(msg);
+};
+
+// Caller has issued subscription for regular real-time return of sensor data
+this.subscribe = function(caller_id, request_id, msg_obj, request_callback)
+{
+    // Note that RTMonitorAPI builds the actual unique request_id that goes to the server
+    // as a concatenation of the caller_id and the request_id given by the caller.
+    var caller_request_id = caller_id+'_'+request_id;
+
+    msg_obj.msg_type = 'rt_subscribe';
+    msg_obj.request_id = caller_request_id;
+
+    this.log('RTMonitorAPI subscribe request_id '+caller_request_id);
+
+    var msg = JSON.stringify(msg_obj);
+
+    this.request_callbacks[caller_request_id] = { callback: request_callback } ;
 
     return this.sock_send_str(msg);
 };
