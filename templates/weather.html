@@ -13,7 +13,7 @@
 <h1 class="widget_error">Connection issues</h1>
 
 <h1><img src="{{ url_for('static', filename='weather/weather.png') }}" alt=""> {{ data.location.title() }}</h1>
-<h2>Issued {{ data.issued.astimezone(tz=None).strftime("%H:%M") }}</h2>
+<div class="timestamp">Issued {{ data.issued.astimezone(tz=None).strftime("%H:%M") }}</div>
 {% for result in data.results %}
 
 {% set timestamp = result.0 %}
@@ -25,7 +25,7 @@
 <h2 class="time">{{ timestamp.astimezone(tz=None).strftime('%H:%M') }}:</h2>
 {% endif %}
 {% if data.icon %}
-<img src="{{ url_for('static', filename='weather/icons/weather_icon-' + data.icon + '.png') }}" alt="" />
+<img src="{{ url_for('static', filename='weather/icons/weather_icon-' + data.icon + '.png') }}" alt="" class="icon" />
 {% endif %}
 
 <p>
