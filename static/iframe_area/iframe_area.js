@@ -1,11 +1,21 @@
 /* Iframe Area Widget for ACP Lobby Screen */
 
+/* exported IframeArea */
 /*global $ */
 
-function IframeArea(container, params) {
+function IframeArea(config, params) {
 
     'use strict';
 
+    // Backwards compatibility or first argument
+    var container;
+    if (typeof(config) === 'string') {
+        container = config;
+    }
+    else {
+        this.config = config;
+        container = config.container;
+    }
     this.container = container;
     this.params = params;
 
