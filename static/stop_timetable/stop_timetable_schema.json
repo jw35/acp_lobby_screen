@@ -20,12 +20,19 @@
             "description": "Used as the title of the timetable display"
         },
 
+        "offset": {
+            "type": "integer",
+            "title": "Timing offset",
+            "description": "Offset in minutes against the current time to provide the station board for",
+            "minimum": -120,
+            "maximum": 120
+        },
+
         "layout": {
             "type": "string",
             "title": "Layout",
             "description": "Required layout for the display",
-            "enum": [ "simple", "debug" ],
-            "default": "simple"
+            "enum": [ "simple", "nextbuss", "debug" ]
         },
 
         "destinations": {

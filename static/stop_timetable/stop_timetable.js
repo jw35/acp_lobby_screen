@@ -167,6 +167,10 @@ function StopTimetable(config, params) {
         }
         finally {
             // Tomorrow morning, sometime between 04:00:00 and 04:14:59.9999
+            // NB: populate_journeys takes note of offset. Don't run it
+            // at a time when the maximum offset (currently +/- 120 min)
+            // could end up calculating the wrong day! So not earlier
+            // than 02:00 or later than 22:00
             var minutes = Math.random()*15;
             var tomorrow = moment().add(1, 'd').hour(4).minute(minutes);
             var delta = tomorrow.toDate() - moment().toDate();
@@ -191,7 +195,7 @@ function StopTimetable(config, params) {
         // or at the departure_time of the last entry
         var start_time;
         if (journey_table.length === 0) {
-            start_time = moment().tz(TIMETABLE_TIMEZONE)
+            start_time = get_now().tz(TIMETABLE_TIMEZONE)
                                  .subtract(30, 'm').format('HH:mm:ss');
         }
         else {
@@ -302,10 +306,12 @@ function StopTimetable(config, params) {
 
     function refresh_subscriptions() {
         // Walk journey_table, subscribe to real time updates for
-        // journeys with due time within a window of now,
+        // journeys with due time within a window of (now + offset),
         // and un-subscribe for journeys outside these limits
 
-        //log('refresh_subscriptions - running');
+        var now = get_now();
+
+        log('refresh_subscriptions - running for', now.toISOString());
 
         // Cancel the update timer if it's running
         if (subscription_timer_id) {
@@ -318,8 +324,8 @@ function StopTimetable(config, params) {
             for (var i = 0; i < journey_table.length; i++) {
                 var entry = journey_table[i];
 
-                if ( (entry.due.isBefore(moment().subtract(30, 'minutes')) ||
-                      entry.due.isAfter(moment().add(60, 'minutes'))) ) {
+                if ( (entry.due.isBefore(now.subtract(30, 'minutes')) ||
+                      entry.due.isAfter(now.add(60, 'minutes'))) ) {
 
                     if (entry.rtsub) {
                         log('refresh_subscriptions - unsubscribing', entry.rtsub);
@@ -500,7 +506,7 @@ function StopTimetable(config, params) {
             var entry = journey_table[i];
 
             // Skip anything that left in the past
-            if (entry.eta.isBefore(moment().subtract(1, 'minutes'))) {
+            if (entry.eta.isBefore(get_now().subtract(1, 'minutes'))) {
                 continue;
             }
 
@@ -634,7 +640,7 @@ function StopTimetable(config, params) {
             var entry = journey_table[i];
 
             // Skip anything that left in the past
-            if (entry.eta.isBefore(moment().subtract(1, 'minutes'))) {
+            if (entry.eta.isBefore(get_now().subtract(1, 'minutes'))) {
                 continue;
             }
 
@@ -781,7 +787,7 @@ function StopTimetable(config, params) {
                 var journey = journey_table[j];
 
                 // Skip anything that left in the past
-                if (journey.eta.isBefore(moment())) {
+                if (journey.eta.isBefore(get_now())) {
                     continue;
                 }
 
@@ -927,6 +933,13 @@ function StopTimetable(config, params) {
         name = name.replace(/Road Park[ -](and|&)[ -]Ride/i, 'Rd P&R');
         name = name.replace(/Park[ -](and|&)[ -]Ride/i, 'P&R');
         return name;
+    }
+
+
+    function get_now() {
+        // Return the current time offset by params.offset or 0
+        var offset = params.offset || 0;
+        return moment().add(offset, 'minutes');
     }
 
 
