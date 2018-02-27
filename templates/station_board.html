@@ -15,7 +15,7 @@
 <div class="timestamp">Updated {{ data.generatedAt.strftime("%H:%M") }}</div>
 
 {% if data.nrccMessages %}
-    {% if data.nrccMessages.message|length <= 2 %}
+    {% if data.nrccMessages.message|length <= 1 %}
         {% for message in data.nrccMessages.message %}
             {% for key in message %}
                 <div class="message">{{ message[key] }}</div>
