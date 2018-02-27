@@ -494,7 +494,7 @@ function StopTimetable(config, params) {
 
         cell = document.createElement('th');
         cell.classList.add('time');
-        cell.innerHTML = 'Arriving';
+        cell.innerHTML = 'Arrives';
         heading.appendChild(cell);
 
 
@@ -625,7 +625,7 @@ function StopTimetable(config, params) {
         cell = document.createElement('th');
         cell.appendChild(document.createTextNode('Route'));
         cell.appendChild(document.createElement('br'));
-        cell.appendChild(document.createTextNode('Arriving'));
+        cell.appendChild(document.createTextNode('Arrives'));
         heading.appendChild(cell);
 
         cell = document.createElement('th');
@@ -767,7 +767,7 @@ function StopTimetable(config, params) {
 
         cell = document.createElement('th');
         cell.classList.add('time');
-        cell.innerHTML = 'Arriving';
+        cell.innerHTML = 'Arrives';
         heading.appendChild(cell);
 
         // For each destination...
@@ -776,7 +776,7 @@ function StopTimetable(config, params) {
             var nrows = 0;
 
             var h3 = document.createElement('h3');
-            h3.innerHTML = destination.description;
+            h3.innerHTML = 'To ' + destination.description;
             result.appendChild(h3);
 
             var table = document.createElement('table');
