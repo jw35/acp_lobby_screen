@@ -130,6 +130,12 @@ def station_board():
         data = client.service.GetDepartureBoard(numRows=50,crs=station,
             _soapheaders={"AccessToken":app.config["NRE_API_KEY"]},
             timeOffset=offset)
+        # Strip HTML from alert messages
+        # who came up with this data structure?)
+        if (data.nrccMessages):
+            for message in data.nrccMessages.message:
+               for key in message:
+                message[key] = re.sub('<[^<]+?>', '', message[key])
         cache.set(cache_key,data,timeout=30)
 
     return render_template('station_board.html', data=data)
