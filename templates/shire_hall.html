@@ -3,7 +3,7 @@
 <html>
 
   <head>
-    <title>ACP Lobby Screen</title>
+    <title>Shire Hall travel</title>
 
     {% include 'lobby_screen_head.html' %}
 
@@ -106,22 +106,32 @@ example of a locally-configured static message.</p>
         },
         { id: 'stop_bus_map_1',
           static_url: '/lobby_screen/static',
-          title: 'Live Buses: U and Citi4',
+          title: 'Live Buses: Shire Hall',
           stops: [
-            { stop_id: '0500CCITY424',
-              common_name: 'William Gates Building',
-              lat: 52.21129,
-              lng: 0.09107
-            },
-            { stop_id: '0500CCITY199',
-              common_name: 'Cam Uni Vet School',
+            { stop_id: '0500CCITY401',
+              common_name: 'Shire Hall',
               lat: 52.21297,
-              lng: 0.09062
+              lng: 0.11235
+            },
+            { stop_id: '0500CCITY496',
+              common_name: 'The Busway Shire Hall',
+              lat: 52.213,
+              lng: 0.11257
+            },
+            { stop_id: '0500CCITY497',
+              common_name: 'The Busway Shire Hall',
+              lat: 52.21274,
+              lng: 0.11263
+            },
+            { stop_id: '0500CCITY394',
+              common_name: 'Shire Hall',
+              lat: 52.21297,
+              lng: 0.11263
             }
           ],
           breadcrumbs: true,
-          lat: 52.215,
-          lng: 0.09,
+          lat: 52.2125,
+          lng: 0.112,
           zoom: 15
         }
       ));
@@ -152,7 +162,6 @@ example of a locally-configured static message.</p>
           zoom: 12
         }
       ));
-
     </script>
 
   </head>
