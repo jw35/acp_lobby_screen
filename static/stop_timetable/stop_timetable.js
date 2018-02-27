@@ -52,6 +52,8 @@ function StopTimetable(config, params) {
         //     timetable: TNDS timetable entry from API
         //       origin: stop object of origin stop
         //       destination: stop object of destination stop
+        //       destinations: list of first timetable entry for each of
+        //                                          params.destinations
         //       departure: moment() of timetabled departure tine
         //       arrival: moment() of timetabled arrival at last stop
         //       due: moment() of time at this stop
@@ -258,10 +260,30 @@ function StopTimetable(config, params) {
             log('add_journeys - adding', journey_key, result.time);
             added++;
 
+            // See if this journey goes to any of our destinations
+            var destination_table = [];
+            // For each destination (if we have any)
+            if (params.destinations) {
+                for (var d = 0; d < params.destinations.length; d++) {
+                    var destination = params.destinations[d];
+                    // For every timetable entry on this journey
+                    for (var e = 0; e < result.journey.timetable.length; e++) {
+                        entry = result.journey.timetable[e];
+                        // Does it go to this destination?
+                        if (destination.stop_ids.indexOf(entry.stop.atco_code) !== -1) {
+                            destination_table[d] = entry;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Populate the journey_table entry
             var entry = {
                 timetable: result,
                 origin: origin_stop,
                 destination: destination_stop,
+                destinations: destination_table,
                 departure: timetable_time_to_moment(departure_time_str),
                 arrival: timetable_time_to_moment(arrival_time_str),
                 due: timetable_time_to_moment(result.time),
@@ -786,24 +808,14 @@ function StopTimetable(config, params) {
             for (var j=0; j<journey_table.length; j++) {
                 var journey = journey_table[j];
 
-                // Skip anything that left in the past
+                // Skip anything that has already left
                 if (journey.eta.isBefore(get_now())) {
                     continue;
                 }
 
-                // ...for each stop...
-                var found = false;
-                var entry;
-                for (var s = 0; s < journey.timetable.journey.timetable.length; s++) {
-                    entry = journey.timetable.journey.timetable[s];
-                    if (destination.stop_ids.indexOf(entry.stop.atco_code) !== -1) {
-                        found = true;
-                        break;
-                    }
-                } // END for each stop
-
-                // If we found something
-                if (found) {
+                // If this journey goes to this destination
+                if (journey.destinations[d]) {
+                    var entry = journey.destinations[d];
                     var row = document.createElement('tr');
                     var arrival = timetable_time_to_moment(entry.time);
 
@@ -851,7 +863,7 @@ function StopTimetable(config, params) {
                         break;
                     }
 
-                } // END if we found something
+                } // END journey goes to this destination
 
             } // END for each journey
 
