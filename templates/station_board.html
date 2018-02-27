@@ -15,11 +15,15 @@
 <div class="timestamp">Updated {{ data.generatedAt.strftime("%H:%M") }}</div>
 
 {% if data.nrccMessages %}
-    {% for message in data.nrccMessages.message %}
-        {% for key in message %}
-            <div class="message">{{ message[key] | safe }}</div>
+    {% if data.nrccMessages.message|length <= 2 %}
+        {% for message in data.nrccMessages.message %}
+            {% for key in message %}
+                <div class="message">{{ message[key] }}</div>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
+    {% else %}
+        <div class="message">Multiple travel alerts in force - see www.nationalrail.co.uk for details.</div>
+    {% endif %}
 {% endif %}
 
 <table>

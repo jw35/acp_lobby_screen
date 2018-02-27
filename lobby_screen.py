@@ -1,4 +1,4 @@
-from flask import Flask, g, render_template, jsonify, request, json, abort
+from flask import Flask, render_template, request, abort
 import re
 import logging
 from logging import Formatter
@@ -86,7 +86,7 @@ weather_icon = {
     "30": "28",
 }
 
-app= Flask(__name__, static_url_path="/lobby_screen/static")
+app = Flask(__name__, static_url_path="/lobby_screen/static")
 app.config.from_object(__name__)
 app.config.update(dict(
     SEND_FILE_MAX_AGE_DEFAULT=0,
@@ -99,12 +99,15 @@ assert 'METOFFICE_KEY' in app.config, 'No METOFFICE_KEY setting found'
 # An in-memory cache for departure board information
 cache = SimpleCache()
 
+
 # Direct logs to STDERR even when not in debug
 @app.before_first_request
 def setup_logging():
     if not app.debug:
         stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(Formatter('[%(asctime)s] [%(process)d] [%(levelname)s] %(message)s'))
+        stream_handler.setFormatter(Formatter(
+            '[%(asctime)s] [%(process)d] [%(levelname)s] %(message)s')
+        )
         app.logger.addHandler(stream_handler)
         app.logger.setLevel(logging.INFO)
 
@@ -120,25 +123,34 @@ def station_board():
     assert station, 'No station code found'
     offset = int(request.args.get('offset', 0))
 
-    cache_key = "station_board {0} {1}".format(station, offset);
+    cache_key = "station_board {0} {1}".format(station, offset)
     data = cache.get(cache_key)
     if data:
         app.logger.info('Cache hit for %s', cache_key)
     else:
         app.logger.info('Cache miss for %s', cache_key)
         client = zeep.Client(wsdl=WSDL)
-        data = client.service.GetDepartureBoard(numRows=50,crs=station,
-            _soapheaders={"AccessToken":app.config["NRE_API_KEY"]},
-            timeOffset=offset)
-        cache.set(cache_key,data,timeout=30)
+        data = client.service.GetDepartureBoard(
+            numRows=50, crs=station,
+            _soapheaders={"AccessToken": app.config["NRE_API_KEY"]},
+            timeOffset=offset
+        )
+        # Strip HTML from alert messages
+        # who came up with this data structure?)
+        if (data.nrccMessages):
+            for message in data.nrccMessages.message:
+                for key in message:
+                    message[key] = re.sub('<[^<]+?>', '', message[key])
+        cache.set(cache_key, data, timeout=30)
 
     return render_template('station_board.html', data=data)
+
 
 def extract_weather_results(data):
     '''
     Walk the (assumed date/time ordered) forecast data returned by the
-    Met Office API and finding the forecast dated immediately before 
-    now and the next two, without making any assumptions about the 
+    Met Office API and finding the forecast dated immediately before
+    now and the next two, without making any assumptions about the
     interval between forecasts
     '''
 
@@ -146,19 +158,21 @@ def extract_weather_results(data):
     results = []
     now = datetime.datetime.now(tz=pytz.UTC)
     for period in data["SiteRep"]["DV"]["Location"]["Period"]:
-        day = iso8601.parse_date(period["value"][0:10],default_timezone=datetime.timezone.utc)
+        day = iso8601.parse_date(
+            period["value"][0:10], default_timezone=datetime.timezone.utc
+        )
         for rep in period["Rep"]:
-            rep['description'] = weather_descriptions.get(rep['W'],'')
-            rep['icon'] = weather_icon.get(rep['W'],'')
+            rep['description'] = weather_descriptions.get(rep['W'], '')
+            rep['icon'] = weather_icon.get(rep['W'], '')
             rep['wind_desc'] = mph_to_descr(int(rep['S']))
             timestamp = day + datetime.timedelta(minutes=int(rep["$"]))
             if timestamp > now and not results:
                 results.append(previous)
             if timestamp > now:
-                results.append((timestamp,rep))
+                results.append((timestamp, rep))
             if len(results) >= 3:
                 return(results)
-            previous = ((timestamp,rep))
+            previous = ((timestamp, rep))
     return(results)
 
 
@@ -180,7 +194,7 @@ def mph_to_descr(speed):
         return 'Fresh'
     elif speed < 39:     # 6, 7
         return 'Strong'
-    elif speed < 73  :   # 8, 9, 10, 11
+    elif speed < 73:   # 8, 9, 10, 11
         return 'Gale'
     else:                # 12 upward
         return 'huricane'
@@ -196,32 +210,34 @@ def weather():
     location = request.args.get('location', '')
     assert location, 'No location code found'
 
-    cache_key = "weather {0}".format(location);
+    cache_key = "weather {0}".format(location)
     data = cache.get(cache_key)
     if data:
         app.logger.info('Cache hit for %s', cache_key)
     else:
         app.logger.info('Cache miss for %s', cache_key)
         r = requests.get(METOFFICE_API + location, {
-            "res": "3hourly", 
+            "res": "3hourly",
             "key": app.config["METOFFICE_KEY"]
         })
         r.raise_for_status()
-        # https://stackoverflow.com/questions/35042216/requests-module-return-json-with-items-unordered
+        # https://stackoverflow.com/questions/35042216/
+        #requests-module-return-json-with-items-unordered
         data = r.json(object_pairs_hook=OrderedDict)
-        cache.set(cache_key,data,timeout=500)
+        cache.set(cache_key, data, timeout=500)
 
     results = extract_weather_results(data)
     issued = iso8601.parse_date(data["SiteRep"]["DV"]["dataDate"])
-    return render_template('weather.html', data= {
+    return render_template('weather.html', data={
         "results": results,
         "location": data["SiteRep"]["DV"]["Location"]["name"],
-        "issued": iso8601.parse_date(data["SiteRep"]["DV"]["dataDate"]),
-    })
+        "issued": issued}
+    )
+
 
 @app.route('/icon_check', methods=['GET'])
 def icon_check():
-    return render_template('icon_check.html', data= {
+    return render_template('icon_check.html', data={
         "weather_descriptions": weather_descriptions,
         "weather_icon": weather_icon,
     })
@@ -233,6 +249,7 @@ def layout(layout_id):
         return render_template(layout_id + '.html')
     except jinja2.exceptions.TemplateNotFound:
         abort(404)
+
 
 @app.route('/')
 def index():
