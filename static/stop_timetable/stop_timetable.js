@@ -514,12 +514,6 @@ function StopTimetable(config, params) {
         cell.innerHTML = 'Destination';
         heading.appendChild(cell);
 
-        cell = document.createElement('th');
-        cell.classList.add('time');
-        cell.innerHTML = 'Arrives';
-        heading.appendChild(cell);
-
-
         table.appendChild(heading);
 
         var nrows = 0;
@@ -570,17 +564,14 @@ function StopTimetable(config, params) {
             row.appendChild(cell);
 
             cell = document.createElement('td');
-            cell.innerHTML = fixup(last_stop);
-            row.appendChild(cell);
-
-            cell = document.createElement('td');
-            cell.classList.add('time');
+            var text = fixup(last_stop);
             if (fresh_timestamp(entry)) {
-                cell.innerHTML = entry.arrival.clone().add(entry.delay).format('HH:mm');
+                text += ' (at ' + entry.arrival.clone().add(entry.delay).format('HH:mm') +')';
             }
             else {
-                cell.innerHTML = entry.arrival.format('HH:mm');
+                text += ' (at ' + entry.arrival.format('HH:mm') +')';
             }
+            cell.innerHTML = text;
             row.appendChild(cell);
 
             table.appendChild(row);
@@ -941,9 +932,15 @@ function StopTimetable(config, params) {
 
     function fixup(name) {
         // Fix assorted problems with bus and line names
-        name = name.replace(/Cambridge North Railway Station/i, 'Cambridge Nth Stn');
-        name = name.replace(/Road Park[ -](and|&)[ -]Ride/i, 'Rd P&R');
+        name = name.replace(/(\s+)Street$/i,'$1St');
+        name = name.replace(/(\s+)Road$/i,'$1Rd');
+        name = name.replace(/(\s+)Avenue$/i,'$1Ave');
+        name = name.replace(/\|.*/, '');
         name = name.replace(/Park[ -](and|&)[ -]Ride/i, 'P&R');
+        name = name.replace(/Road P&R/i, 'Rd P&R');
+        name = name.replace(/Bus Station/i, 'Bus Stn');
+        name = name.replace(/Cambridge North Railway Station/i, 'Cambridge Nth Stn');
+        name = name.replace(/Hinchingbrooke/i, 'Hin\'brooke');
         return name;
     }
 
