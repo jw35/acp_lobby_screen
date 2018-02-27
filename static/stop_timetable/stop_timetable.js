@@ -546,7 +546,7 @@ function StopTimetable(config, params) {
             cell = document.createElement('td');
             cell.classList.add('time');
             if (fresh_timestamp(entry)) {
-                if (entry.delay.asMinutes() <= 1.0) {
+                if (entry.delay && entry.delay.asMinutes() <= 1.0) {
                     cell.innerHTML = 'On time';
                 }
                 else {
@@ -820,7 +820,7 @@ function StopTimetable(config, params) {
                     cell = document.createElement('td');
                     cell.classList.add('time');
                     if (fresh_timestamp(journey)) {
-                        if (entry.delay.asMinutes() <= 1.0) {
+                        if (entry.delay && entry.delay.asMinutes() <= 1.0) {
                            cell.innerHTML = 'On time';
                         }
                         else {
