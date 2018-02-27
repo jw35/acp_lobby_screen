@@ -935,6 +935,7 @@ function StopTimetable(config, params) {
         name = name.replace(/(\s+)Street$/i,'$1St');
         name = name.replace(/(\s+)Road$/i,'$1Rd');
         name = name.replace(/(\s+)Avenue$/i,'$1Ave');
+        name = name.replace(/(\s+)Close$/i,'$1Cl');
         name = name.replace(/\|.*/, '');
         name = name.replace(/Park[ -](and|&)[ -]Ride/i, 'P&R');
         name = name.replace(/Road P&R/i, 'Rd P&R');
