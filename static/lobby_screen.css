@@ -59,7 +59,7 @@ table {
 
 th, td {
     border-bottom: 1px solid #ddd;
-    padding: 0.3em 0.2em;
+    padding: 0.3em;
     text-align: left;
     vertical-align: top;
 }
@@ -69,8 +69,8 @@ th, td {
 /* .timestamp for 'Last updated hh:mm', etc. */
 
 .timestamp {
-    font-weight: bold;
     font-size: 1.2em;
+    font-weight: bold;
 }
 
 /* .message for 'message of the day' boxes, etc */
@@ -104,10 +104,10 @@ th.time, td.time {
     background: red;
     color: white;
     display: none;
+    font-size: 2em;
     left: 0;
     position: absolute;
     text-align: center;
-    font-size: 2em;
     top: 0;
     width: 100%;
 }
@@ -117,13 +117,13 @@ th.time, td.time {
 
 /* For debugging, create a 1920 x 1080 *inside* a 1px border */
 .wrapper {
-    width: 1920px;
-    height: 1080px;
-    overflow: hidden;
     /* border: 1px solid red; */
-    position: absolute;
+    height: 1080px;
     left: 0;
+    overflow: hidden;
+    position: absolute;
     top: 0;
+    width: 1920px;
 }
 
 .credits {
