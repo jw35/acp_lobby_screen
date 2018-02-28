@@ -3,7 +3,7 @@
 <html>
 
   <head>
-    <title>ACP Lobby Screen</title>
+    <title>Shire Hall travel</title>
 
     {% include 'lobby_screen_head.html' %}
 
@@ -30,14 +30,14 @@
     <script type="text/javascript">
 
       var DEBUG = ''; // widget.log() code will check this global variable
-
+/*
       widget.push(new MessageArea(
         { container: 'message_area_1',
           static_url: '{{ url_for('static', filename='message_area/') }}',
         },
-        { title: 'SmartPanel',
+        { title: 'Lobby Screen',
           message: `
-<p>This is an early preview of an <em>Adaptive Cities</em> <strong>lobby screen</strong>.
+<p>This is an early preview of an <em>Adaptive Cities</em> <strong>Lobby Screen</strong>.
 These screens display real-time travel information in the lobbies of
 public buildings to inform travel choices.</p>
 
@@ -87,42 +87,105 @@ example of a locally-configured static message.</p>
           ]
         }
       ));
-
-      widget.push(new StopTimetable(
-        { container: 'stop_timetable_2',
-          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
-        },
-        { stop_id: '0500CCITY199',
-          common_name: 'Cam Uni Vet School',
-          layout: 'simple',
-          lat: 52.21129,
-          lng: 0.09107
-        }
-      ));
-
+*/
       widget.push(new StopBusMap(
         { container: 'stop_bus_map_1',
           static_url: '{{ url_for('static', filename='stop_bus_map/') }}'
         },
         { id: 'stop_bus_map_1',
           static_url: '/lobby_screen/static',
-          title: 'Live Buses: U and Citi4',
+          title: 'Live Buses: Shire Hall',
           stops: [
-            { stop_id: '0500CCITY424',
-              common_name: 'William Gates Building',
-              lat: 52.21129,
-              lng: 0.09107
-            },
-            { stop_id: '0500CCITY199',
-              common_name: 'Cam Uni Vet School',
+            { stop_id: '0500CCITY401',
+              common_name: 'Shire Hall',
               lat: 52.21297,
-              lng: 0.09062
-            }
+              lng: 0.11235
+            },
+            { stop_id: '0500CCITY496',
+              common_name: 'The Busway Shire Hall',
+              lat: 52.213,
+              lng: 0.11257
+            },
+            { stop_id: '0500CCITY497',
+              common_name: 'The Busway Shire Hall',
+              lat: 52.21274,
+              lng: 0.11263
+            },
+            { stop_id: '0500CCITY394',
+              common_name: 'Shire Hall',
+              lat: 52.21297,
+              lng: 0.11263
+            },
+        { stop_id: '0500CCITY275',
+          common_name: 'Castle St',
+          lat: 52.21049,
+          lng: 0.11404
+        }
           ],
           breadcrumbs: true,
-          lat: 52.215,
-          lng: 0.09,
+          lat: 52.2125,
+          lng: 0.112,
           zoom: 15
+        }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_1',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY401',
+          common_name: '1 Shire Hall (outbound)',
+          layout: 'simple',
+          lat: 52.21297,
+          lng: 0.11235
+        }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_2',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+            { stop_id: '0500CCITY497',
+              common_name: '2 The Busway Shire Hall',
+          layout: 'simple',
+              lat: 52.21274,
+              lng: 0.11263
+            }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_3',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+            { stop_id: '0500CCITY496',
+              common_name: '3 The Busway Shire Hall',
+          layout: 'simple',
+              lat: 52.213,
+              lng: 0.11257
+            }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_4',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+            { stop_id: '0500CCITY394',
+              common_name: '4 Shire Hall (to city centre)',
+          layout: 'simple',
+              lat: 52.21297,
+              lng: 0.11263
+            }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_5',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY275',
+          common_name: '5 Castle St',
+          layout: 'simple',
+          lat: 52.21049,
+          lng: 0.11404
         }
       ));
 
@@ -131,6 +194,15 @@ example of a locally-configured static message.</p>
           static_url: '{{ url_for('static', filename='station_+board/') }}'
         },
         { station: 'CBG',
+          offset: 0
+        }
+      ));
+
+      widget.push(new StationBoard(
+        { container: 'station_board_2',
+          static_url: '{{ url_for('static', filename='station_+board/') }}'
+        },
+        { station: 'CMB',
           offset: 0
         }
       ));
@@ -147,9 +219,9 @@ example of a locally-configured static message.</p>
         { container: 'traffic_map_1',
           static_url: '{{ url_for('static', filename='traffic_map/') }}'
         },
-        { lat: 52.204684,
-          lng: 0.124622,
-          zoom: 12
+        { lat: 52.2218,
+          lng: 0.1021,
+          zoom: 13
         }
       ));
 
@@ -175,35 +247,43 @@ example of a locally-configured static message.</p>
         <span>SmartPanel</span>
       </div>
 
-      <div class="container_1_2 col_1 row_1" id="message_area_1">
+      <div class="container_2_2 col_1 row_1" id="traffic_map_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_2 col_1 row_3" id="weather_area_1">
+      <div class="container_1_2 col_1 row_3" id="station_board_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_2 col_3 row_1" id="stop_timetable_1">
+      <div class="container_1_2 col_2 row_3" id="station_board_2">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_2 col_2 row_3" id="stop_timetable_2">
+      <div class="container_1_4 col_3 row_1" id="twitter_timeline_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_2 col_2 row_1" id="station_board_1">
+      <div class="container_2_2 col_5 row_1" id="stop_bus_map_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_2 col_4 row_1" id="traffic_map_1">
+      <div class="container_1_1 col_4 row_1" id="stop_timetable_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_2 col_4 row_3" id="stop_bus_map_1">
+      <div class="container_1_1 col_4 row_2" id="stop_timetable_2">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_4 col_6 row_1" id="twitter_timeline_1">
+      <div class="container_2_1 col_5 row_4" id="stop_timetable_3">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_2_1 col_5 row_3" id="stop_timetable_4">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_2 col_4 row_3" id="stop_timetable_5">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 

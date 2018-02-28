@@ -21,19 +21,11 @@ function StopBusMap(config, params) {
 
     var self = this;
 
-    // Backwards compatibility or first argument
-    var container;
-
     var STATIC_URL;
 
-    if (typeof(config) === 'string') {
-        container = config;
-        STATIC_URL = params.static_url;
-    }
-    else {
-        container = config.container;
-        STATIC_URL = config.static_url;
-    }
+    STATIC_URL = config.static_url;
+
+    this.container = config.container;
 
     var sensors = {};
 
@@ -76,11 +68,11 @@ function StopBusMap(config, params) {
     var progress_timer;
 
     this.init = function() {
-        log("Instantiated StopBusMap", container, params);
+        log("Instantiated StopBusMap", config.container, params);
 
-        var container_el = document.getElementById(container);
+        var container_el = document.getElementById(config.container);
 
-        log("Running StopBusMap.init", container);
+        log("Running StopBusMap.init", config.container);
 
         // Empty the 'container' div (i.e. remove loading GIF)
         while (container_el.firstChild) {
@@ -97,13 +89,13 @@ function StopBusMap(config, params) {
 
         var connection_div = document.createElement('div');
         connection_div.setAttribute('class','stop_bus_map_connection_div');
-        connection_div.setAttribute('id', container+'_connection');
+        connection_div.setAttribute('id', config.container+'_connection');
         connection_div.innerHTML = "Connection issues";
         container_el.appendChild(connection_div);
 
         var title_h1 = document.createElement('h1');
         title_h1.setAttribute('class', 'stop_bus_map_title_h1');
-        title_h1.setAttribute('id', container+'_title_h1');
+        title_h1.setAttribute('id', config.container+'_title_h1');
         var img = document.createElement('img');
         img.setAttribute('src', config.static_url + 'images/bus.png');
         title_h1.appendChild(img);
@@ -114,7 +106,7 @@ function StopBusMap(config, params) {
 
         var map_div = document.createElement('div');
         map_div.setAttribute('class','stop_bus_map_div');
-        map_div.setAttribute('id', container+'_map');
+        map_div.setAttribute('id', config.container+'_map');
         container_el.appendChild(map_div);
 
         map = L.map(map_div, { zoomControl:false }).setView([params.lat, params.lng], params.zoom);
@@ -136,26 +128,26 @@ function StopBusMap(config, params) {
     };
 
     /*this.reload = function() {
-        log("Running StationBoard.reload", container);
+        log("Running StationBoard.reload", config.container);
         this.do_load();
     }*/
 
 function do_load()
 {
-    log("Running StopBusMap.do_load", container);
-    log("StopBusMapMap.do_load done", container);
+    log("Running StopBusMap.do_load", config.container);
+    log("StopBusMapMap.do_load done", config.container);
 };
 
 function rtmonitor_disconnected()
 {
     log('stop_bus_map rtmonitor_disconnected');
-    document.getElementById(container+'_connection').style.display = 'inline-block';
+    document.getElementById(config.container+'_connection').style.display = 'inline-block';
 }
 
 function rtmonitor_connected()
 {
     log('stop_bus_map rtmonitor_connected');
-    document.getElementById(container+'_connection').style.display = 'none';
+    document.getElementById(config.container+'_connection').style.display = 'none';
     subscribe();
 };
 
@@ -190,7 +182,7 @@ function subscribe()
                                   ]
                         } ] };
 
-    var request_status = RTMONITOR_API.subscribe(container,
+    var request_status = RTMONITOR_API.subscribe(config.container,
                                                  request_id,
                                                  request,
                                                  handle_records);

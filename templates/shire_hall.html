@@ -30,7 +30,7 @@
     <script type="text/javascript">
 
       var DEBUG = ''; // widget.log() code will check this global variable
-
+/*
       widget.push(new MessageArea(
         { container: 'message_area_1',
           static_url: '{{ url_for('static', filename='message_area/') }}',
@@ -87,19 +87,7 @@ example of a locally-configured static message.</p>
           ]
         }
       ));
-
-      widget.push(new StopTimetable(
-        { container: 'stop_timetable_2',
-          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
-        },
-        { stop_id: '0500CCITY199',
-          common_name: 'Cam Uni Vet School',
-          layout: 'simple',
-          lat: 52.21129,
-          lng: 0.09107
-        }
-      ));
-
+*/
       widget.push(new StopBusMap(
         { container: 'stop_bus_map_1',
           static_url: '{{ url_for('static', filename='stop_bus_map/') }}'
@@ -127,12 +115,77 @@ example of a locally-configured static message.</p>
               common_name: 'Shire Hall',
               lat: 52.21297,
               lng: 0.11263
-            }
+            },
+        { stop_id: '0500CCITY275',
+          common_name: 'Castle St',
+          lat: 52.21049,
+          lng: 0.11404
+        }
           ],
           breadcrumbs: true,
           lat: 52.2125,
           lng: 0.112,
           zoom: 15
+        }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_1',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY401',
+          common_name: 'Shire Hall (outbound)',
+          layout: 'simple',
+          lat: 52.21297,
+          lng: 0.11235
+        }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_2',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+            { stop_id: '0500CCITY497',
+              common_name: 'The Busway Shire Hall',
+          layout: 'simple',
+              lat: 52.21274,
+              lng: 0.11263
+            }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_3',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+            { stop_id: '0500CCITY496',
+              common_name: 'The Busway Shire Hall',
+          layout: 'simple',
+              lat: 52.213,
+              lng: 0.11257
+            }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_4',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+            { stop_id: '0500CCITY394',
+              common_name: 'Shire Hall (to city centre)',
+          layout: 'simple',
+              lat: 52.21297,
+              lng: 0.11263
+            }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_5',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY275',
+          common_name: 'Castle St',
+          layout: 'simple',
+          lat: 52.21049,
+          lng: 0.11404
         }
       ));
 
@@ -145,6 +198,15 @@ example of a locally-configured static message.</p>
         }
       ));
 
+      widget.push(new StationBoard(
+        { container: 'station_board_2',
+          static_url: '{{ url_for('static', filename='station_+board/') }}'
+        },
+        { station: 'CMB',
+          offset: 0
+        }
+      ));
+/*
       widget.push(new TwitterTimeline(
         { container: 'twitter_timeline_1',
           static_url: '{{ url_for('static', filename='twitter_timeline/') }}'
@@ -152,7 +214,7 @@ example of a locally-configured static message.</p>
         { who: 'Cambs_Traffic'
         }
       ));
-
+*/
       widget.push(new TrafficMap(
         { container: 'traffic_map_1',
           static_url: '{{ url_for('static', filename='traffic_map/') }}'
@@ -162,6 +224,7 @@ example of a locally-configured static message.</p>
           zoom: 12
         }
       ));
+
     </script>
 
   </head>
@@ -181,38 +244,42 @@ example of a locally-configured static message.</p>
         <a href="http://www.cam.ac.uk">
             <img alt="The University of Cambridge" src="{{ url_for('static', filename='logo_uc_112.png') }}">
         </a>
-        <span>Adaptive Cities Platform</span>
+        <span>SmartPanel</span>
       </div>
 
-      <div class="container_1_2 col_1 row_1" id="message_area_1">
+      <div class="container_2_2 col_1 row_1" id="traffic_map_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_2 col_1 row_3" id="weather_area_1">
+      <div class="container_1_2 col_1 row_3" id="station_board_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_2 col_3 row_1" id="stop_timetable_1">
+      <div class="container_1_2 col_2 row_3" id="station_board_2">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_2 col_2 row_3" id="stop_timetable_2">
+      <div class="container_2_2 col_5 row_1" id="stop_bus_map_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_2 col_2 row_1" id="station_board_1">
+      <div class="container_2_1 col_3 row_1" id="stop_timetable_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_2 col_4 row_1" id="traffic_map_1">
+      <div class="container_2_1 col_3 row_2" id="stop_timetable_2">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_2 col_4 row_3" id="stop_bus_map_1">
+      <div class="container_2_1 col_5 row_4" id="stop_timetable_3">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_4 col_6 row_1" id="twitter_timeline_1">
+      <div class="container_2_1 col_5 row_3" id="stop_timetable_4">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_2_2 col_3 row_3" id="stop_timetable_5">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
