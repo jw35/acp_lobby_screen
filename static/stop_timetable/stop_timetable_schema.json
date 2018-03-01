@@ -57,9 +57,27 @@
                         }
                     },
                     "area": {
-                        "type": "string",
+                        "type": "array",
                         "title": "Destination area",
-                        "description": "A list of lat/lng coordinate pairs defining the destination area"
+                        "description": "A list of lat/lng coordinate pairs defining the destination area",
+                        "items": {
+                            "type": "object",
+                            "required": ["lng", "lat"],
+                            "properties": {
+                                "lng": {
+                                    "type": "number",
+                                    "title": "Longitude",
+                                    "maximum": 180,
+                                    "minumum": -180
+                                },
+                                "lat": {
+                                    "type": "number",
+                                    "title": "Latitude",
+                                    "maximum": 90,
+                                    "minimum": -90
+                                }
+                            }
+                        }
                     }
                 }
             }
