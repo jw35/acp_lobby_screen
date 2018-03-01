@@ -72,7 +72,7 @@
             },
             { description: 'Hospital',
               stop_ids: ['0500CCITY517']
-            },
+            }
           ]
         }
       ));
@@ -88,6 +88,35 @@
           lng: 0.09107
         }
       ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_3',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY424',
+          common_name: 'William Gates Building',
+          layout: 'nextbus',
+          destinations: [
+            { description: 'City Centre',
+              stop_ids: ['0500CCITY419']
+            },
+            { description: 'Station',
+              stop_ids: ['0500CCITY507', '0500CCITY530']
+            },
+            { description: 'Hospital',
+              //stop_ids: ['0500CCITY517'],
+              area: 
+                  [
+                    {  lat: 52.176747687499386, lng: 0.14107950031757358 },
+                    {  lat: 52.17706348889764, lng: 0.14607913792133334 },
+                    {  lat: 52.175431824205745, lng: 0.14610059559345248 },
+                    {  lat: 52.174944944921215, lng: 0.14170177280902865 }
+                  ]
+            }
+          ]
+        }
+      ));
+
 
       widget.push(new StopBusMap(
          { container: 'stop_bus_map_1',
@@ -240,6 +269,10 @@
       </div>
 
       <div class="container_2_2 col_1 row_3" id="stop_timetable_2">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_2 col_3 row_3" id="stop_timetable_3">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 

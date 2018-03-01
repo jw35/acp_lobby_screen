@@ -78,6 +78,9 @@ function StopTimetable(config, params) {
         RTMONITOR_API.ondisconnect(rtmonitor_disconnected);
         RTMONITOR_API.onconnect(rtmonitor_connected);
 
+        // On startup, calculate bounding boxes of any 'destination areas' given in params
+        add_box_to_params_destinations_areas();
+
         // Set up the HTML skeleton of the container
         initialise_container(container);
 
@@ -143,6 +146,24 @@ function StopTimetable(config, params) {
         content_area.appendChild(departure_div);
     }
 
+    // This widget *may* have been given params.destinations containing
+    // broad destinations, each as a list of stops or a polygon (or both).
+    // If a polygon, then params.destinations[i].area = [ {lat: lng:}, ... ].
+    // This function adds a 'box' property {north: south: east: west; } containing
+    // the bounding lat/longs of the polygon as an optimization for geo.js is_inside.
+    function add_box_to_params_destinations_areas()
+    {
+        if (!params.destinations) {
+            return;
+        }
+
+        for (var i=0; i<params.destinations.length; i++) {
+            if (params.destinations[i].area) {
+                params.destinations[i].box = get_box(params.destinations[i].area);
+                // console.log('get_box '+JSON.stringify(params.destinations[i].box));
+            }
+        }
+    }
 
     // ==== Timetable API functions ====================================
 
@@ -268,10 +289,17 @@ function StopTimetable(config, params) {
                     var destination = params.destinations[d];
                     // For every timetable entry on this journey
                     for (var e = 0; e < result.journey.timetable.length; e++) {
-                        entry = result.journey.timetable[e];
+                        var timetable_entry = result.journey.timetable[e];
                         // Does it go to this destination?
-                        if (destination.stop_ids.indexOf(entry.stop.atco_code) !== -1) {
-                            destination_table[d] = entry;
+                        if (( destination.stop_ids &&
+                              destination.stop_ids.indexOf(timetable_entry.stop.atco_code) !== -1 ) ||
+                            ( destination.area &&
+                              is_inside({ lat: timetable_entry.stop.latitude,
+                                          lng: timetable_entry.stop.longitude },
+                                        destination.area,
+                                        destination.box)))
+                        {
+                            destination_table[d] = timetable_entry;
                             break;
                         }
                     }
