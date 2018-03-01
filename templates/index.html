@@ -147,9 +147,19 @@ example of a locally-configured static message.</p>
         { container: 'traffic_map_1',
           static_url: '{{ url_for('static', filename='traffic_map/') }}'
         },
-        { lat: 52.204684,
-          lng: 0.124622,
-          zoom: 12
+        { interval: 7.5,
+          maps:
+          [
+            { lat: 52.204684,
+              lng: 0.124622,
+              zoom: 12
+            },
+            { lat: 52.204684,
+              lng: 0.124622,
+              zoom: 10
+            },
+
+          ]
         }
       ));
 
