@@ -18,6 +18,11 @@
             integrity="sha256-FJZOELgwnfQRdG8KZUSWCYgucECDf4w5kfQdQSGbVpI="
             crossorigin="anonymous"></script>
 
+    <!-- handlebars (don't tell IJL) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.js"
+    integrity="sha256-JWyJjSicZs/EX4AJmuCHSYYARSvIkYeM79Dn1pJOSCE="
+    crossorigin="anonymous"></script>
+
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEkMI-ZAAt1kjv668jfBXhNB1-odv5m3g"></script>
 
 
@@ -72,9 +77,9 @@
         { container: 'stop_timetable_1',
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
-        { stop_id: '0500CCITY424',
-          common_name: 'Cambridge, opp William Gates Building',
-          layout: 'nextbus',
+        { stop_id: '0500CCITY199',
+          common_name: 'Cam Uni Vet School',
+          layout: 'simple',
           destinations: [
             { description: 'City Centre',
               stop_ids: ['0500CCITY419']
@@ -93,22 +98,12 @@
         { container: 'stop_timetable_2',
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
-        { stop_id: '0500CCITY424',
-          common_name: 'Cambridge, opp William Gates Building',
-          layout: 'debug'
-        }
-      ));
-
-      widget.push(new StopTimetable(
-        { container: 'stop_timetable_3',
-          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
-        },
         { stop_id: '0500CCITY199',
-          common_name: 'Cambridge, opp Cam Uni Vet School',
-          layout: 'nextbus',
+          common_name: 'Cam Uni Vet School',
+          layout: 'debug',
           destinations: [
             { description: 'City Centre',
-              stop_ids: ['0500CCITY419', '0500CCITY484', '0500CCITY119', '0500CCITY494']
+              stop_ids: ['0500CCITY419']
             },
             { description: 'Station',
               stop_ids: ['0500CCITY507', '0500CCITY530']
@@ -116,19 +111,31 @@
             { description: 'Hospital',
               stop_ids: ['0500CCITY517']
             },
-          ]
-        }
+        ]
+      }
       ));
 
       widget.push(new StopTimetable(
-        { container: 'stop_timetable_4',
+        { container: 'stop_timetable_3',
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
         { stop_id: '0500CCITY199',
-          common_name: 'Cambridge, opp Cam Uni Vet School',
-          layout: 'debug'
-        }
+          common_name: 'Cam Uni Vet School',
+          layout: 'multiline',
+          destinations: [
+            { description: 'City Centre',
+              stop_ids: ['0500CCITY419']
+            },
+            { description: 'Station',
+              stop_ids: ['0500CCITY507', '0500CCITY530']
+            },
+            { description: 'Hospital',
+              stop_ids: ['0500CCITY517']
+            },
+        ]
+      }
       ));
+
 
       function reload_widgets () {
         for (var i = 0; i < widget.length; i++) {
@@ -196,16 +203,13 @@
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 -->
-      <div class="container_1_4 col_1 row_1" id="stop_timetable_1">
+      <div class="container_2_4 col_1 row_1" id="stop_timetable_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
-      <div class="container_2_4 col_2 row_1" id="stop_timetable_2">
+      <div class="container_2_4 col_3 row_1" id="stop_timetable_2">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
-      <div class="container_1_4 col_4 row_1" id="stop_timetable_3">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-      <div class="container_2_4 col_5 row_1" id="stop_timetable_4">
+      <div class="container_2_4 col_5 row_1" id="stop_timetable_3">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 <!--
