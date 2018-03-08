@@ -1,7 +1,7 @@
 // /* Bus Stop Timetable Widget for ACP Lobby Screen */
 
 /* jshint esversion:6 */
-/* globals RTMONITOR_API, DEBUG, moment, Handlebars */
+/* globals RTMONITOR_API, DEBUG, moment, Handlebars, get_box, is_inside */
 /* exported StopTimetable */
 
 function StopTimetable(config, params) {
@@ -54,11 +54,12 @@ function StopTimetable(config, params) {
         //       first: timetable object of first (origin) stop
         //       last: timetable object of last (destination) stop
         //       destinations: list of first matching timetable object
-        //                              for each params.destinations
-        //       last_is_destination: destinations[] index of destination
-        //                              containing final stop
-        //       due: moment() of timetable time at this stop
-        //       eta: moment of best estimate time at this stop
+        //                     for each params.destinations
+        //       last_is_destination: index into destinations[] of a
+        //                     destination containing this journey's
+        //                     last stop
+        //       due: moment() of timetabled time at this stop
+        //       eta: moment() of best estimate time at this stop
         //       [all of first/last/destinations[n] have additional
         //        .due = moment(this.time)]
         //     rt: most recent real time report for this journey
@@ -95,6 +96,25 @@ function StopTimetable(config, params) {
     };
 
 
+    // This widget *may* have been given params.destinations containing
+    // broad destinations, each as a list of stops or a polygon (or both).
+    // If a polygon, then params.destinations[i].area = [ {lat: lng:}, ... ].
+    // This function adds a 'box' property {north: south: east: west; } containing
+    // the bounding lat/longs of the polygon as an optimization for geo.js is_inside.
+    function add_box_to_params_destinations_areas()
+    {
+        if (!params.destinations) {
+            return;
+        }
+
+        for (var i=0; i<params.destinations.length; i++) {
+            if (params.destinations[i].area) {
+                params.destinations[i].box = get_box(params.destinations[i].area);
+                // console.log('get_box '+JSON.stringify(params.destinations[i].box));
+            }
+        }
+    }
+
     function initialise_container(id) {
 
         var container = document.getElementById(id);
@@ -107,11 +127,11 @@ function StopTimetable(config, params) {
         // <div class="stop_timetable">
         //   <div class="content_area">
         //     <h1>Title</h1>
-        //     <div class="stop_timetable_connection_div" id="<container?_connection"
+        //     <div class="stop_timetable_connection_div" id="<container>_connection"
         //       Connection issues
         //     </div>
-        //     <div class="departures">
-        //       ...
+        //     <div>
+        //       <content goes here>
         //     </div>
         //   </div>
         // </div>
@@ -149,24 +169,6 @@ function StopTimetable(config, params) {
         content_area.appendChild(departure_div);
     }
 
-    // This widget *may* have been given params.destinations containing
-    // broad destinations, each as a list of stops or a polygon (or both).
-    // If a polygon, then params.destinations[i].area = [ {lat: lng:}, ... ].
-    // This function adds a 'box' property {north: south: east: west; } containing
-    // the bounding lat/longs of the polygon as an optimization for geo.js is_inside.
-    function add_box_to_params_destinations_areas()
-    {
-        if (!params.destinations) {
-            return;
-        }
-
-        for (var i=0; i<params.destinations.length; i++) {
-            if (params.destinations[i].area) {
-                params.destinations[i].box = get_box(params.destinations[i].area);
-                // console.log('get_box '+JSON.stringify(params.destinations[i].box));
-            }
-        }
-    }
 
     // ==== Timetable API functions ====================================
 
@@ -286,40 +288,10 @@ function StopTimetable(config, params) {
             added++;
 
             // See if this journey goes to any of our destinations
-            var destination_table = [];
-            var last_is_destination;
-            // For each destination (if we have any)
-            if (params.destinations) {
-                for (var d = 0; d < params.destinations.length; d++) {
-                    var destination = params.destinations[d];
-                    // For every timetable entry on this journey
-                    for (var e = 0; e < result.journey.timetable.length; e++) {
-                        var timetable_entry = result.journey.timetable[e];
-                        // Does it go to this destination?
-                        if (( destination.stop_ids &&
-                              destination.stop_ids.indexOf(timetable_entry.stop.atco_code) !== -1 ) ||
-                            ( destination.area &&
-                              is_inside({ lat: timetable_entry.stop.latitude,
-                                          lng: timetable_entry.stop.longitude },
-                                        destination.area,
-                                        destination.box))) {
-                            timetable_entry.due = timetable_time_to_moment(timetable_entry.time);
-                            destination_table[d] = timetable_entry;
-                            break;
-                        }
-                    }
-                    // Is the last stop of this journey part of a destination?
-                    if (( destination.stop_ids &&
-                          destination.stop_ids.indexOf(last.stop.atco_code) !== -1 ) ||
-                        ( destination.area &&
-                          is_inside({ lat: last.stop.latitude,
-                                      lng: last.stop.longitude },
-                                    destination.area,
-                                    destination.box))) {
-                            last_is_destination = d;
-                        }
-                }
-            }
+            var r = make_destination_table(result);
+            log('m_d_t rsult', r);
+            var destination_table = r[0];
+            var last_is_destination = r[1];
 
             // Populate the journey_table
             var journey = {
@@ -344,6 +316,64 @@ function StopTimetable(config, params) {
 
     }
 
+
+    function make_destination_table(result) {
+        // Work out which, if any, destinations is served by this journey
+        var destination_table = [];
+        var last_is_destination;
+
+        // For each supplied destination (if we have any)...
+        if (params.destinations) {
+            for (var d = 0; d < params.destinations.length; d++) {
+                var destination = params.destinations[d];
+                var seen_self = false;
+
+                // ...for every timetable entry on this journey...
+                for (var e = 0; e < result.journey.timetable.length; e++) {
+                    var timetable_entry = result.journey.timetable[e];
+
+                    // ...does this journey go to this destination after
+                    // passing ourself?
+                    if (( seen_self ) &&
+                        (( destination.stop_ids &&
+                           destination.stop_ids.indexOf(timetable_entry.stop.atco_code) !== -1 ) ||
+                         ( destination.area &&
+                           is_inside({ lat: timetable_entry.stop.latitude,
+                                       lng: timetable_entry.stop.longitude },
+                                     destination.area,
+                                     destination.box)))) {
+                        timetable_entry.due = timetable_time_to_moment(timetable_entry.time);
+                        destination_table[d] = timetable_entry;
+                        break;
+                    }
+
+                    // Is this timetable entry 'us'?
+                    if (timetable_entry.stop.atco_code === params.stop_id) {
+                        seen_self = true;
+                    }
+
+                }
+
+                // Separately, is the last (final) stop of this journey
+                // part of this destination?
+                var last = result.journey.timetable[result.journey.timetable.length-1];
+                if (( destination.stop_ids &&
+                      destination.stop_ids.indexOf(last.stop.atco_code) !== -1 ) ||
+                    ( destination.area &&
+                      is_inside({ lat: last.stop.latitude,
+                                  lng: last.stop.longitude },
+                                destination.area,
+                                destination.box))) {
+                        last_is_destination = d;
+                }
+            }
+        }
+
+        log('in m_d_t, d_t:', destination_table, 'l_i_d:', last_is_destination);
+
+        return [destination_table, last_is_destination];
+
+    }
 
     // ==== Real-time subscription functions ===========================
 
@@ -646,6 +676,23 @@ function StopTimetable(config, params) {
 
         log('display_multiline - running');
 
+        var rows = display_multiline_view();
+
+        // If there's nothing to display
+        if (rows.length === 0) {
+            var div = document.createElement('div');
+            div.setAttribute('class','no-departures');
+            div.innerHTML = 'No more departures today';
+            return div;
+        }
+
+        return display_multiline_render_dom(rows);
+
+    }
+
+
+    function display_multiline_view() {
+
         // First - build a view data structure
 
         var rows = [];
@@ -657,7 +704,6 @@ function StopTimetable(config, params) {
             if (rows.length >= MAX_LINES) {
                 break;
             }
-
             // Skip anything that left in the past
             if (journey.eta.isBefore(get_now().subtract(1, 'minutes'))) {
                 continue;
@@ -699,34 +745,36 @@ function StopTimetable(config, params) {
             }
 
             // Delay
+            row.delay = {};
             if (fresh_timestamp(journey)) {
                 var minutes = Math.trunc(journey.delay.asMinutes());
                 var hours = Math.trunc(journey.delay.asHours());
                 var eta = journey.eta.format('HH:mm');
-                row.delay = {};
+                row.delay.mark = false;
                 if (minutes < 1) {
                     row.delay.text = 'On time';
                 }
                 else if (minutes < 60) {
                     row.delay.text = pluralise(minutes, 'minute') + ' late (' + eta +')';
+                    row.delay.mark = true;
                 }
                 else {
                     row.delay.text = pluralise(hours, 'hour') + ' ' + pluralise(minutes % 60, 'minute') +
                     ' late (' + eta +')';
+                    row.delay.mark = true;
                 }
-                row.delay.minutes = minutes;
             }
 
             rows.push(row);
 
         }
 
-        if (rows.length === 0) {
-            var div = document.createElement('div');
-            div.setAttribute('class','no-departures');
-            div.innerHTML = 'No more departures today';
-            return div;
-        }
+        return rows;
+
+    }
+
+
+    function display_multiline_render_mustache(rows) {
 
         var source = `
 <table class="multiline">
@@ -748,13 +796,13 @@ function StopTimetable(config, params) {
       <td>via</td>
       <td colspan="1">
       {{#each via}}
-      {{this.desc}} ({{this.time}})
+      {{this.desc}} ({{this.time}}){{#unless @last}}, {{/unless}}
       {{/each}}
       </td>
       {{/if}}
     </tr>
     <tr class="timing">
-    {{#if this.delay.minutes}}
+    {{#if this.delay.mark}}
       <td colspan="3" class="issue">{{this.delay.text}}</td>
     {{else}}
       <td colspan="3">{{this.delay.text}}</td>
@@ -771,6 +819,135 @@ function StopTimetable(config, params) {
         return result;
 
     }
+
+
+    function display_multiline_render_dom(rows) {
+
+//<table class="multiline">
+
+        var table = document.createElement('table');
+        table.classList.add('multiline');
+
+        var tr, td;
+
+//{{#each rows}}
+        for (var r = 0; r < rows.length; r++) {
+            var row = rows[r];
+//  <tbody>
+            var tbody = document.createElement('tbody');
+            table.appendChild(tbody);
+
+//    <tr>
+            tr = document.createElement('tr');
+            tbody.appendChild(tr);
+
+//      <td rowspan="3" class="expected">{{this.due}}</td>
+            td = document.createElement('td');
+            tr.appendChild(td);
+            td.classList.add('expected');
+            td.setAttribute('rowspan', '3');
+            td.innerHTML = row.due;
+
+//      <td rowspan="3" class="line">{{this.line}}</td>
+            td = document.createElement('td');
+            tr.appendChild(td);
+            td.classList.add('line');
+            td.setAttribute('rowspan', '3');
+            td.innerHTML = row.line;
+
+//      <td>to</td>
+            td = document.createElement('td');
+            tr.appendChild(td);
+            td.innerHTML = 'to';
+
+//      <td>{{this.destination.desc}} <span class="together">(at {{this.destination.time}})</span></td>
+            td = document.createElement('td');
+            tr.appendChild(td);
+            td.innerHTML = row.destination.desc;
+            var span = document.createElement('span');
+            td.appendChild(span);
+            span.classList.add('together');
+            span.innerHTML = '(at ' + row.destination.time;
+
+//      {{#if realtime}}
+//      <td rowspan="3"><img src="{{../config.static_url}}/clock-with-white-face.png" alt="" /></td>
+//      {{else}}
+//      <td rowspan="3"><img src="{{../config.static_url}}/timetable-outline.png" alt="" /></td>
+//      {{/if}}
+            var url;
+            if (row.realtime) {
+                url = config.static_url + '/clock-with-white-face.png';
+            }
+            else {
+                url = config.static_url + '/timetable-outline.png';
+            }
+            td = document.createElement('td');
+            tr.appendChild(td);
+            var img = document.createElement('img');
+            td.appendChild(img);
+            img.setAttribute('src', url);
+            img.setAttribute('alt', '');
+
+//    </tr>
+//    <tr class="via">
+            tr = document.createElement('tr');
+            tbody.appendChild(tr);
+            tr.classList.add('via');
+
+//      {{#if via}}
+            if (row.via) {
+
+//      <td>via</td>
+                td = document.createElement('td');
+                tr.appendChild(td);
+                td.innerHTML = 'to';
+
+//      <td colspan="1">
+                td = document.createElement('td');
+                tr.appendChild(td);
+
+//      {{#each via}}
+                var text;
+                for (var v = 0; v < row.via.length; v++) {
+                    var via = row.via[v];
+
+//      {{this.desc}} ({{this.time}}){{#unless @last}}, {{/unless}}
+                    if (v > 0) {
+                        text = text + ', ';
+                    }
+                    text = text + via.desc + ' (' + via.time + ')';
+//      {{/each}}
+                }
+                tr.innerHTML = text;
+//      </td>
+//      {{/if}}
+            }
+//    </tr>
+//    <tr class="timing">
+            tr = document.createElement('tr');
+            tbody.appendChild(tr);
+            tr.classList.add('timing');
+//    {{#if this.delay.mark}}
+//      <td colspan="3" class="issue">{{this.delay.text}}</td>
+//    {{else}}
+//      <td colspan="3">{{this.delay.text}}</td>
+//    {{/if}}
+            td = document.createElement('td');
+            tr.appendChild(td);
+            if (row.delay.mark) {
+                td.classList.add('issue');
+            }
+            td.innerHTML = row.delay.text;
+//    </tr>
+///  </tbody>
+        }
+//  {{/each}}
+//</table>
+
+        return table;
+
+    }
+
 
 
     function display_debug() {
