@@ -75,26 +75,43 @@
       // WGB        0500CCITY424
       // Christs    0500CCITY111
 
+/*
       widget.push(new StopTimetable(
         { container: 'stop_timetable_1',
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
-        { stop_id: '0500CCITY111',
+        { stop_id: '0500CCITY199',
           common_name: 'Cam Uni Vet School',
-          layout: 'simple',
+          layout: 'multiline',
           destinations: [
             { description: 'City Centre',
-              stop_ids: ['0500CCITY419']
+              area: [
+                {  "lat": 52.207862294900934, "lng": 0.11361030105035753 },
+                {  "lat": 52.21047891499041, "lng": 0.11815932753961535 },
+                {  "lat": 52.204127756109976, "lng": 0.12644198897760364 },
+                {  "lat": 52.20078744495295, "lng": 0.11854556563775988 }
+              ]
             },
             { description: 'Station',
-              stop_ids: ['0500CCITY507', '0500CCITY530']
+              area: [
+                {  "lat": 52.19247891040565, "lng": 0.13503756519639865 },
+                {  "lat": 52.194017876507935, "lng": 0.1361104488023557 },
+                {  "lat": 52.19366273521314, "lng": 0.13724770542467016 },
+                {  "lat": 52.19215006458652, "lng": 0.13630356785142794 }
+              ]
             },
             { description: 'Hospital',
-              stop_ids: ['0500CCITY517']
+              area: [
+                {  "lat": 52.176747687499386, "lng": 0.14107950031757358 },
+                {  "lat": 52.17706348889764,  "lng": 0.14607913792133334 },
+                {  "lat": 52.175431824205745, "lng": 0.14610059559345248 },
+                {  "lat": 52.174944944921215, "lng": 0.14170177280902865 }
+              ]
             },
-        ]
-      }
+          ]
+        }
       ));
+
 
       widget.push(new StopTimetable(
         { container: 'stop_timetable_2',
@@ -102,40 +119,77 @@
         },
         { stop_id: '0500CCITY111',
           common_name: 'Cam Uni Vet School',
-          layout: 'debug',
+          layout: 'multiline',
           destinations: [
             { description: 'City Centre',
-              stop_ids: ['0500CCITY419']
+              area: [
+                {  "lat": 52.207862294900934, "lng": 0.11361030105035753 },
+                {  "lat": 52.21047891499041, "lng": 0.11815932753961535 },
+                {  "lat": 52.204127756109976, "lng": 0.12644198897760364 },
+                {  "lat": 52.20078744495295, "lng": 0.11854556563775988 }
+              ]
             },
             { description: 'Station',
-              stop_ids: ['0500CCITY507', '0500CCITY530']
+              area: [
+                {  "lat": 52.19247891040565, "lng": 0.13503756519639865 },
+                {  "lat": 52.194017876507935, "lng": 0.1361104488023557 },
+                {  "lat": 52.19366273521314, "lng": 0.13724770542467016 },
+                {  "lat": 52.19215006458652, "lng": 0.13630356785142794 }
+              ]
             },
             { description: 'Hospital',
-              stop_ids: ['0500CCITY517']
+              area: [
+                {  "lat": 52.176747687499386, "lng": 0.14107950031757358 },
+                {  "lat": 52.17706348889764,  "lng": 0.14607913792133334 },
+                {  "lat": 52.175431824205745, "lng": 0.14610059559345248 },
+                {  "lat": 52.174944944921215, "lng": 0.14170177280902865 }
+              ]
             },
-        ]
-      }
+          ]
+        }
       ));
 
+*/
       widget.push(new StopTimetable(
         { container: 'stop_timetable_3',
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
-        { stop_id: '0500CCITY111',
+        { stop_id: '0500CCITY424',
           common_name: 'Cam Uni Vet School',
           layout: 'multiline',
           destinations: [
             { description: 'City Centre',
-              stop_ids: ['0500CCITY419']
+              area: [
+                {  "lat": 52.207862294900934, "lng": 0.11361030105035753 },
+                {  "lat": 52.21047891499041, "lng": 0.11815932753961535 },
+                {  "lat": 52.204127756109976, "lng": 0.12644198897760364 },
+                {  "lat": 52.20078744495295, "lng": 0.11854556563775988 }
+              ]
             },
             { description: 'Station',
-              stop_ids: ['0500CCITY507', '0500CCITY530']
+              area: [
+                /*
+                {  "lat": 52.19229475704664, "lng": 0.13460841175401583 },
+                {  "lat": 52.19437301496545, "lng": 0.13632502552354708 },
+                {  "lat": 52.19386003628276, "lng": 0.13808455463731661 },
+                {  "lat": 52.19179490836965, "lng": 0.1364323138841428 }
+                */
+                {  "lat": 52.192212742453094, "lng": 0.1350032910704613 },
+{  "lat": 52.19371225752975, "lng": 0.13509985059499743 },
+{  "lat": 52.19369910410862, "lng": 0.13722416013479236 },
+{  "lat": 52.19217328084697, "lng": 0.13693448156118396 } 
+              ]
             },
             { description: 'Hospital',
-              stop_ids: ['0500CCITY517']
+              area: [
+                {  "lat": 52.176747687499386, "lng": 0.14107950031757358 },
+                {  "lat": 52.17706348889764,  "lng": 0.14607913792133334 },
+                {  "lat": 52.175431824205745, "lng": 0.14610059559345248 },
+                {  "lat": 52.174944944921215, "lng": 0.14170177280902865 }
+              ]
             },
-        ]
-      }
+          ]
+        }
       ));
 
 

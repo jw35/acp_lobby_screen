@@ -111,6 +111,9 @@ function StopTimetable(config, params) {
             if (params.destinations[i].area) {
                 params.destinations[i].box = get_box(params.destinations[i].area);
                 // console.log('get_box '+JSON.stringify(params.destinations[i].box));
+                log('Destination', i);
+                log('           ', JSON.stringify(params.destinations[i].area));
+                log('           ', JSON.stringify(params.destinations[i].box));
             }
         }
     }
@@ -289,7 +292,6 @@ function StopTimetable(config, params) {
 
             // See if this journey goes to any of our destinations
             var r = make_destination_table(result);
-            log('m_d_t rsult', r);
             var destination_table = r[0];
             var last_is_destination = r[1];
 
@@ -328,9 +330,17 @@ function StopTimetable(config, params) {
                 var destination = params.destinations[d];
                 var seen_self = false;
 
+                log('Doing destination', d, destination.description);
+                log('                 ', destination.area);
+                log('                 ', destination.box);
+
                 // ...for every timetable entry on this journey...
                 for (var e = 0; e < result.journey.timetable.length; e++) {
                     var timetable_entry = result.journey.timetable[e];
+
+                    log('  trying', timetable_entry.stop.atco_code, timetable_entry.stop.common_name, seen_self);
+                    log('        ', timetable_entry.stop.latitude, timetable_entry.stop.longitude);
+
 
                     // ...does this journey go to this destination after
                     // passing ourself?
@@ -344,6 +354,7 @@ function StopTimetable(config, params) {
                                      destination.box)))) {
                         timetable_entry.due = timetable_time_to_moment(timetable_entry.time);
                         destination_table[d] = timetable_entry;
+                        log(' Matched');
                         break;
                     }
 
@@ -368,8 +379,6 @@ function StopTimetable(config, params) {
                 }
             }
         }
-
-        log('in m_d_t, d_t:', destination_table, 'l_i_d:', last_is_destination);
 
         return [destination_table, last_is_destination];
 
@@ -687,6 +696,7 @@ function StopTimetable(config, params) {
         }
 
         return display_multiline_render_dom(rows);
+        //return display_multiline_render_mustache(rows);
 
     }
 
@@ -721,7 +731,7 @@ function StopTimetable(config, params) {
             var last = journey.last;
             var last_desc = describe_stop(journey.last);
             // Is the last stop itself in a destination?
-            if (journey.last_is_destination) {
+            if (journey.last_is_destination !== undefined) {
                 last = journey.destinations[journey.last_is_destination];
                 last_desc = params.destinations[journey.last_is_destination].description;
             }
@@ -846,28 +856,28 @@ function StopTimetable(config, params) {
             tr.appendChild(td);
             td.classList.add('expected');
             td.setAttribute('rowspan', '3');
-            td.innerHTML = row.due;
+            td.textContent = row.due;
 
 //      <td rowspan="3" class="line">{{this.line}}</td>
             td = document.createElement('td');
             tr.appendChild(td);
             td.classList.add('line');
             td.setAttribute('rowspan', '3');
-            td.innerHTML = row.line;
+            td.textContent = row.line;
 
 //      <td>to</td>
             td = document.createElement('td');
             tr.appendChild(td);
-            td.innerHTML = 'to';
+            td.textContent = 'to';
 
 //      <td>{{this.destination.desc}} <span class="together">(at {{this.destination.time}})</span></td>
             td = document.createElement('td');
             tr.appendChild(td);
-            td.innerHTML = row.destination.desc;
+            td.textContent = row.destination.desc;
             var span = document.createElement('span');
             td.appendChild(span);
             span.classList.add('together');
-            span.innerHTML = '(at ' + row.destination.time;
+            span.textContent = ' (' + row.destination.time +')';
 
 //      {{#if realtime}}
 //      <td rowspan="3"><img src="{{../config.static_url}}/clock-with-white-face.png" alt="" /></td>
@@ -895,19 +905,19 @@ function StopTimetable(config, params) {
             tr.classList.add('via');
 
 //      {{#if via}}
-            if (row.via) {
+            if (row.via && row.via.length > 0) {
 
 //      <td>via</td>
                 td = document.createElement('td');
                 tr.appendChild(td);
-                td.innerHTML = 'to';
+                td.textContent = 'via';
 
 //      <td colspan="1">
                 td = document.createElement('td');
                 tr.appendChild(td);
 
 //      {{#each via}}
-                var text;
+                var text = '';
                 for (var v = 0; v < row.via.length; v++) {
                     var via = row.via[v];
 
@@ -918,7 +928,7 @@ function StopTimetable(config, params) {
                     text = text + via.desc + ' (' + via.time + ')';
 //      {{/each}}
                 }
-                tr.innerHTML = text;
+                td.textContent = text;
 //      </td>
 //      {{/if}}
             }
@@ -934,10 +944,11 @@ function StopTimetable(config, params) {
 //    {{/if}}
             td = document.createElement('td');
             tr.appendChild(td);
+            td.setAttribute('colspan', '3');
             if (row.delay.mark) {
                 td.classList.add('issue');
             }
-            td.innerHTML = row.delay.text;
+            td.textContent = row.delay.text;
 //    </tr>
 ///  </tbody>
         }
