@@ -32,7 +32,7 @@
             "type": "string",
             "title": "Layout",
             "description": "Required layout for the display",
-            "enum": [ "simple", "nextbuss", "debug" ]
+            "enum": [ "simple", "multiline", "nextbuss", "debug" ]
         },
 
         "destinations": {
@@ -60,6 +60,7 @@
                         "type": "array",
                         "title": "Destination area",
                         "description": "A list of lat/lng coordinate pairs defining the destination area",
+                        "minItems": 3,
                         "items": {
                             "type": "object",
                             "required": ["lng", "lat"],
