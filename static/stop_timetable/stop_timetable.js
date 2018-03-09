@@ -4,6 +4,54 @@
 /* globals RTMONITOR_API, DEBUG, moment, Handlebars, get_box, is_inside */
 /* exported StopTimetable */
 
+/*
+
+NOTES:
+
+Being entirely event-driven, the flow of control in this widget is
+complicated. Here's a summary of the primary flow.
+
+The main data structure is journey_table which contains one row for each
+journey today. The rows contain timetable and real time information
+relating to these journeys.
+
+self.init() is called from the framework to start everything off. This
+establishes rtmonitor_connected() and rtmonitor_disconnected() as
+callbacks for connect/disconnect events from RTMONITOR_API, initialises
+the HTML in the container and calls populate_journeys().
+
+populate_journeys() retrieves batches of journeys through this stop and
+initialises journey_table. It makes recursively calls until all
+remaining journeys have been retrieved. It then schedules itself to
+run again early tomorrow morning to retrieve tomorrow's journeys. After
+retrieving each batch of journeys, it calls refresh_display() and
+refresh_subscriptions().
+
+rtmonitor_disconnected() runs whenever the app is notified that the
+web sockets interface has disconnected. It removes all records of any
+subscriptions since they have just evaporated.
+
+rtmonitor_connected() runs whenever the app is notified that the
+web sockets interface has re-connected. It re-establishes necessary
+subscriptions by calling refresh_subscriptions()
+
+refresh_subscriptions() creates RTMONITOR_API subscriptions for any
+journeys in the recent past or near future and removes subscriptions for
+journeys outside these bounds. It nominates handle_message() to run each
+time a new RT message comes in. Each time refresh_subscriptions() is run
+it arranges to re-run itself in SUBSCRIPTION_REFRESH_INTERVAL seconds if
+it's not rerun before then for other reasons.
+
+handle_message() runs in response to incoming RT messages. It updates
+the journey_table for the corresponding journeys and calls
+refresh_display(),
+
+refresh_display() re-draws the timetable display. Each time it run it
+arranges to re-run itself in DISPLAY_REFRESH_INTERVAL seconds if it's
+not rerun before then for other reasons.
+
+*/
+
 function StopTimetable(config, params) {
 
     'use strict';
