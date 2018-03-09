@@ -75,7 +75,6 @@
       // WGB        0500CCITY424
       // Christs    0500CCITY111
 
-/*
       widget.push(new StopTimetable(
         { container: 'stop_timetable_1',
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
@@ -112,15 +111,15 @@
         }
       ));
 
-
       widget.push(new StopTimetable(
         { container: 'stop_timetable_2',
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
         { stop_id: '0500CCITY111',
-          common_name: 'Cam Uni Vet School',
+          common_name: 'Christ\'s College',
           layout: 'multiline',
           destinations: [
+            /* Skip  becasue 0500CCITY111 is inside this area
             { description: 'City Centre',
               area: [
                 {  "lat": 52.207862294900934, "lng": 0.11361030105035753 },
@@ -129,6 +128,7 @@
                 {  "lat": 52.20078744495295, "lng": 0.11854556563775988 }
               ]
             },
+            */
             { description: 'Station',
               area: [
                 {  "lat": 52.19247891040565, "lng": 0.13503756519639865 },
@@ -149,13 +149,12 @@
         }
       ));
 
-*/
       widget.push(new StopTimetable(
         { container: 'stop_timetable_3',
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
         { stop_id: '0500CCITY424',
-          common_name: 'Cam Uni Vet School',
+          common_name: 'William Gates Building',
           layout: 'multiline',
           destinations: [
             { description: 'City Centre',
@@ -168,16 +167,10 @@
             },
             { description: 'Station',
               area: [
-                /*
                 {  "lat": 52.19229475704664, "lng": 0.13460841175401583 },
                 {  "lat": 52.19437301496545, "lng": 0.13632502552354708 },
                 {  "lat": 52.19386003628276, "lng": 0.13808455463731661 },
                 {  "lat": 52.19179490836965, "lng": 0.1364323138841428 }
-                */
-                {  "lat": 52.192212742453094, "lng": 0.1350032910704613 },
-{  "lat": 52.19371225752975, "lng": 0.13509985059499743 },
-{  "lat": 52.19369910410862, "lng": 0.13722416013479236 },
-{  "lat": 52.19217328084697, "lng": 0.13693448156118396 } 
               ]
             },
             { description: 'Hospital',

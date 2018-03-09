@@ -111,9 +111,9 @@ function StopTimetable(config, params) {
             if (params.destinations[i].area) {
                 params.destinations[i].box = get_box(params.destinations[i].area);
                 // console.log('get_box '+JSON.stringify(params.destinations[i].box));
-                log('Destination', i);
-                log('           ', JSON.stringify(params.destinations[i].area));
-                log('           ', JSON.stringify(params.destinations[i].box));
+                //log('Destination', i);
+                //log('           ', JSON.stringify(params.destinations[i].area));
+                //log('           ', JSON.stringify(params.destinations[i].box));
             }
         }
     }
@@ -330,16 +330,16 @@ function StopTimetable(config, params) {
                 var destination = params.destinations[d];
                 var seen_self = false;
 
-                log('Doing destination', d, destination.description);
-                log('                 ', destination.area);
-                log('                 ', destination.box);
+                //log('Doing destination', d, destination.description);
+                //log('                 ', destination.area);
+                //log('                 ', destination.box);
 
                 // ...for every timetable entry on this journey...
                 for (var e = 0; e < result.journey.timetable.length; e++) {
                     var timetable_entry = result.journey.timetable[e];
 
-                    log('  trying', timetable_entry.stop.atco_code, timetable_entry.stop.common_name, seen_self);
-                    log('        ', timetable_entry.stop.latitude, timetable_entry.stop.longitude);
+                    //log('  trying', timetable_entry.stop.atco_code, timetable_entry.stop.common_name, seen_self);
+                    //log('        ', timetable_entry.stop.latitude, timetable_entry.stop.longitude);
 
 
                     // ...does this journey go to this destination after
@@ -354,7 +354,7 @@ function StopTimetable(config, params) {
                                      destination.box)))) {
                         timetable_entry.due = timetable_time_to_moment(timetable_entry.time);
                         destination_table[d] = timetable_entry;
-                        log(' Matched');
+                        //log(' Matched');
                         break;
                     }
 
