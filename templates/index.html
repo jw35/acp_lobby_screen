@@ -93,12 +93,35 @@ example of a locally-configured static message.</p>
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
         { stop_id: '0500CCITY199',
-          common_name: 'Cam Uni Vet School',
-          layout: 'simple',
+          common_name: 'Vet School inbound',
+          layout: 'multiline',
+          lat: 52.21129,
+          lng: 0.09107,
+          destinations: [
+            { description: 'City Centre',
+              area: [
+                {  "lat": 52.207862294900934, "lng": 0.11361030105035753 },
+                {  "lat": 52.21047891499041, "lng": 0.11815932753961535 },
+                {  "lat": 52.204127756109976, "lng": 0.12644198897760364 },
+                {  "lat": 52.20078744495295, "lng": 0.11854556563775988 }
+              ]
+            },
+          ]
+        }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_3',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY050',
+          common_name: 'Vet School outbound',
+          layout: 'multiline',
           lat: 52.21129,
           lng: 0.09107
         }
       ));
+
 
       widget.push(new StopBusMap(
         { container: 'stop_bus_map_1',
@@ -197,7 +220,11 @@ example of a locally-configured static message.</p>
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_2 col_2 row_3" id="stop_timetable_2">
+      <div class="container_1_2 col_2 row_3" id="stop_timetable_2">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_2 col_3 row_3" id="stop_timetable_3">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
