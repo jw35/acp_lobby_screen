@@ -720,6 +720,7 @@ function StopTimetable(config, params) {
             }
 
             var row = {};
+            row.rows = 1;
 
             // Due
             row.due = journey.due.format('HH:mm');
@@ -745,12 +746,15 @@ function StopTimetable(config, params) {
 
             // Via
             row.via = [];
-            for (var d = 0; d < params.destinations.length; d++) {
-                if (journey.destinations[d] && d !== journey.last_is_destination) {
-                    row.via.push({
-                        desc: params.destinations[d].description,
-                        time: apply_delay(journey.destinations[d].due, journey).format('HH:mm')
-                    });
+            if (params.destinations) {
+                row.rows += 1;
+                for (var d = 0; d < params.destinations.length; d++) {
+                    if (journey.destinations[d] && d !== journey.last_is_destination) {
+                        row.via.push({
+                            desc: params.destinations[d].description,
+                            time: apply_delay(journey.destinations[d].due, journey).format('HH:mm')
+                        });
+                    }
                 }
             }
 
@@ -763,15 +767,18 @@ function StopTimetable(config, params) {
                 row.delay.mark = false;
                 if (minutes < 1) {
                     row.delay.text = 'On time';
+                    row.rows += 1;
                 }
                 else if (minutes < 60) {
                     row.delay.text = pluralise(minutes, 'minute') + ' late (' + eta +')';
                     row.delay.mark = true;
+                    row.rows += 1;
                 }
                 else {
                     row.delay.text = pluralise(hours, 'hour') + ' ' + pluralise(minutes % 60, 'minute') +
                     ' late (' + eta +')';
                     row.delay.mark = true;
+                    row.rows += 1;
                 }
             }
 
@@ -855,14 +862,14 @@ function StopTimetable(config, params) {
             td = document.createElement('td');
             tr.appendChild(td);
             td.classList.add('expected');
-            td.setAttribute('rowspan', '3');
+            td.setAttribute('rowspan', row.rows);
             td.textContent = row.due;
 
 //      <td rowspan="3" class="line">{{this.line}}</td>
             td = document.createElement('td');
             tr.appendChild(td);
             td.classList.add('line');
-            td.setAttribute('rowspan', '3');
+            td.setAttribute('rowspan', row.rows);
             td.textContent = row.line;
 
 //      <td>to</td>
@@ -873,11 +880,11 @@ function StopTimetable(config, params) {
 //      <td>{{this.destination.desc}} <span class="together">(at {{this.destination.time}})</span></td>
             td = document.createElement('td');
             tr.appendChild(td);
-            td.textContent = row.destination.desc;
+            td.textContent = row.destination.desc + ' ';
             var span = document.createElement('span');
             td.appendChild(span);
             span.classList.add('together');
-            span.textContent = ' (' + row.destination.time +')';
+            span.textContent = '(' + row.destination.time +')';
 
 //      {{#if realtime}}
 //      <td rowspan="3"><img src="{{../config.static_url}}/clock-with-white-face.png" alt="" /></td>
@@ -900,12 +907,11 @@ function StopTimetable(config, params) {
 
 //    </tr>
 //    <tr class="via">
-            tr = document.createElement('tr');
-            tbody.appendChild(tr);
-            tr.classList.add('via');
-
 //      {{#if via}}
             if (row.via && row.via.length > 0) {
+                tr = document.createElement('tr');
+                tbody.appendChild(tr);
+                tr.classList.add('via');
 
 //      <td>via</td>
                 td = document.createElement('td');
@@ -934,23 +940,25 @@ function StopTimetable(config, params) {
             }
 //    </tr>
 //    <tr class="timing">
-            tr = document.createElement('tr');
-            tbody.appendChild(tr);
-            tr.classList.add('timing');
+            if (row.delay.text) {
+                tr = document.createElement('tr');
+                tbody.appendChild(tr);
+                tr.classList.add('timing');
 //    {{#if this.delay.mark}}
 //      <td colspan="3" class="issue">{{this.delay.text}}</td>
 //    {{else}}
 //      <td colspan="3">{{this.delay.text}}</td>
 //    {{/if}}
-            td = document.createElement('td');
-            tr.appendChild(td);
-            td.setAttribute('colspan', '3');
-            if (row.delay.mark) {
-                td.classList.add('issue');
-            }
-            td.textContent = row.delay.text;
+                td = document.createElement('td');
+                tr.appendChild(td);
+                td.setAttribute('colspan', '3');
+                if (row.delay.mark) {
+                    td.classList.add('issue');
+                }
+                td.textContent = row.delay.text;
 //    </tr>
 ///  </tbody>
+            }
         }
 //  {{/each}}
 //</table>

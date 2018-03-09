@@ -38,6 +38,10 @@
 
 /* Custom styling for the 'multiline' layout */
 
+.stop_timetable table {
+    max-width: 100%;
+}
+
 .stop_timetable .multiline tr {
     vertical-align: top;
 }
@@ -66,12 +70,12 @@
 }
 
 .stop_timetable .multiline .expected {
-    font-size: 1.2rem;
+    font-size: 1rem;
     text-align: center;
 }
 
 .stop_timetable .multiline .line {
-    font-size: 1.2rem;
+    font-size: 1rem;
     text-align: center;
 }
 
