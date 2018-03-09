@@ -197,16 +197,23 @@ function StopTimetable(config, params) {
 
         }
         finally {
-            // Tomorrow morning, sometime between 04:00:00 and 04:14:59.9999
+            // Re-run popumate_journeys tomorrow morning, sometime
+            // between 04:00:00 and 04:59:59.9999
             // NB: populate_journeys takes note of offset. Don't run it
-            // at a time when the maximum offset (currently +/- 120 min)
-            // could end up calculating the wrong day! So not earlier
-            // than 02:00 or later than 22:00
-            var minutes = Math.random()*15;
-            var tomorrow = moment().add(1, 'd').hour(4).minute(minutes);
-            var delta = tomorrow.toDate() - moment().toDate();
-            console.log('Scheduling next populate_journeys for', tomorrow.format());
-            window.setTimeout(populate_journeys, delta);
+            //     at a time when the maximum offset (currently +/- 120 min)
+            //     could end up calculating the wrong day! So not earlier
+            //     than 02:00 or later than 22:00
+            var minutes = Math.random()*60;
+            //var tomorrow = moment().add(1, 'd').hour(4).minute(minutes);
+            var tomorrow = moment().add(5, 'm');
+            console.log('[' + container + ']', 'Scheduling next populate_journeys for', tomorrow.format());
+            var timer = window.setInterval(function () {
+                if (moment().isAfter(tomorrow)) {
+                    console.log('[' + container + ']', 'Re-running populate_journeys');
+                    clearInterval(timer);
+                    populate_journeys();
+                }
+            }, 60 * SECONDS);
         }
 
     }
@@ -1252,7 +1259,9 @@ function StopTimetable(config, params) {
 
     function log() {
         if ((typeof DEBUG !== 'undefined') && DEBUG.indexOf('stop_timetable_log') >= 0) {
-            console.log.apply(console, arguments);
+            var args = [].slice.call(arguments);
+            args.unshift('[' + container + ']');
+            console.log.apply(console, args);
         }
     }
 
@@ -1310,11 +1319,11 @@ function StopTimetable(config, params) {
         name = name.replace(/(\s+)Avenue$/i,'$1Ave');
         name = name.replace(/(\s+)Close$/i,'$1Cl');
         name = name.replace(/\|.*/, '');
-        name = name.replace(/^Madingley Road Park & Ride/i, 'P&R1');
-        name = name.replace(/^Newmarket Road Park & Ride/i, 'P&R2');
-        name = name.replace(/^Trumpington Park & Ride/i, 'P&R3');
-        name = name.replace(/^Babraham Road Park & Ride/i, 'P&R4');
-        name = name.replace(/^Milton Park & Ride/i, 'P&R5');
+        name = name.replace(/^Madingley Road Park & Ride/i, 'P&R');
+        name = name.replace(/^Newmarket Road Park & Ride/i, 'P&R');
+        name = name.replace(/^Trumpington Park & Ride/i, 'P&R');
+        name = name.replace(/^Babraham Road Park & Ride/i, 'P&R');
+        name = name.replace(/^Milton Park & Ride/i, 'P&R');
         name = name.replace(/Park[ -](and|&)[ -]Ride/i, 'P&R');
         name = name.replace(/Bus Station/i, 'Bus Stn');
         name = name.replace(/Cambridge North Railway Station/i, 'Cambridge Nth Stn');
