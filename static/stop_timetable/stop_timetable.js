@@ -252,8 +252,7 @@ function StopTimetable(config, params) {
             //     could end up calculating the wrong day! So not earlier
             //     than 02:00 or later than 22:00
             var minutes = Math.random()*60;
-            //var tomorrow = moment().add(1, 'd').hour(4).minute(minutes);
-            var tomorrow = moment().add(5, 'm');
+            var tomorrow = moment().add(1, 'd').hour(4).minute(minutes);
             console.log('[' + container + ']', 'Scheduling next populate_journeys for', tomorrow.format());
             var timer = window.setInterval(function () {
                 if (moment().isAfter(tomorrow)) {
