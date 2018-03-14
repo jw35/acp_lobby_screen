@@ -1,5 +1,6 @@
 /* Traffic Map Widget for ACP Lobby Screen */
 
+/*jshint esversion:6 */
 /*global google, document, DEBUG */
 /*exported TrafficMap */
 
@@ -57,6 +58,13 @@ function TrafficMap(config, params) {
         title.appendChild(document.createTextNode(' '));
         title.appendChild(document.createTextNode('Road Traffic'));
         widget_area.appendChild(title);
+
+        // Ledgend
+        var ledgend = document.createElement('div');
+        ledgend.classList.add('ledgend');
+        ledgend.innerHTML =
+           `Live traffic speed<br/><i>Fast</i> <img src="${config.static_url}traffic-legend.png" alt=""/> <i>Slow</i>`;
+        widget_area.appendChild(ledgend);
 
         // Rotation logic
         var map_no = 0;
