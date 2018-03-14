@@ -59,9 +59,9 @@ table {
 
 th, td {
     border-bottom: 1px solid #ddd;
-    padding: 0.3em;
+    padding: 0.2rem;
     text-align: left;
-    vertical-align: top;
+    vertical-align: center;
 }
 
 /* Dedicated classes */

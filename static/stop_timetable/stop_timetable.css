@@ -1,7 +1,5 @@
 /* Styles for the stop_timetable widget */
 
-/* Content area definition */
-
 .stop_timetable {
     height: 100%;
     padding: 0.5em;
@@ -14,6 +12,12 @@
     position: relative;
 }
 
+/* Custom layout for the 'simple' layout */
+
+.stop_timetable .simple  td:first-child {
+    font-size: 1.2rem;
+}
+
 /* Custom styling for the 'nextbus' layout */
 
 .stop_timetable h3 {
@@ -23,6 +27,10 @@
 
 .stop_timetable .nextbus table {
         margin-top: 0.3em;
+}
+
+.stop_timetable .nextbus td:first-child {
+    font-size: 1.2rem;
 }
 
 /* Custom styling for the 'debug' layout */
@@ -48,16 +56,16 @@
 
 .stop_timetable .multiline td {
     border: none;       /* override lobby_screen.css default */
-    padding: 0.2em 0.3em;
+    padding: 0.2rem 0.2rem;
 }
 
 .stop_timetable .multiline tr:first-child td {
     border-top: 1px solid #ddd;
-    padding-top: 0.4em;
+    padding-top: 0.4rem;
 }
 
 .stop_timetable .multiline tr:last-child td {
-    padding-bottom: 0.4em;
+    padding-bottom: 0.4rem;
 }
 
 .stop_timetable .multiline .via {
@@ -70,12 +78,12 @@
 }
 
 .stop_timetable .multiline .expected {
-    font-size: 1rem;
+    font-size: 1.2rem;
     text-align: center;
 }
 
 .stop_timetable .multiline .line {
-    font-size: 1rem;
+    font-size: 1.2rem;
     text-align: center;
 }
 

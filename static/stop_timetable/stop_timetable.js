@@ -631,6 +631,7 @@ function StopTimetable(config, params) {
         //log('display_simple - running');
 
         var table = document.createElement('table');
+        table.classList.add('simple');
         var heading = document.createElement('tr');
         var cell;
 
