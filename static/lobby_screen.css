@@ -61,7 +61,7 @@ th, td {
     border-bottom: 1px solid #ddd;
     padding: 0.2rem;
     text-align: left;
-    vertical-align: center;
+    vertical-align: middle;
 }
 
 /* Dedicated classes */
