@@ -857,7 +857,7 @@ function StopTimetable(config, params) {
       <td>to</td>
       <td>{{this.destination.desc}} <span class="together">(at {{this.destination.time}})</span></td>
       {{#if realtime}}
-      <td rowspan="3"><img src="{{../config.static_url}}/clock-with-white-face.png" alt="" /></td>
+      <td rowspan="3"><img src="{{../config.static_url}}/images/signal4.gif" alt="" /></td>
       {{else}}
       <td rowspan="3"><img src="{{../config.static_url}}/timetable-outline.png" alt="" /></td>
       {{/if}}
@@ -947,7 +947,7 @@ function StopTimetable(config, params) {
 //      {{/if}}
             var url;
             if (row.realtime) {
-                url = config.static_url + '/clock-with-white-face.png';
+                url = config.static_url + '/images/signal6.gif';
             }
             else {
                 url = config.static_url + '/timetable-outline.png';
