@@ -26,7 +26,3 @@
 .station_board .credit img {
     height: 30px;
 }
-
-.station_board td:first-child {
-    font-size: 1.2rem;
-}

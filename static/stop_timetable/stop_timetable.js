@@ -653,6 +653,9 @@ function StopTimetable(config, params) {
         cell.innerHTML = 'Destination';
         heading.appendChild(cell);
 
+        cell = document.createElement('th');
+        heading.appendChild(cell);
+
         table.appendChild(heading);
 
         var nrows = 0;
@@ -678,6 +681,7 @@ function StopTimetable(config, params) {
 
             cell = document.createElement('td');
             cell.classList.add('time');
+            cell.classList.add('key');
             cell.innerHTML = journey.due.format('HH:mm');
             row.appendChild(cell);
 
@@ -712,6 +716,21 @@ function StopTimetable(config, params) {
             }
             cell.innerHTML = text;
             row.appendChild(cell);
+
+            var url;
+            if (fresh_timestamp(journey)) {
+                url = config.static_url + '/images/signal6.gif';
+            }
+            else {
+                url = config.static_url + '/timetable-outline.png';
+            }
+            cell = document.createElement('td');
+            cell.classList.add('icon');
+            row.appendChild(cell);
+            var img = document.createElement('img');
+            cell.appendChild(img);
+            img.setAttribute('src', url);
+            img.setAttribute('alt', '');
 
             table.appendChild(row);
 
@@ -917,6 +936,7 @@ function StopTimetable(config, params) {
             td = document.createElement('td');
             tr.appendChild(td);
             td.classList.add('expected');
+            td.classList.add('key');
             td.setAttribute('rowspan', row.rows);
             td.textContent = row.due;
 
@@ -954,6 +974,8 @@ function StopTimetable(config, params) {
                 url = config.static_url + '/timetable-outline.png';
             }
             td = document.createElement('td');
+            td.classList.add('icon');
+            td.setAttribute('rowspan', row.rows);
             tr.appendChild(td);
             var img = document.createElement('img');
             td.appendChild(img);
@@ -1211,6 +1233,9 @@ function StopTimetable(config, params) {
         cell.innerHTML = 'Arrives';
         heading.appendChild(cell);
 
+        cell = document.createElement('th');
+        heading.appendChild(cell);
+
         // For each destination...
         for (var d = 0; d < params.destinations.length; d++) {
             var destination = params.destinations[d];
@@ -1240,6 +1265,7 @@ function StopTimetable(config, params) {
                     // Due time
                     cell = document.createElement('td');
                     cell.classList.add('time');
+                    cell.classList.add('key');
                     cell.innerHTML = journey.due.format('HH:mm');
                     row.append(cell);
 
@@ -1274,6 +1300,22 @@ function StopTimetable(config, params) {
                         cell.innerHTML = arrival.format('HH:mm');
                     }
                     row.appendChild(cell);
+
+                    // Realtime indicator
+                    var url;
+                    if (fresh_timestamp(journey)) {
+                        url = config.static_url + '/images/signal6.gif';
+                    }
+                    else {
+                        url = config.static_url + '/timetable-outline.png';
+                    }
+                    cell = document.createElement('td');
+                    cell.classList.add('icon');
+                    row.appendChild(cell);
+                    var img = document.createElement('img');
+                    cell.appendChild(img);
+                    img.setAttribute('src', url);
+                    img.setAttribute('alt', '');
 
                     table.appendChild(row);
                     nrows++;

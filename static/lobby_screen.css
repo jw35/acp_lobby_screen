@@ -61,7 +61,22 @@ th, td {
     border-bottom: 1px solid #ddd;
     padding: 0.2rem;
     text-align: left;
-    vertical-align: middle;
+    vertical-align: top;
+}
+
+td {
+    padding: 0.2rem 0.2rem 0.736px 0.2rem;
+}
+
+/* Custom class for 'important' columns */
+/* The relatice offset is a hack to get the content to */
+/* appear to align correctlt with it's smaller-sized   */
+/* neibours. Set by eye */
+th.key, td.key {
+    font-size: 1.4rem;
+    font-weight: normal;
+    position: relative;
+    top: -0.11em;
 }
 
 /* Dedicated classes */
