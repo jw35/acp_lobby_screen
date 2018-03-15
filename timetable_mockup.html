@@ -2,16 +2,17 @@
 
 <html>
 
-  <head>
-    <title>ACP Lobby Screen</title>
-    <!-- Lobby screen stylesheet -->
-    <link rel="stylesheet" href="file:static/lobby_screen.css">
-    <link rel="stylesheet" href="file:static/stop_timetable/stop_timetable.css">
-  </head>
+    <head>
+        <title>ACP Lobby Screen</title>
+        <!-- Lobby screen stylesheet -->
+        <link rel="stylesheet" href="file:static/lobby_screen.css">
+        <link rel="stylesheet" href="file:static/stop_timetable/stop_timetable.css">
+        <link rel="stylesheet" href="file:static/STATION_BOARD/station_board.css">
+    </head>
 
-  <body>
+    <body>
 
-    <div class="wrapper">
+        <div class="wrapper">
 
 <!-- **************************************************************** -->
 
@@ -25,177 +26,172 @@
               <img src="file:static/stop_timetable/bus.png" alt=""> Cam Uni Vet School
             </h1>
 
-            <div>
-
             <div class="timestamp">
               Updated 13:24
             </div>
 
             <table class="multiline">
 
+                <!-- ========================= -->
+
                 <tbody>
 
-                    <!-- ========================= -->
+                    <tr>
+                      <td rowspan="3" class="expected">13:24</td>
+                      <td rowspan="3" class="line">U</td>
+                      <td>to</td>
+                      <td>Hospital <span class="together">(at 13:50)</span></td>
+                      <td rowspan="3"><img src="static/stop_timetable/images/signal6.gif" alt="" /></td>
+                    </tr>
 
-                    <tbody>
+                    <tr class="via">
+                        <td>via</td>
+                        <td colspan="2">City Centre (13:35), Station (13:40)</td>
+                    </tr>
 
-                        <tr>
-                          <td rowspan="3" class="expected">13:24</td>
-                          <td rowspan="3" class="line">U</td>
-                          <td>to</td>
-                          <td>Hospital <span class="together">(at 13:50)</span></td>
-                          <td rowspan="3"><img src="static/stop_timetable/clock-with-white-face.png" alt="" /></td>
-                        </tr>
+                    <tr class="timing">
+                        <td colspan="3" class="issue">5 minuites late (13:29)</td>
+                    </tr>
 
-                        <tr class="via">
-                            <td>via</td>
-                            <td colspan="2">City Centre (13:35), Station (13:40)</td>
-                        </tr>
+                </tbody>
 
-                        <tr class="timing">
-                            <td colspan="3" class="issue">5 minuites late (13:29)</td>
-                        </tr>
+                <!-- ========================= -->
 
-                    </tbody>
+                <tbody>
 
-                    <!-- ========================= -->
+                    <tr>
+                      <td rowspan="3" class="expected">13:44</td>
+                      <td rowspan="3" class="line">4</td>
+                      <td>to</td>
+                      <td>Drummer St <span class="together">(at 13:55)</span></td>
+                      <td rowspan="3"><img src="static/stop_timetable/images/signal6.gif" alt="" /></td>
+                    </tr>
 
-                    <tbody>
+                    <tr class="via">
+                        <td>via</td>
+                        <td colspan="2">Somewhere else (at 12:34), Further On (12:35),
+                        Round-the-bend (12:36), Almost The end (12:37)</td>
+                    </tr>
 
-                        <tr>
-                          <td rowspan="3" class="expected">13:44</td>
-                          <td rowspan="3" class="line">4</td>
-                          <td>to</td>
-                          <td>Drummer St <span class="together">(at 13:55)</span></td>
-                          <td rowspan="3"><img src="static/stop_timetable/clock-with-white-face.png" alt="" /></td>
-                        </tr>
+                    <tr class="timing">
+                        <td colspan="3">On time</td>
+                   </tr>
 
-                        <tr class="via">
-                            <td>via</td>
-                            <td colspan="2">Somewhere else (at 12:34), Further On (12:35),
-                            Round-the-bend (12:36), Almost The end (12:37)</td>
-                        </tr>
+                </tbody>
 
-                        <tr class="timing">
-                            <td colspan="3">On time</td>
-                       </tr>
+                <!-- ========================= -->
 
-                    </tbody>
+                <tbody>
 
-                    <!-- ========================= -->
+                    <tr>
+                      <td rowspan="2" class="expected">13:54</td>
+                      <td rowspan="2" class="line">X3</td>
+                      <td>to</td>
+                      <td>Drummer St Bus Stn <span class="together">(at 14:06)</span></td>
+                      <td rowspan="2"><img src="static/stop_timetable/images/signal6.gif" alt="" /></td>
+                    </tr>
 
-                    <tbody>
+                    <tr class="timing">
+                        <td colspan="3" class="issue">5 minuites late (13:29)</td>
+                    </tr>
 
-                        <tr>
-                          <td rowspan="2" class="expected">13:54</td>
-                          <td rowspan="2" class="line">X3</td>
-                          <td>to</td>
-                          <td>Drummer St Bus Stn <span class="together">(at 14:06)</span></td>
-                          <td rowspan="2"><img src="static/stop_timetable/clock-with-white-face.png" alt="" /></td>
-                        </tr>
+                </tbody>
 
-                        <tr class="timing">
-                            <td colspan="3" class="issue">5 minuites late (13:29)</td>
-                        </tr>
+                <!-- ========================= -->
 
-                    </tbody>
+                <tbody>
 
-                    <!-- ========================= -->
+                    <tr>
+                      <td rowspan="2" class="expected">14:04</td>
+                      <td rowspan="2" class="line">4</td>
+                      <td>to</td>
+                      <td>Drummer St <span class="together">(at 14:15)</span></td>
+                      <td rowspan="2"><img src="static/stop_timetable/timetable-outline.png" alt="" /></td>
+                    </tr>
 
-                    <tbody>
+                    <tr class="via last">
+                        <td>via</td>
+                        <td colspan="3">XX</td>
+                    </tr>
 
-                        <tr>
-                          <td rowspan="2" class="expected">14:04</td>
-                          <td rowspan="2" class="line">4</td>
-                          <td>to</td>
-                          <td>Drummer St <span class="together">(at 14:15)</span></td>
-                          <td rowspan="2"><img src="static/stop_timetable/timetable-outline.png" alt="" /></td>
-                        </tr>
+                </tbody>
 
-                        <tr class="via last">
-                            <td>via</td>
-                            <td colspan="3">XX</td>
-                        </tr>
+                <!-- ========================= -->
 
-                    </tbody>
+                <tbody>
 
-                    <!-- ========================= -->
+                    <tr>
+                      <td rowspan="1" class="expected">14:24</td>
+                      <td rowspan="1" class="line">4</td>
+                      <td>to</td>
+                      <td>Drummer St <span class="together">(at 14:35)</span></td>
+                      <td rowspan="1"><img src="static/stop_timetable/timetable-outline.png" alt="" /></td>
+                    </tr>
 
-                    <tbody>
+                </tbody>
 
-                        <tr>
-                          <td rowspan="1" class="expected">14:24</td>
-                          <td rowspan="1" class="line">4</td>
-                          <td>to</td>
-                          <td>Drummer St <span class="together">(at 14:35)</span></td>
-                          <td rowspan="1"><img src="static/stop_timetable/timetable-outline.png" alt="" /></td>
-                        </tr>
+                <!-- ========================= -->
 
-                    </tbody>
+                <tbody>
 
-                    <!-- ========================= -->
+                    <tr>
+                      <td rowspan="1" class="expected">14:44</td>
+                      <td rowspan="1" class="line">4</td>
+                      <td>to</td>
+                      <td>Drummer St <span class="together">(at 14:55)</span></td>
+                      <td rowspan="1"><img src="static/stop_timetable/timetable-outline.png" alt="" /></td>
+                    </tr>
 
-                    <tbody>
+                </tbody>
 
-                        <tr>
-                          <td rowspan="1" class="expected">14:44</td>
-                          <td rowspan="1" class="line">4</td>
-                          <td>to</td>
-                          <td>Drummer St <span class="together">(at 14:55)</span></td>
-                          <td rowspan="1"><img src="static/stop_timetable/timetable-outline.png" alt="" /></td>
-                        </tr>
+                <!-- ========================= -->
 
-                    </tbody>
+                <tbody>
 
-                    <!-- ========================= -->
+                    <tr>
+                      <td rowspan="3" class="expected">14:54</td>
+                      <td rowspan="3" class="line">X3</td>
+                      <td>to</td>
+                      <td>Drummer St Bus Stn <span class="together">(at 15:03)</span></td>
+                      <td rowspan="3"><img src="static/stop_timetable/clock-with-white-face.png" alt="" /></td>
+                    </tr>
 
-                    <tbody>
+                    <tr class="via">
+                        <td>via</td>
+                        <td colspan="2">XX</td>
+                    </tr>
 
-                        <tr>
-                          <td rowspan="3" class="expected">14:54</td>
-                          <td rowspan="3" class="line">X3</td>
-                          <td>to</td>
-                          <td>Drummer St Bus Stn <span class="together">(at 15:03)</span></td>
-                          <td rowspan="3"><img src="static/stop_timetable/clock-with-white-face.png" alt="" /></td>
-                        </tr>
+                   <tr class="timing">
+                        <td colspan="3" class="issue">5 minuites late (13:29)</td>
+                   </tr>
 
-                        <tr class="via">
-                            <td>via</td>
-                            <td colspan="2">XX</td>
-                        </tr>
+                </tbody>
 
-                       <tr class="timing">
-                            <td colspan="3" class="issue">5 minuites late (13:29)</td>
-                       </tr>
+                <!-- ========================= -->
 
-                   </tbody>
+                <tbody>
 
-                    <!-- ========================= -->
+                    <tr>
+                      <td rowspan="3" class="time expected">15:04</td>
+                      <td rowspan="3" class="line">4</td>
+                      <td>to</td>
+                      <td>Drummer St <span class="together">(at 15:15)</span></td>
+                      <td rowspan="3"><img src="static/stop_timetable/clock-with-white-face.png" alt="" /></td>
+                    </tr>
 
-                    <tbody>
+                    <tr class="via">
+                        <td>via</td>
+                        <td colspan="2">XX</td>
+                    </tr>
 
-                        <tr>
-                          <td rowspan="3" class="time expected">15:04</td>
-                          <td rowspan="3" class="line">4</td>
-                          <td>to</td>
-                          <td>Drummer St <span class="together">(at 15:15)</span></td>
-                          <td rowspan="3"><img src="static/stop_timetable/clock-with-white-face.png" alt="" /></td>
-                        </tr>
-
-                        <tr class="via">
-                            <td>via</td>
-                            <td colspan="2">XX</td>
-                        </tr>
-
-                       <tr class="timing last">
-                            <td colspan="3" class="late">5 minuites late (13:29)</td>
-                       </tr>
-
-                   </tbody>
+                   <tr class="timing last">
+                        <td colspan="3" class="late">5 minuites late (13:29)</td>
+                   </tr>
 
                 </tbody>
 
             </table>
+
         </div>
 
     </div>
@@ -204,8 +200,295 @@
 
 <!-- **************************************************************** -->
 
+<div class="container_1_2 col_2 row_1" id="stop_timetable_1">
+    <div class="stop_timetable">
+        <div class="content_area">
+            <h1><img src="static/stop_timetable/bus.png" alt=""> William Gates Building</h1>
+            <div class="timestamp">Updated 13:17</div>
+            <div class="nextbus">
+
+                <h3>To City Centre</h3>
+                <table>
+                    <tr>
+                        <th class="time">Due</th>
+                        <th class="time">Expected</th>
+                        <th class="time">Route</th>
+                        <th class="time">Arrives</th>
+                    </tr>
+                    <tr>
+                        <td class="time">13:23</td>
+                        <td class="time">On time</td>
+                        <td>U</td>
+                        <td class="time">13:34</td>
+                        </tr>
+                    <tr>
+                        <td class="time">13:38</td>
+                        <td class="time"></td>
+                        <td>U</td>
+                        <td class="time">13:49</td>
+                    </tr>
+                </table>
+
+                <h3>To Station</h3>
+                <table>
+                    <tr>
+                        <th class="time">Due</th>
+                        <th class="time">Expected</th>
+                        <th class="time">Route</th>
+                        <th class="time">Arrives</th>
+                    </tr>
+                    <tr>
+                        <td class="time">13:23</td>
+                        <td class="time">On time</td>
+                        <td>U</td>
+                        <td class="time">13:45</td>
+                    </tr>
+                    <tr>
+                        <td class="time">13:38</td>
+                        <td class="time"></td>
+                        <td>U</td>
+                        <td class="time">14:00</td>
+                    </tr>
+                </table>
+
+                <h3>To Hospital</h3>
+                <table>
+                    <tr>
+                        <th class="time">Due</th>
+                        <th class="time">Expected</th>
+                        <th class="time">Route</th>
+                        <th class="time">Arrives</th>
+                    </tr>
+                    <tr>
+                        <td class="time">13:23</td>
+                        <td class="time">On time</td>
+                        <td>U</td>
+                        <td class="time">13:52</td>
+                    </tr>
+                    <tr>
+                        <td class="time">13:38</td>
+                        <td class="time"></td>
+                        <td>U</td>
+                        <td class="time">14:07</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- **************************************************************** -->
+
+<div class="container_1_2 col_3 row_1" id="station_board_1">
+
+    <div class="station_board">
+
+        <div class="content_area">
+
+            <h1><img src="/lobby_screen/static/station_board/train.png" alt=""/> Cambridge</h1>
+            <div class="timestamp">Updated 13:50</div>
+
+            <table>
+                <tbody>
+                    <tr>
+                        <th class="time">Due</th>
+                        <th class="time">Expected</th>
+                        <th>Destination</th>
+                    </tr>
+                    <tr class="issue">
+                        <td class="time">13:47</td>
+                        <td class="time">13:50</td>
+                        <td>London Kings X</td>
+                    </tr>
+                    <tr>
+                        <td class="time">13:52</td>
+                        <td class="time">On time</td>
+                        <td>Cambridge North</td>
+                    </tr>
+                    <tr>
+                        <td class="time">13:56</td>
+                        <td class="time">On time</td>
+                        <td>London Kings X</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:01</td>
+                        <td class="time">On time</td>
+                        <td>Birm'ham New St</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:04</td>
+                        <td class="time">On time</td>
+                        <td>Ely</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:04</td>
+                        <td class="time">On time</td>
+                        <td>London Liv. St</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:10</td>
+                        <td class="time">On time</td>
+                        <td>Norwich</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:10</td>
+                        <td class="time">On time</td>
+                        <td>Stansted Airport</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:17</td>
+                        <td class="time">On time</td>
+                        <td>London Kings X</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:21</td>
+                        <td class="time">On time</td>
+                        <td>London Liv. St</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:24</td>
+                        <td class="time">On time</td>
+                        <td>Brighton</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:27</td>
+                        <td class="time">On time</td>
+                        <td>Stansted Airport</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:28</td>
+                        <td class="time">On time</td>
+                        <td>Cambridge North</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="credit">
+            <a href="http://www.nationalrail.co.uk/"><img alt="Powered by National Rail Enquires" src="static/station_board/NRE_Powered_logo.png"></a>
+        </div>
+
     </div>
 
-  </body>
+</div>
+
+<!-- **************************************************************** -->
+
+<div class="container_2_2 col_1 row_3" id="stop_timetable_3">
+
+    <div class="stop_timetable">
+        <div class="content_area">
+            <h1><img src="static/stop_timetable/bus.png"> Cambridge, opp Christs College</h1>
+            <div>
+                <div class="timestamp">Updated 14:07</div>
+                <table class="simple">
+                    <tr>
+                        <th class="time">Due</th>
+                        <th class="time">Expected</th>
+                        <th>Route</th>
+                        <th>Destination</th>
+                    </tr>
+                    <tr>
+                        <td class="time">14:10</td>
+                        <td class="time">On time</td>
+                        <td>8</td>
+                        <td>Cottenham (at 14:46)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:11</td>
+                        <td class="time">On time</td>
+                        <td>5</td>
+                        <td>Bar Hill (at 14:31)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:13</td>
+                        <td class="time"></td>
+                        <td>1</td>
+                        <td>Kings Hedges (at 14:30)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:13</td>
+                        <td class="time"></td>
+                        <td>2</td>
+                        <td>Cambridge Nth Stn (at 14:36)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:16</td>
+                        <td class="time"></td>
+                        <td>3</td>
+                        <td>Stanesfield Rd (at 14:28)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:23</td>
+                        <td class="time"></td>
+                        <td>2</td>
+                        <td>Cambridge Nth Stn (at 14:46)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:23</td>
+                        <td class="time"></td>
+                        <td>1</td>
+                        <td>Kings Hedges (at 14:40)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:26</td>
+                        <td class="time"></td>
+                        <td>3</td>
+                        <td>Berghott Cl (at 14:44)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:26</td>
+                        <td class="time"></td>
+                        <td>6</td>
+                        <td>Oakington (at 14:52)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:30</td>
+                        <td class="time"></td>
+                        <td>8</td>
+                        <td>Cottenham (at 15:06)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:31</td>
+                        <td class="time"></td>
+                        <td>5</td>
+                        <td>Swavesey (at 15:16)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:33</td>
+                        <td class="time">On time</td>
+                        <td>1</td>
+                        <td>Kings Hedges (at 14:47)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:33</td>
+                        <td class="time"></td>
+                        <td>2</td>
+                        <td>Cambridge Nth Stn (at 14:56)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:36</td>
+                        <td class="time">On time</td>
+                        <td>3</td>
+                        <td>Stanesfield Rd (at 14:48)</td>
+                    </tr>
+                    <tr>
+                        <td class="time">14:43</td>
+                        <td class="time"></td>
+                        <td>2</td>
+                        <td>Cambridge Nth Stn (at 15:06)</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- **************************************************************** -->
+
+        </div>
+
+    </body>
 
 </html>
