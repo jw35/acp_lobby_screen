@@ -30,15 +30,15 @@
     <script type="text/javascript">
 
       var DEBUG = ''; // widget.log() code will check this global variable
-/*
+
       widget.push(new MessageArea(
         { container: 'message_area_1',
-          static_url: '{{ url_for('static', filename='message_area/') }}',
+          static_url: '{{ url_for('static', filename='message_area/') }}'
         },
         { title: 'Lobby Screen',
           message: `
-<p>This is an early preview of an <em>Adaptive Cities</em> <strong>Lobby Screen</strong>.
-These screens display real-time travel information in the lobbies of
+              <p>This is a demo of a <strong>SmartPanel</strong>.</p>
+              <p>These screens display real-time travel information in the lobbies of
 public buildings to inform travel choices.</p>
 
 <p>Screens are geo-located to automatically display relevant information
@@ -67,27 +67,6 @@ example of a locally-configured static message.</p>
         }
       ))
 
-      widget.push(new StopTimetable(
-        { container: 'stop_timetable_1',
-          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
-        },
-        { stop_id: '0500CCITY424',
-          common_name: 'William Gates Building',
-          layout: 'nextbus',
-          destinations: [
-            { description: 'City Centre',
-              stop_ids: ['0500CCITY419']
-            },
-            { description: 'Station',
-              stop_ids: ['0500CCITY507', '0500CCITY530']
-            },
-            { description: 'Hospital',
-              stop_ids: ['0500CCITY517']
-            },
-          ]
-        }
-      ));
-*/
       widget.push(new StopBusMap(
         { container: 'stop_bus_map_1',
           static_url: '{{ url_for('static', filename='stop_bus_map/') }}'
@@ -134,7 +113,7 @@ example of a locally-configured static message.</p>
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
         { stop_id: '0500CCITY401',
-          common_name: 'Shire Hall (outbound)',
+          common_name: 'Shire Hall (out)',
           layout: 'simple',
           lat: 52.21297,
           lng: 0.11235
@@ -146,7 +125,7 @@ example of a locally-configured static message.</p>
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
             { stop_id: '0500CCITY497',
-              common_name: 'The Busway Shire Hall',
+              common_name: 'Busway (out)',
           layout: 'simple',
               lat: 52.21274,
               lng: 0.11263
@@ -158,7 +137,7 @@ example of a locally-configured static message.</p>
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
             { stop_id: '0500CCITY496',
-              common_name: 'The Busway Shire Hall',
+              common_name: 'Busway (to City Centre)',
           layout: 'simple',
               lat: 52.213,
               lng: 0.11257
@@ -170,25 +149,25 @@ example of a locally-configured static message.</p>
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
             { stop_id: '0500CCITY394',
-              common_name: 'Shire Hall (to city centre)',
+              common_name: 'Shire Hall (to City Centre)',
           layout: 'simple',
               lat: 52.21297,
               lng: 0.11263
             }
       ));
-
+/*
       widget.push(new StopTimetable(
         { container: 'stop_timetable_5',
           static_url: '{{ url_for('static', filename='stop_timetable/') }}'
         },
         { stop_id: '0500CCITY275',
-          common_name: 'Castle St',
+          common_name: '5 Castle St',
           layout: 'simple',
           lat: 52.21049,
           lng: 0.11404
         }
       ));
-
+*/
       widget.push(new StationBoard(
         { container: 'station_board_1',
           static_url: '{{ url_for('static', filename='station_+board/') }}'
@@ -198,15 +177,6 @@ example of a locally-configured static message.</p>
         }
       ));
 
-      widget.push(new StationBoard(
-        { container: 'station_board_2',
-          static_url: '{{ url_for('static', filename='station_+board/') }}'
-        },
-        { station: 'CMB',
-          offset: 0
-        }
-      ));
-/*
       widget.push(new TwitterTimeline(
         { container: 'twitter_timeline_1',
           static_url: '{{ url_for('static', filename='twitter_timeline/') }}'
@@ -214,14 +184,24 @@ example of a locally-configured static message.</p>
         { who: 'Cambs_Traffic'
         }
       ));
-*/
+
       widget.push(new TrafficMap(
         { container: 'traffic_map_1',
           static_url: '{{ url_for('static', filename='traffic_map/') }}'
         },
-        { lat: 52.204684,
-          lng: 0.124622,
-          zoom: 12
+        { interval: 7.5,
+          maps:
+          [
+            { lat: 52.204684,
+              lng: 0.124622,
+              zoom: 12
+            },
+            { lat: 52.204684,
+              lng: 0.124622,
+              zoom: 10
+            },
+
+          ]
         }
       ));
 
@@ -251,11 +231,15 @@ example of a locally-configured static message.</p>
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_2 col_1 row_3" id="station_board_1">
+      <div class="container_1_2 col_1 row_3" id="message_area_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_1_2 col_2 row_3" id="station_board_2">
+      <div class="container_1_2 col_2 row_3" id="station_board_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_4 col_3 row_1" id="twitter_timeline_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
@@ -263,11 +247,11 @@ example of a locally-configured static message.</p>
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_1 col_3 row_1" id="stop_timetable_1">
+      <div class="container_1_1 col_4 row_1" id="stop_timetable_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_1 col_3 row_2" id="stop_timetable_2">
+      <div class="container_1_1 col_4 row_2" id="stop_timetable_2">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
@@ -279,7 +263,7 @@ example of a locally-configured static message.</p>
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_2 col_3 row_3" id="stop_timetable_5">
+      <div class="container_1_2 col_4 row_3" id="weather_area_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
