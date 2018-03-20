@@ -169,6 +169,9 @@
   <body onLoad="page_load()">
 
     <div class="wrapper">
+
+      {% include 'smartpanel_header.html' %}
+
 <!--
       <div class="container_1_2 col_1 row_1" id="station_board_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
@@ -211,14 +214,6 @@
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 -->
-
-      <div class="credits">
-        <div id="screen_clock"></div>
-        <a href="https://www.greatercambridge.org.uk/"><img alt="Greater Cambridge Partnership" src="{{ url_for('static', filename='logo_gccd_112.png') }}"></a>
-        <a href="http://www.connectingcambridgeshire.co.uk/smartcamb/"><img alt="Connecting Cambridgshire" src="{{ url_for('static', filename='logo_sc_112.png') }}" ></a>
-        <a href="http://www.cam.ac.uk"><img alt="The University of Cambridge" src="{{ url_for('static', filename='logo_uc_112.png') }}"></a>
-        <span>Adaptive Cities Platform</span>
-      </div>
 
     </div>
 

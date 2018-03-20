@@ -215,17 +215,7 @@ example of a locally-configured static message.</p>
 
     <div class="wrapper">
 
-      <div class="credits">
-        <div id="screen_clock"></div>
-
-        <a href="http://www.connectingcambridgeshire.co.uk/smartcamb/">
-            <img alt="Connecting Cambridgshire" src="{{ url_for('static', filename='logo_sc_112.png') }}" >
-        </a>
-        <a href="http://www.cam.ac.uk">
-            <img alt="The University of Cambridge" src="{{ url_for('static', filename='logo_uc_112.png') }}">
-        </a>
-        <span>SmartPanel</span>
-      </div>
+      {% include 'smartpanel_header.html' %}
 
       <div class="container_2_2 col_1 row_1" id="traffic_map_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
