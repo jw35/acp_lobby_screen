@@ -14,34 +14,32 @@
 
 <h1><img src="{{ url_for('static', filename='weather/weather.png') }}" alt=""> {{ data.location.title() }}</h1>
 <div class="timestamp">Issued {{ data.issued.astimezone(tz=None).strftime("%H:%M") }}</div>
+
 {% for result in data.results %}
 
-{% set timestamp = result.0 %}
-{% set data = result.1 %}
+<div class="title">
+     <span>{{ result.title }}</span>
+     <span>({{ result.timestamp.astimezone(tz=None).strftime('%H:%M') }})</span>
+</div>
 
-{% if loop.index0 == 0 %}
-<h2 class="time">Now:</h2>
-{% else %}
-<h2 class="time">{{ timestamp.astimezone(tz=None).strftime('%H:%M') }}:</h2>
-{% endif %}
-{% if data.icon %}
-<img src="{{ url_for('static', filename='weather/icons/weather_icon-' + data.icon + '.png') }}" alt="" class="icon" />
+{% if result.icon %}
+<img src="{{ url_for('static', filename='weather/icons/weather_icon-' + result.icon + '.png') }}" alt="" class="icon" />
 {% endif %}
 
 <p>
 
-<b>{{ data.description }}</b>
+<b>{{ result.description }}</b>
 
 <br>
 
-<b>{{ data.T }}&deg;C</b>
-{% if data.T != data.F %}
-(feels like {{ data.F }}&deg;C)
+<b>{{ result.T }}&deg;C</b>
+{% if result.T != result.F %}
+(feels like {{ result.F }}&deg;C)
 {% endif %}
 
 <br>
 
-Wind <b>{{ data.wind_desc }}</b> ({{ data.S }} mph) <b>{{ data.D }}</b>
+Wind <b>{{ result.wind_desc }}</b> ({{ result.S }} mph) <b>{{ result.D }}</b>
 
 </p>
 

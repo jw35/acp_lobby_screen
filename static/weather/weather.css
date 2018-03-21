@@ -2,48 +2,36 @@
 
 .weather {
     height: 100%;
-    padding: 0.5em;
+    padding: 0.5rem;
     position: relative;
     width: 100%;
 }
 
 .weather .content_area {
-    position: relative;
-}
-
-.weather .content_area {
-    border-bottom: 40px solid transparent;
     height: 100%;
     overflow: hidden;
 }
 
-.weather .credit {
-    bottom: 0.5em;
-    height: 30px;
-    left: 0;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-    position: absolute;
-    width: 100%;
+.weather .title {
+    clear: both;
+    margin-bottom: 0.3rem;
+    margin-top: 0.9rem;
 }
 
-.weather .credit img {
-    height: 30px;
-}
-
-.weather h2.time {
-    margin-bottom: 0;
-    margin-top: 0.5em;
+.weather .title :first-child {
+    font-size: 1.3rem;
+    font-weight: bold;
 }
 
 .weather .icon {
     float: right;
-    height: 96px;
-    width: 96px;
+    height: 80px;
+    width: 80px;
 }
 
 .weather p {
-    margin-bottom: 0.5em;
-    margin-top: 0.5em;
+    margin-bottom: 1.3rem;
+    margin-left: 1rem;
+    margin-top: 0.1rem;
 }
 
