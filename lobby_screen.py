@@ -290,7 +290,7 @@ def extract_weather_results(forecasts, data):
 
     # Push current on the front of results if it's different from the
     # existing first result
-    if current != results[0]:
+    if current['timestamp'] < results[0]['timestamp']:
         current['description'] = weather_descriptions.get(current['W'], '')
         current['icon'] = weather_icon.get(current['W'], '')
         current['wind_desc'] = mph_to_descr(int(current['S']))
