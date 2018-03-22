@@ -12,18 +12,18 @@
 
 <h1 class="widget_error">Connection issues</h1>
 
-<h1><img src="{{ url_for('static', filename='weather/weather.png') }}" alt=""> {{ data.location.title() }}</h1>
-<div class="timestamp">Issued {{ data.issued.astimezone(tz=None).strftime("%H:%M") }}</div>
+<h1><img src="{{ url_for('static', filename='weather/weather.png') }}" alt=""> {{ data.location }}</h1>
+<div class="timestamp">Issued {{ data.issued }}</div>
 
 {% for result in data.results %}
 
 <div class="title">
      <span>{{ result.title }}</span>
-     <span>({{ result.timestamp.astimezone(tz=None).strftime('%H:%M') }})</span>
+     <span>({{ result.timestamp_text }})</span>
 </div>
 
 {% if result.icon %}
-<img src="{{ url_for('static', filename='weather/icons/weather_icon-' + result.icon + '.png') }}" alt="" class="icon" />
+<img src="{{ url_for('static', filename=result.icon) }}" alt="" class="icon" />
 {% endif %}
 
 <p>

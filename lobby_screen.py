@@ -296,7 +296,7 @@ def extract_weather_results(forecasts, data):
     # Enhance the values being returned
     for counter, rep in enumerate(results):
         rep['description'] = weather_descriptions.get(rep['W'], '')
-        rep['icon'] = weather_icon.get(rep['W'], '')
+        rep['icon'] = 'weather/icons/weather_icon-' + weather_icon.get(rep['W'], '') + '.png'
         rep['wind_desc'] = mph_to_descr(int(rep['S']))
         rep['title'] = forecasts[counter]['label']
 
@@ -304,7 +304,7 @@ def extract_weather_results(forecasts, data):
     # existing first result
     if current['timestamp'] < results[0]['timestamp']:
         current['description'] = weather_descriptions.get(current['W'], '')
-        current['icon'] = weather_icon.get(current['W'], '')
+        current['icon'] = 'weather/icons/weather_icon-' + weather_icon.get(current['W'], '')  + '.png'
         current['wind_desc'] = mph_to_descr(int(current['S']))
         current['title'] = 'Now'
         results.insert(0, current)
@@ -340,11 +340,14 @@ def weather():
 
     forecasts = get_forecast_list(forecast_breakpoints)
     results = extract_weather_results(forecasts, data)
-    issued = iso8601.parse_date(data["SiteRep"]["DV"]["dataDate"])
+    for result in results:
+        result['timestamp_text'] = result['timestamp'].astimezone(tz=None).strftime('%H:%M')
+    issued = iso8601.parse_date(data["SiteRep"]["DV"]["dataDate"]).astimezone(tz=None).strftime("%H:%M")
     return render_template('weather.html', data={
         "results": results,
-        "location": data["SiteRep"]["DV"]["Location"]["name"],
-        "issued": issued}
+        "location": data["SiteRep"]["DV"]["Location"]["name"].title(),
+        "issued": issued
+        }
     )
 
 
