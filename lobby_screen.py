@@ -201,6 +201,7 @@ def get_forecast_list(breakpoints):
     '''
 
     now = uk_tz.localize(datetime.now())
+    max_forecasts = 8
 
     # Find the first breakpoint with display_until after now (wrapping
     # to tomorrow if necessary)
@@ -222,20 +223,25 @@ def get_forecast_list(breakpoints):
     # to tomorrow if necessary
     results = []
     qualifier = 'this '
-    while len(results) < len(breakpoints):
+    while len(results) < max_forecasts:
         forecast_datetime = uk_tz.localize(
             datetime.combine(today, breakpoints[row]['forecast_time'])
         ).astimezone(utc_tz)
+        if forecast_datetime.date() == now.date():
+            qualifier = 'this'
+        elif forecast_datetime.date() == now.date() + timedelta(days=1):
+            qualifier = 'tomorrow'
+        else:
+            qualifier = forecast_datetime.strftime('%A')
         results.append(
             {'time': forecast_datetime,
-             'label': (qualifier + breakpoints[row]['label']).capitalize()
+             'label': (qualifier + ' ' + breakpoints[row]['label']).capitalize()
              }
         )
         row += 1
         if row >= len(breakpoints):
             row = 0
             today = today + timedelta(days=1)
-            qualifier = 'tomorrow '
 
     return results
 
