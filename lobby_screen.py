@@ -19,6 +19,11 @@ METOFFICE_API = 'http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/jso
 uk_tz = pytz.timezone('Europe/London')
 utc_tz = pytz.utc
 
+station_abbrev = {'London Kings Cross': 'London Kings X',
+                  'London Liverpool Street': 'London Liv. St',
+                  'Birmingham New Street': "Birm'ham New St",
+                  }
+
 # The forecasts to display
 forecast_breakpoints = [
         # forecast_time: use the forecast nearest this time
@@ -161,10 +166,17 @@ def station_board():
         )
         # Strip HTML from alert messages
         # who came up with this data structure?)
-        if (data.nrccMessages):
-            for message in data.nrccMessages.message:
+        if data['nrccMessages']:
+            for message in data['nrccMessages']['message']:
                 for key in message:
                     message[key] = re.sub('<[^<]+?>', '', message[key])
+        # Apply station abbreviations
+        for service in data['trainServices']['service']:
+            dest = service['destination']['location'][0]['locationName']
+            if dest in station_abbrev:
+                service['destination']['location'][0]['locationName'] = station_abbrev[dest]
+        # Format data.generatedAt
+        data['generatedAt_text'] = data['generatedAt'].strftime("%H:%M")
         cache.set(cache_key, data, timeout=30)
 
     return render_template('station_board.html', data=data)

@@ -12,7 +12,7 @@
 <h1 class="widget_error">Connection issues</h1>
 
 <h1><img src="{{ url_for('static', filename='station_board/train.png') }}"> {{ data.locationName }}</h1>
-<div class="timestamp">Updated {{ data.generatedAt.strftime("%H:%M") }}</div>
+<div class="timestamp">Updated {{ data.generatedAt_text }}</div>
 
 {% if data.nrccMessages %}
     {% if data.nrccMessages.message|length <= 1 %}
@@ -33,14 +33,6 @@
     <th>Destination</th>
   </tr>
 {% for service in data.trainServices.service %}
-  {% set dest = service.destination.location.0.locationName %}
-  {% if dest == 'London Kings Cross' %}
-    {% set dest = 'London Kings X' %}
-  {% elif dest == 'London Liverpool Street' %}
-    {% set dest = 'London Liv. St' %}
-  {% elif dest == 'Birmingham New Street' %}
-    {% set dest = "Birm'ham New St" %}
-  {% endif %}
   {% if service.etd != 'On time' %}
   <tr class="issue">
   {% else %}
@@ -48,7 +40,7 @@
   {% endif %}
     <td class="time key">{{ service.std }}</td>
     <td class="time">{{ service.etd }}</td>
-    <td>{{ dest }}</td>
+    <td>{{ service.destination.location.0.locationName }}</td>
   </tr>
 {% endfor %}
 </table>
