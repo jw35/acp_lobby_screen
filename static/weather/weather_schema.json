@@ -12,7 +12,7 @@
         "location": {
             "type": "string",
             "title": "Location code",
-            "description": "Met Office 3 hour forecast location code",
+            "description": "Met Office 3 hour forecast location code (Cambridge = 310042)",
             "format": "forecast_location"
         }
 
