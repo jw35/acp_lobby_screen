@@ -1,0 +1,88 @@
+<!doctype html>
+
+<html>
+
+  <head>
+    <title>ACP Lobby Screen</title>
+
+    {% include 'lobby_screen_head.html' %}
+
+    <!-- Widget stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='station_board/station_board.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='message_area/message_area.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='iframe_area/iframe_area.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stop_bus_map/stop_bus_map.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stop_timetable/stop_timetable.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='weather/weather.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='traffic_map/traffic_map.css') }}">
+
+    <!-- Widget Javascript -->
+    <script src="{{ url_for('static', filename='station_board/station_board.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='traffic_map/traffic_map.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='message_area/message_area.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='iframe_area/iframe_area.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='stop_bus_map/stop_bus_map.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='stop_timetable/stop_timetable.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='weather/weather.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='twitter_timeline/twitter_timeline.js') }}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+      var DEBUG = ''; // widget.log() code will check this global variable
+
+      widget.push(new TrafficMap(
+        { container: 'traffic_map_1',
+          static_url: '{{ url_for('static', filename='traffic_map/') }}'
+        },
+        { lat: 52.204684,
+          lng: 0.124622,
+          zoom: 13
+        }
+      ));
+
+      widget.push(new Weather(
+        { container: 'weather_area_1',
+          static_url: '{{ url_for('static', filename='weather/') }}'
+        },
+        { location: '310042'
+        }
+      ))
+
+      widget.push(new TwitterTimeline(
+        { container: 'twitter_timeline_1',
+          static_url: '{{ url_for('static', filename='twitter_timeline/') }}'
+        },
+        { who: 'Cambs_Traffic'
+        }
+      ));
+
+    </script>
+
+  </head>
+
+  <body onLoad="page_load()">
+
+    <!-- Widget display area definition -->
+
+    <div class="wrapper">
+
+      {% include 'smartpanel_header.html' %}
+
+      <div class="container_3_4 col_1 row_1" id="traffic_map_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_2_4 col_4 row_1" id="twitter_timeline_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_4 col_6 row_1" id="weather_area_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+    </div>
+
+  </body>
+
+</html>

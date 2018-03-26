@@ -1,0 +1,118 @@
+<!doctype html>
+
+<html>
+
+  <head>
+    <title>ACP Lobby Screen</title>
+
+    {% include 'lobby_screen_head.html' %}
+
+    <!-- Widget stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='station_board/station_board.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='message_area/message_area.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='iframe_area/iframe_area.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stop_bus_map/stop_bus_map.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stop_timetable/stop_timetable.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='weather/weather.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='traffic_map/traffic_map.css') }}">
+
+    <!-- Widget Javascript -->
+    <script src="{{ url_for('static', filename='station_board/station_board.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='traffic_map/traffic_map.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='message_area/message_area.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='iframe_area/iframe_area.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='stop_bus_map/stop_bus_map.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='stop_timetable/stop_timetable.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='weather/weather.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='twitter_timeline/twitter_timeline.js') }}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+      var DEBUG = ''; // widget.log() code will check this global variable
+
+      widget.push(new StopBusMap(
+        { container: 'stop_bus_map_1',
+          static_url: '{{ url_for('static', filename='stop_bus_map/') }}'
+        },
+        { id: 'stop_bus_map_1',
+          static_url: '/lobby_screen/static',
+          title: 'Live Buses: U and Citi4',
+          stops: [
+            { stop_id: '0500CCITY424',
+              common_name: 'William Gates Building',
+              lat: 52.21129,
+              lng: 0.09107
+            },
+            { stop_id: '0500CCITY199',
+              common_name: 'Cam Uni Vet School',
+              lat: 52.21297,
+              lng: 0.09062
+            }
+          ],
+          breadcrumbs: true,
+          lat: 52.215,
+          lng: 0.09,
+          zoom: 15
+        }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_1',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY424',
+          common_name: 'William Gates Building',
+          layout: 'nextbus',
+          destinations: [
+            { description: 'City Centre',
+              stop_ids: ['0500CCITY419']
+            },
+            { description: 'Station',
+              stop_ids: ['0500CCITY507', '0500CCITY530']
+            },
+            { description: 'Hospital',
+              stop_ids: ['0500CCITY517']
+            },
+          ]
+        }
+      ));
+
+      widget.push(new StationBoard(
+        { container: 'station_board_1',
+          static_url: '{{ url_for('static', filename='station_+board/') }}'
+        },
+        { station: 'CBG',
+          offset: 0
+        }
+      ));
+
+    </script>
+
+  </head>
+
+  <body onLoad="page_load()">
+
+    <!-- Widget display area definition -->
+
+    <div class="wrapper">
+
+      {% include 'smartpanel_header.html' %}
+
+      <div class="container_3_4 col_1 row_1" id="stop_bus_map_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_2_4 col_4 row_1" id="stop_timetable_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_4 col_6 row_1" id="station_board_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+    </div>
+
+  </body>
+
+</html>
