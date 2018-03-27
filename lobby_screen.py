@@ -156,27 +156,38 @@ def station_board():
     data = cache.get(cache_key)
     if data:
         app.logger.info('Cache hit for %s', cache_key)
+
     else:
         app.logger.info('Cache miss for %s', cache_key)
+        data = {'messages': [], 'services': []}
+
         client = zeep.Client(wsdl=WSDL)
-        data = client.service.GetDepartureBoard(
+        raw_data = client.service.GetDepartureBoard(
             numRows=50, crs=station,
             _soapheaders={"AccessToken": app.config["NRE_API_KEY"]},
             timeOffset=offset
         )
-        # Strip HTML from alert messages
-        # who came up with this data structure?)
-        if data['nrccMessages']:
-            for message in data['nrccMessages']['message']:
+
+        data['locationName'] = raw_data['locationName']
+        data['generatedAt'] = raw_data['generatedAt'].strftime("%H:%M")
+
+        if raw_data['nrccMessages']:
+            for message in raw_data['nrccMessages']['message']:
                 for key in message:
-                    message[key] = re.sub('<[^<]+?>', '', message[key])
-        # Apply station abbreviations
-        for service in data['trainServices']['service']:
+                    data['messages'].append(re.sub('<[^<]+?>', '', message[key]))
+        if len(data['messages']) > 1:
+            data['messages'] = ['Multiple travel alerts in force - see www.nationalrail.co.uk for details.']
+
+        for service in raw_data['trainServices']['service']:
+            this_service = {}
+            this_service['std'] = service['std']
+            this_service['etd'] = service['etd']
             dest = service['destination']['location'][0]['locationName']
             if dest in station_abbrev:
-                service['destination']['location'][0]['locationName'] = station_abbrev[dest]
-        # Format data.generatedAt
-        data['generatedAt_text'] = data['generatedAt'].strftime("%H:%M")
+                dest = station_abbrev[dest]
+            this_service['destination'] = dest
+            data['services'].append(this_service)
+
         cache.set(cache_key, data, timeout=30)
 
     return render_template('station_board.html', data=data)
