@@ -37,25 +37,18 @@
         },
         { title: 'SmartPanel',
           message: `
-<p>This is an early preview of an <em>Adaptive Cities</em> <strong>lobby screen</strong>.
-These screens display real-time travel information in the lobbies of
-public buildings to inform travel choices.</p>
-
-<p>Screens are geo-located to automatically display relevant information
-and can be further customised by local managers &ndash; this is an
-example of a locally-configured static message.</p>
-
-<p>Lobby Screens are under active development, but they can already display:</p>
-
-<ul>
-  <li>Bus positions and timings</li>
-  <li>Train departure times</li>
-  <li>Google traffic maps</li>
-  <li>Weather forecasts</li>
-  <li>Twitter timelines</li>
-  <li>Static messages</li>
-  <li>Other web pages</li>
-</ul>
+<p>This is an early preview of our <em>Adaptive Cities</em> <strong>SmartPanel</strong>, providing
+a glimpse into the value of the underlying Adaptive Cities Platform.
+</p>
+<p>The platform processes real-time sensor data (using Java Vertx), stores it, supports real-time
+analysis incorporating historical data, and provides a simple web application allowing the 
+data to be browsed (smartcambridge.org).
+</p>
+<p>The Adaptive Cities Programme assumes an important objective in collecting urban sensor data is that
+the region will <em>adapt</em> (e.g. by re-routing traffic) to mitigate problems, and that adaptation will
+happen in real-time, based on a <em>prediction</em> of the situation evolving.
+<p>
+<p>If you have feedback or questions, contact Ian Lewis ijl20@cam.ac.uk</p>
 `       }
       ))
 
@@ -143,6 +136,7 @@ example of a locally-configured static message.</p>
         }
       ));
 
+      /*
       widget.push(new TrafficMap(
         { container: 'traffic_map_1',
           static_url: '{{ url_for('static', filename='traffic_map/') }}'
@@ -152,7 +146,27 @@ example of a locally-configured static message.</p>
           zoom: 12
         }
       ));
+    */
 
+      widget.push(new TrafficMap(
+        { container: 'traffic_map_1',
+          static_url: '{{ url_for('static', filename='traffic_map/') }}'
+        },
+        { interval: 7.5,
+          maps:
+          [
+            { lat: 52.204684,
+              lng: 0.124622,
+              zoom: 12
+            },
+            { lat: 52.204684,
+              lng: 0.124622,
+              zoom: 10
+            },
+
+          ]
+        }
+      ));
     </script>
 
   </head>

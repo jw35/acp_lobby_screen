@@ -78,15 +78,6 @@
         }
       ));
 
-      widget.push(new StationBoard(
-        { container: 'station_board_1',
-          static_url: '{{ url_for('static', filename='station_+board/') }}'
-        },
-        { station: 'CBG',
-          offset: 0
-        }
-      ));
-
     </script>
 
   </head>
@@ -99,15 +90,11 @@
 
       {% include 'smartpanel_header.html' %}
 
-      <div class="container_3_4 col_1 row_1" id="stop_bus_map_1">
+      <div class="container_2_2 col_1 row_1" id="stop_bus_map_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_4 col_4 row_1" id="stop_timetable_1">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-
-      <div class="container_1_4 col_6 row_1" id="station_board_1">
+      <div class="container_1_2 col_3 row_1" id="stop_timetable_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 

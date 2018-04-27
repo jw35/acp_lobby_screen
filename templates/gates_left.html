@@ -35,9 +35,19 @@
         { container: 'traffic_map_1',
           static_url: '{{ url_for('static', filename='traffic_map/') }}'
         },
-        { lat: 52.204684,
-          lng: 0.124622,
-          zoom: 13
+        { interval: 7.5,
+          maps:
+          [
+            { lat: 52.204684,
+              lng: 0.124622,
+              zoom: 12
+            },
+            { lat: 52.204684,
+              lng: 0.124622,
+              zoom: 10
+            },
+
+          ]
         }
       ));
 
@@ -48,14 +58,6 @@
         { location: '310042'
         }
       ))
-
-      widget.push(new TwitterTimeline(
-        { container: 'twitter_timeline_1',
-          static_url: '{{ url_for('static', filename='twitter_timeline/') }}'
-        },
-        { who: 'Cambs_Traffic'
-        }
-      ));
 
     </script>
 
@@ -69,15 +71,11 @@
 
       {% include 'smartpanel_header.html' %}
 
-      <div class="container_3_4 col_1 row_1" id="traffic_map_1">
+      <div class="container_2_2 col_1 row_1" id="traffic_map_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
-      <div class="container_2_4 col_4 row_1" id="twitter_timeline_1">
-        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
-      </div>
-
-      <div class="container_1_4 col_6 row_1" id="weather_area_1">
+      <div class="container_1_2 col_3 row_1" id="weather_area_1">
         <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
       </div>
 
