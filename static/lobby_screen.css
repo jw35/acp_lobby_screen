@@ -22,7 +22,8 @@
 
 /* https://getbootstrap.com/docs/4.0/content/reboot/#native-font-stack */
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  overflow: hidden;
 }
 
 /* Generic styles for Lobby Screen widgets */
@@ -189,6 +190,13 @@ th.time, td.time {
     width: 320px;
 }
 
+.container_1_4 {
+    border: 1px solid black;
+    height: 1020px;
+    overflow: hidden;
+    width: 320px;
+}
+
 .container_2_1 {
     border: 1px solid black;
     height: 255px;
@@ -203,18 +211,18 @@ th.time, td.time {
     width: 640px;
 }
 
-.container_1_4 {
-    border: 1px solid black;
-    height: 1020px;
-    overflow: hidden;
-    width: 320px;
-}
-
 .container_2_4 {
     border: 1px solid black;
     height: 1020px;
     overflow: hidden;
     width: 640px;
+}
+
+.container_3_4 {
+    border: 1px solid black;
+    height: 1020px;
+    overflow: hidden;
+    width: 960px;
 }
 
 
