@@ -134,7 +134,7 @@ flag to chromium-browser e.g. to double the scale of the displayed page: ```--fo
 ```
 @sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' ~/.config/chromium/Default/Preferences
 
-@chromium-browser --noerrdialogs --incognito --kiosk http://smartcambridge.org/smartpanel/<display_id>
+@chromium-browser --noerrdialogs --incognito --kiosk http://smartcambridge.org/smartpanel/display/<display_id>
 ```
 So total changes to ```~/.config/lxsession/LXDE-pi/autostart``` are
 
