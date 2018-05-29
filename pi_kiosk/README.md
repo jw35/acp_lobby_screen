@@ -27,9 +27,21 @@ involves a bit of trial-and-error. Any of these suggestions below might work.
 
 ### Set Pi desktop image to a 1920x1080 test image
 
-First of all, download the 1920x1080_test.jpg image in this folder to the Pi, and set it as the
-Pi desktop image by right-clicking the desktop and choosing 'Appearance'. Make sure you use the 
-option 'Center' to place the test image in the center of the screen without scaling.
+First of all, download the 1920x1080_test.jpg image in this folder to the Pi. It doesn't really matter where you
+download it to but (home)/Pictures should make it easy to find for the next step.
+
+Below you can see the full image scaled to fit your window, so note it has an alternating black-and-white border.
+This border is likely to disappear off the edge of your TV until you correct various display settings in both the Pi
+and the TV.
+
+![TV test image](1920x1080_test.jpg "Test TV image")
+
+Set it as the
+Pi desktop image by right-clicking the desktop and choosing 'Desktop Preferences' then on the first tab ('Desktop') set
+the 'Layout' to 'Center Image on Screen' and for 'Picture' choose the downloaded image. 
+It is *essential* you use the 
+Layout option 'Center image on screen' to place the test image in the center of the screen without scaling 
+(the point is to get an *unscaled* image to check the TV resolution...).
 
 ### Set the Pi screen resolution to 1920x1080
 
@@ -40,8 +52,10 @@ On the 'Resolution' option click the button 'Set Resolution' and select to use t
 
 ### Have the Pi desktop top taskbar auto-hide
 
-Right-click the taskbar at the top of the screen.  Choose 'auto-hide' with a 2-pixel 'hidden
-size'.  The taskbar should disappear but you can get it back by moving the mouse to the top
+Right-click the taskbar at the top of the screen.  Choose 'Panel Preferences' then on the 'Advanced' tab
+under 'Automatic Hiding' set the checkbox 'Minimise panel when not in use' and set 'Size when minimised'
+to 2 pixels. This will auto-hide the top menu bar with a 2-pixel 'hidden
+size' so it should disappear but you can get it back by moving the mouse to the top
 of the screen.
 
 ### You may need to mess with the *Pi* display overscan settings
@@ -51,7 +65,7 @@ the Advanced .. Overscan menu option. With a bit of luck you won't need this but
 far and the TV is still cropping the desktop it's worth a try.
 
 At this point, if you still have a 'cropping' issue, the problem is almost certainly with the settings
-on the TV.  E.g. you can try the TV 'Picture Mode'..'Fill Screen' or other similar options.
+on the TV, covered in the next section.  E.g. you can try the TV 'Picture Mode'..'Fill Screen' or other similar options.
 
 If you are *really* desperate, you can edit the Raspberry Pi ```config.txt``` file (see Google) where you
 have pixel-level 'overscan' adjustments where you can tell the Pi how to adjust its output to compensate for
