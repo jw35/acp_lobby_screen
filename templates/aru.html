@@ -1,0 +1,275 @@
+<!doctype html>
+
+<html>
+
+  <head>
+    <title>ARU travel</title>
+
+    {% include 'lobby_screen_head.html' %}
+
+    <!-- Widget stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='lobby_screen.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='station_board/station_board.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='message_area/message_area.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='iframe_area/iframe_area.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stop_bus_map/stop_bus_map.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stop_timetable/stop_timetable.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='weather/weather.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='traffic_map/traffic_map.css') }}">
+
+    <!-- Widget Javascript -->
+    <script src="{{ url_for('static', filename='station_board/station_board.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='traffic_map/traffic_map.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='message_area/message_area.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='iframe_area/iframe_area.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='stop_bus_map/stop_bus_map.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='stop_timetable/stop_timetable.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='weather/weather.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='twitter_timeline/twitter_timeline.js') }}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+      var DEBUG = ''; // widget.log() code will check this global variable
+
+      widget.push(new MessageArea(
+        { container: 'message_area_1',
+          static_url: '{{ url_for('static', filename='message_area/') }}'
+        },
+        { title: 'ARU Travel',
+          message: `
+              <p>This is our initial design of a <strong>SmartPanel</strong>.</p>
+
+              <p>We're working with colleagues in the region to create these screens 
+              to display real-time travel information in the lobbies of
+              public buildings.</p>
+
+<p>Screens are geo-located to automatically display relevant information
+and can be further customised by local managers.</p>
+
+<p>Lobby Screens are under active development, but they can already display:</p>
+
+<ul>
+  <li>Bus positions and timings</li>
+  <li>Train departure times</li>
+  <li>Google traffic maps</li>
+  <li>Weather forecasts</li>
+  <li>Twitter timelines</li>
+  <li>Static messages</li>
+  <li>Other web pages</li>
+</ul>
+`       }
+      ))
+
+      widget.push(new Weather(
+        { container: 'weather_area_1',
+          static_url: '{{ url_for('static', filename='weather/') }}'
+        },
+        { location: '310042'
+        }
+      ))
+
+      widget.push(new StopBusMap(
+        { container: 'stop_bus_map_1',
+          static_url: '{{ url_for('static', filename='stop_bus_map/') }}'
+        },
+        {  id: 'stop_bus_map_1',
+          static_url: '/lobby_screen/static',
+      stops: [
+        {   lng: 0.13028199859, 
+            naptan_code: 'CMBDAPMD', 
+            latitude: 52.2028382925, 
+            locality_name: 'Cambridge', 
+            id: '0500CCITY229', 
+            longitude: 0.13028199859, 
+            atco_code: '0500CCITY229', 
+            lat: 52.2028382925, 
+            common_name: 'Parkside', 
+            indicator: 'opp Fire Station', 
+            stop_id: '0500CCITY229'
+        }, 
+        {   lng: 0.13162422832, 
+            naptan_code: 'CMBDAWDJ', 
+            latitude: 52.2030568298, 
+            locality_name: 'Cambridge', 
+            id: '0500CCITY308', 
+            longitude: 0.13162422832, 
+            atco_code: '0500CCITY308', 
+            lat: 52.2030568298, 
+            common_name: 'Fire Station', 
+            indicator: 'o/s', 
+            stop_id: '0500CCITY308'
+        }, 
+        {   lng: 0.132209973, 
+            naptan_code: 'CMBDGAMD', 
+            latitude: 52.2021470521, 
+            locality_name: 'Cambridge', 
+            id: '0500CCITY370', 
+            longitude: 0.132209973, 
+            atco_code: '0500CCITY370', 
+            lat: 52.2021470521,
+            common_name: 'Mortimer Road',
+            indicator: 'opp', 
+            stop_id: '0500CCITY370'
+        },
+        {   lng: 0.1303375231, 
+            naptan_code: 'CMBDGAMG', 
+            latitude: 52.2015514446, 
+            locality_name: 'Cambridge', 
+            id: '0500CCITY371', 
+            longitude: 0.1303375231, 
+            atco_code: '0500CCITY371', 
+            lat: 52.2015514446, 
+            common_name: 'Gonville Place',
+            indicator: 'SW bound', 
+            stop_id: '0500CCITY371'
+        }], 
+      title: 'Nearby Stops', 
+      lat: 52.202879245335616, 
+      zoom: 16, 
+      lng: 0.13063967227935794, 
+      breadcrumbs: true
+    }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_1',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+        { stop_id: '0500CCITY117',
+          common_name: 'Parkside',
+          layout: 'simple',
+          lat: 52.21297,
+          lng: 0.11235
+        }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_2',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+            { stop_id: '0500CCITY371',
+              common_name: 'Gonville Place',
+              layout: 'simple',
+              lat: 52.21274,
+              lng: 0.11263
+            }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_3',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+            { stop_id: '0500CCITY308',
+              common_name: 'East Rd (Fire Stn)',
+              layout: 'simple',
+              lat: 52.213,
+              lng: 0.11257
+            }
+      ));
+
+      widget.push(new StopTimetable(
+        { container: 'stop_timetable_4',
+          static_url: '{{ url_for('static', filename='stop_timetable/') }}'
+        },
+            { stop_id: '0500CCITY370',
+              common_name: 'Mortimer Rd',
+              layout: 'simple',
+              lat: 52.21297,
+              lng: 0.11263
+            }
+      ));
+
+      widget.push(new StationBoard(
+        { container: 'station_board_1',
+          static_url: '{{ url_for('static', filename='station_+board/') }}'
+        },
+        { station: 'CBG',
+          offset: 0
+        }
+      ));
+
+      widget.push(new TwitterTimeline(
+        { container: 'twitter_timeline_1',
+          static_url: '{{ url_for('static', filename='twitter_timeline/') }}'
+        },
+        { who: 'Cambs_Traffic'
+        }
+      ));
+
+      widget.push(new TrafficMap(
+        { container: 'traffic_map_1',
+          static_url: '{{ url_for('static', filename='traffic_map/') }}'
+        },
+        { interval: 12,
+          maps:
+          [
+            { lat: 52.204684,
+              lng: 0.124622,
+              zoom: 13
+            },
+            { lat: 52.204684,
+              lng: 0.124622,
+              zoom: 10
+            },
+
+          ]
+        }
+      ));
+
+    </script>
+
+  </head>
+
+  <body onLoad="page_load()">
+
+    <!-- Widget display area definition -->
+
+    <div class="wrapper">
+
+      {% include 'smartpanel_header.html' %}
+
+      <div class="container_2_2 col_1 row_1" id="traffic_map_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_2 col_1 row_3" id="message_area_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_2 col_2 row_3" id="station_board_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_4 col_3 row_1" id="twitter_timeline_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_2_2 col_5 row_1" id="stop_bus_map_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_1 col_4 row_1" id="stop_timetable_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_1 col_4 row_2" id="stop_timetable_2">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_2_1 col_5 row_4" id="stop_timetable_3">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_2_1 col_5 row_3" id="stop_timetable_4">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+      <div class="container_1_2 col_4 row_3" id="weather_area_1">
+        <img class="spinner" src="{{ url_for('static', filename='indicator-lite.gif') }}" alt=""/>
+      </div>
+
+    </div>
+
+  </body>
+
+</html>
