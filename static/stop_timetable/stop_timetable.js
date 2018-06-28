@@ -75,7 +75,8 @@ function StopTimetable(config, params) {
     // Configuration constants
 
         // Endpoint for the timetable API
-        TIMETABLE_URI                 = 'http://tfc-app3.cl.cam.ac.uk/transport/api',
+        //TIMETABLE_URI                 = 'http://tfc-app3.cl.cam.ac.uk/transport/api',
+        TIMETABLE_URI                 = 'https://smartcambridge.org/transport/api',
         // Maximum refresh interval for the display
         DISPLAY_REFRESH_INTERVAL      = 30 * SECONDS,
         // MAximum refresh interval for real-time subscriptions
