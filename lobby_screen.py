@@ -115,6 +115,16 @@ weather_icon = {
     "30": "28",
 }
 
+# Backup station-id to name mapping for when the MetOffice
+# forget to include names in the returned results
+location_names = {
+    "310042": "Cambridge",
+    "351524": "Fulbourn",
+    "310105": "Luton",
+    "310120": "Peterborough",
+    "353656": "Stansted",
+}
+
 app = Flask(__name__, static_url_path="/lobby_screen/static")
 app.config.from_object(__name__)
 app.config.update(dict(
@@ -354,9 +364,10 @@ def weather():
     for result in results:
         result['timestamp_text'] = result['timestamp'].astimezone(tz=None).strftime('%H:%M')
     issued = iso8601.parse_date(data["SiteRep"]["DV"]["dataDate"]).astimezone(tz=None).strftime("%H:%M")
+    location_name = data["SiteRep"]["DV"]["Location"].get('name', location_names.get(location, ''))
     return render_template('weather.html', data={
         "results": results,
-        "location": data["SiteRep"]["DV"]["Location"]["name"].title(),
+        "location": location_name.title(),
         "issued": issued
         }
     )
