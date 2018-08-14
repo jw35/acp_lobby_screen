@@ -17,7 +17,7 @@ function RTMonitorAPI(client_data) {
 
     var self = this;
 
-    this.VERSION = '2.1_lobby_screen';
+    this.VERSION = '2.1a_lobby_screen';
 
     if (client_data)
     {
@@ -140,7 +140,7 @@ this.connect = function()
                     self.disconnect_callbacks[i].callback.call(self.disconnect_callbacks[i].caller)
                 }
                 // start interval timer trying to reconnect
-                clearInterval(this.sock_timer);
+                clearInterval(self.sock_timer);
                 self.sock_timer = setInterval(function (rt) { return function () { rt.reconnect(); } }(self), 10000);
     };
 };
